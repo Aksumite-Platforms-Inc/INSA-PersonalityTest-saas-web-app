@@ -52,3 +52,33 @@ export default tseslint.config({
   },
 })
 ```
+---
+
+### 🔧 Environment Variables
+
+To configure the backend API URL and other environment-specific settings, follow the steps below:
+
+1. **Create a `.env` file** in the root directory of the project.
+
+2. **Add the following variable** to your `.env` file:
+   ```env
+   REACT_APP_API_URL=http://localhost:5000/api;
+   REACT_APP_SOCKET_URL=http://localhost:5000;
+   ```
+
+3. **Use the variable in your code** to access the backend API:
+   ```javascript
+   const apiUrl = process.env.REACT_APP_API_URL;
+
+   fetch(`${apiUrl}/endpoint`)
+     .then(response => response.json())
+     .then(data => console.log(data));
+   ```
+
+4. **Reference Template**:  
+   Use the `.env.example` file as a guide for setting up your environment variables.  
+   This file lists all required variables without exposing any sensitive data.
+
+> ⚠️ **Note:** Don't forget to restart your development server after adding or changing environment variables.
+
+---
