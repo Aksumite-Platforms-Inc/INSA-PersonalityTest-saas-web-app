@@ -17,12 +17,12 @@ const Login: React.FC = () => {
     saveToken(fakeResponse.token);
 
     // Redirect based on role
-    if (fakeResponse.role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (fakeResponse.role === 'branch_admin') {
-      navigate('/branch-admin-dashboard');
+    if (fakeResponse.role === 'org-admin') {
+      navigate('/admin-dashboard')
+    } else if (fakeResponse.role === 'branch-admin') {
+      navigate('/branch-admin-dashboard')
     } else if (fakeResponse.role === 'employee') {
-      navigate('/employee-dashboard');
+      navigate('/employee-dashboard')
     }
   };
 

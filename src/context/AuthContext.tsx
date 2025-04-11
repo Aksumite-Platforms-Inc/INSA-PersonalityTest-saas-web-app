@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 
 // Define user type
-type UserRole = 'org-admin' | 'branch-admin' | 'employee' | 'superadmin'
+type UserRole = 'org-admin' | 'branch-admin' | 'employee' 
 
 interface User {
   name: string
@@ -39,7 +39,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fakeUser: User = {
       name: 'John Doe',
-      role: 'superadmin', //change this for testing different roles from these:('org-admin', 'branch-admin', 'employee', 'superadmin')
+      role: 'org-admin', //change this for testing different roles from these:('org-admin', 'branch-admin', 'employee')
     }
 
     setTimeout(() => {

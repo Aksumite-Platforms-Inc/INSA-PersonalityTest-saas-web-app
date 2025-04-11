@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 // Define the allowed roles
-type UserRole = 'org-admin' | 'branch-admin' | 'employee' | 'superadmin'
+type UserRole = 'org-admin' | 'branch-admin' | 'employee' 
 
 // Props for ProtectedRoute
 interface ProtectedRouteProps {

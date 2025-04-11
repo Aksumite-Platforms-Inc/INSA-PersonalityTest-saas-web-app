@@ -6,13 +6,12 @@ import {
   Navigate,
 } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
+import OrgAdminLayout from '../layouts/OrgAdminLayout'
+import BranchAdminLayout from '../layouts/BranchAdminLayout'
+import EmployeeLayout from '../layouts/EmployeeLayout'
+import Login from '@/pages/Login'
 
 // We will replace these with the actual layout components
-const OrgAdminLayout = () => <div>Org Admin Dashboard</div>
-const BranchAdminLayout = () => <div>Branch Admin Dashboard</div>
-const EmployeeLayout = () => <div>Employee Dashboard</div>
-const SuperadminLayout = () => <div>Superadmin Control Panel</div>
-const Login = () => <div>Login Page</div>
 const NotFound = () => <div>404 - Page Not Found</div>
 
 function AppRoutes() {
@@ -26,7 +25,7 @@ function AppRoutes() {
 
         {/* Org Admin Protected Route */}
         <Route
-          path="/org-admin"
+          path="/admin-dashboard"
           element={
             <ProtectedRoute role="org-admin">
               <OrgAdminLayout />
@@ -36,7 +35,7 @@ function AppRoutes() {
 
         {/* Branch Admin Protected Route */}
         <Route
-          path="/branch-admin"
+          path="/branch-admin-dashboard"
           element={
             <ProtectedRoute role="branch-admin">
               <BranchAdminLayout />
@@ -46,20 +45,10 @@ function AppRoutes() {
 
         {/* Employee Protected Route */}
         <Route
-          path="/employee"
+          path="/employee-dashboard"
           element={
             <ProtectedRoute role="employee">
               <EmployeeLayout />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Superadmin Protected Route */}
-        <Route
-          path="/superadmin"
-          element={
-            <ProtectedRoute role="superadmin">
-              <SuperadminLayout />
             </ProtectedRoute>
           }
         />
