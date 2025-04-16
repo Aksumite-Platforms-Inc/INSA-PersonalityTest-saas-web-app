@@ -2,7 +2,6 @@ import { PageTitle } from "@/components/page-title"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmployeeProgressChart } from "@/components/branch/employee-progress-chart"
 import { TestCompletionTimeline } from "@/components/branch/test-completion-timeline"
-import { TopPerformers } from "@/components/branch/top-performers"
 import { EmployeeList } from "@/components/branch/employee-list"
 
 export default function BranchDashboard() {
@@ -69,16 +68,6 @@ export default function BranchDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Top Performers */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Performers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TopPerformers />
-        </CardContent>
-      </Card>
 
       {/* Employee List */}
       <Card>
