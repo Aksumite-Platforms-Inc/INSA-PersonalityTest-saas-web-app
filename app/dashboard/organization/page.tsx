@@ -1,8 +1,6 @@
 import { PageTitle } from "@/components/page-title"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BranchesChart } from "@/components/organization/branches-chart"
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart"
-import { TestTypeDistribution } from "@/components/organization/test-type-distribution"
 import { RecentEmployeeActivity } from "@/components/organization/recent-employee-activity"
 
 export default function OrganizationDashboard() {
