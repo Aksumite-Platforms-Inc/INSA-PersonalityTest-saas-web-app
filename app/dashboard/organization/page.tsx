@@ -1,8 +1,6 @@
 import { PageTitle } from "@/components/page-title"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BranchesChart } from "@/components/organization/branches-chart"
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart"
-import { TestTypeDistribution } from "@/components/organization/test-type-distribution"
 import { RecentEmployeeActivity } from "@/components/organization/recent-employee-activity"
 
 export default function OrganizationDashboard() {
@@ -50,33 +48,13 @@ export default function OrganizationDashboard() {
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Branch Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="h-80">
-            <BranchesChart />
-          </CardContent>
-        </Card>
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Employee Test Completion</CardTitle>
-          </CardHeader>
-          <CardContent className="h-80">
-            <EmployeeCompletionChart />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Test Type Distribution */}
+      {/* Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Test Type Distribution</CardTitle>
+          <CardTitle>Employee Test Completion</CardTitle>
         </CardHeader>
         <CardContent className="h-80">
-          <TestTypeDistribution />
+          <EmployeeCompletionChart />
         </CardContent>
       </Card>
 
