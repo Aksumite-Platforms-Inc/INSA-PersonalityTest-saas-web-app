@@ -1,30 +1,39 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
-import { useTranslation } from "@/hooks/use-translation"
-import { BarChart3, Building2, Users, ClipboardList, Settings, Shield, LineChart, Home } from "lucide-react"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/use-translation";
+import {
+  BarChart3,
+  Building2,
+  Users,
+  ClipboardList,
+  Settings,
+  Shield,
+  LineChart,
+  Home,
+} from "lucide-react";
 
 interface SidebarProps {
-  open: boolean
+  open: boolean;
 }
 
 export function Sidebar({ open }: SidebarProps) {
-  const { t } = useTranslation()
-  const pathname = usePathname()
+  const { t } = useTranslation();
+  const pathname = usePathname();
 
   // Determine user role from pathname
-  const role = pathname.split("/")[2] || "employee"
+  const role = pathname.split("/")[2] || "employee";
 
   return (
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-20 flex flex-col border-r bg-background transition-all duration-300 ease-in-out",
         open ? "w-64" : "w-0 md:w-16",
-        "mt-16", // Account for header height
+        "mt-16" // Account for header height
       )}
     >
       <div className="flex-1 overflow-y-auto py-4">
@@ -126,13 +135,13 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/test")}
                 open={open}
               />
-              <SidebarItem
+              {/* <SidebarItem
                 href="/dashboard/employee/results"
                 icon={BarChart3}
                 label={t("sidebar.results")}
                 active={pathname.includes("/results")}
                 open={open}
-              />
+              /> */}
             </>
           )}
 
@@ -147,18 +156,24 @@ export function Sidebar({ open }: SidebarProps) {
         </nav>
       </div>
     </aside>
-  )
+  );
 }
 
 interface SidebarItemProps {
-  href: string
-  icon: React.ElementType
-  label: string
-  active: boolean
-  open: boolean
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  active: boolean;
+  open: boolean;
 }
 
-function SidebarItem({ href, icon: Icon, label, active, open }: SidebarItemProps) {
+function SidebarItem({
+  href,
+  icon: Icon,
+  label,
+  active,
+  open,
+}: SidebarItemProps) {
   return (
     <Link
       href={href}
@@ -166,11 +181,11 @@ function SidebarItem({ href, icon: Icon, label, active, open }: SidebarItemProps
         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
         active
           ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
     >
       <Icon size={20} className={cn("flex-shrink-0", !open && "mx-auto")} />
       {open && <span className="ml-3">{label}</span>}
     </Link>
-  )
+  );
 }
