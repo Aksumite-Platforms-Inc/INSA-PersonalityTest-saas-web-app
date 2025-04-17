@@ -51,15 +51,7 @@ export default function OrganizationDashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Branch Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="h-80">
-            <BranchesChart />
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-1">
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Employee Test Completion</CardTitle>
@@ -69,17 +61,6 @@ export default function OrganizationDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Test Type Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Test Type Distribution</CardTitle>
-        </CardHeader>
-        <CardContent className="h-80">
-          <TestTypeDistribution />
-        </CardContent>
-      </Card>
-
       {/* Recent Employee Activity */}
       <Card>
         <CardHeader>
