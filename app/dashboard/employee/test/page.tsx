@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function TestRedirectPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    router.push("/dashboard/employee/test/select")
-  }, [router])
+    router.push("/dashboard/employee/test/select");
+  }, [router]);
 
-  return null
+  return null;
 }

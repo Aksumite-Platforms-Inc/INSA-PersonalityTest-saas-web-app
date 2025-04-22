@@ -1,61 +1,76 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { PageTitle } from "@/components/page-title"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/hooks/use-toast"
-import { TestQuestionBuilder } from "@/components/superadmin/test-question-builder"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { PageTitle } from "@/components/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { TestQuestionBuilder } from "@/components/superadmin/test-question-builder";
 
 export default function NewTestPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [type, setType] = useState("")
-  const [timeLimit, setTimeLimit] = useState("60")
-  const [instructions, setInstructions] = useState("")
-  const [randomizeQuestions, setRandomizeQuestions] = useState(false)
-  const [showResults, setShowResults] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState("");
+  const [timeLimit, setTimeLimit] = useState("60");
+  const [instructions, setInstructions] = useState("");
+  const [randomizeQuestions, setRandomizeQuestions] = useState(false);
+  const [showResults, setShowResults] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!name || !type) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
       toast({
         title: "Test created",
         description: `${name} has been created successfully.`,
-      })
-      router.push("/dashboard/superadmin/tests")
-    }, 1500)
-  }
+      });
+      router.push("/dashboard/superadmin/tests");
+    }, 1500);
+  };
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Create New Test" description="Design a new psychological assessment test" />
+      <PageTitle
+        title="Create New Test"
+        description="Design a new psychological assessment test"
+      />
 
       <Tabs defaultValue="details" className="space-y-6">
         <TabsList>
@@ -69,12 +84,19 @@ export default function NewTestPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
-                <CardDescription>Define the basic details of your test</CardDescription>
+                <CardDescription>
+                  Define the basic details of your test
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Test Name *</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
@@ -92,13 +114,23 @@ export default function NewTestPage() {
                       <SelectValue placeholder="Select test type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="personality">Personality Assessment</SelectItem>
-                      <SelectItem value="leadership">Leadership Evaluation</SelectItem>
+                      <SelectItem value="personality">
+                        Personality Assessment
+                      </SelectItem>
+                      <SelectItem value="leadership">
+                        Leadership Evaluation
+                      </SelectItem>
                       <SelectItem value="team">Team Compatibility</SelectItem>
                       <SelectItem value="stress">Stress Management</SelectItem>
-                      <SelectItem value="communication">Communication Skills</SelectItem>
-                      <SelectItem value="aptitude">Problem Solving Aptitude</SelectItem>
-                      <SelectItem value="emotional">Emotional Intelligence</SelectItem>
+                      <SelectItem value="communication">
+                        Communication Skills
+                      </SelectItem>
+                      <SelectItem value="aptitude">
+                        Problem Solving Aptitude
+                      </SelectItem>
+                      <SelectItem value="emotional">
+                        Emotional Intelligence
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -110,7 +142,9 @@ export default function NewTestPage() {
                     value={timeLimit}
                     onChange={(e) => setTimeLimit(e.target.value)}
                   />
-                  <p className="text-sm text-muted-foreground">Set to 0 for no time limit</p>
+                  <p className="text-sm text-muted-foreground">
+                    Set to 0 for no time limit
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="instructions">Instructions</Label>
@@ -122,18 +156,37 @@ export default function NewTestPage() {
                   />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="randomize" checked={randomizeQuestions} onCheckedChange={setRandomizeQuestions} />
+                  <Switch
+                    id="randomize"
+                    checked={randomizeQuestions}
+                    onCheckedChange={setRandomizeQuestions}
+                  />
                   <Label htmlFor="randomize">Randomize question order</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="show-results" checked={showResults} onCheckedChange={setShowResults} />
-                  <Label htmlFor="show-results">Show results to test takers</Label>
+                  <Switch
+                    id="show-results"
+                    checked={showResults}
+                    onCheckedChange={setShowResults}
+                  />
+                  <Label htmlFor="show-results">
+                    Show results to test takers
+                  </Label>
                 </div>
               </CardContent>
             </Card>
 
             <div className="flex justify-end">
-              <Button type="button" onClick={() => document.querySelector('[data-value="questions"]')?.click()}>
+              <Button
+                type="button"
+                onClick={() =>
+                  (
+                    document.querySelector(
+                      '[data-value="questions"]'
+                    ) as HTMLElement
+                  )?.click()
+                }
+              >
                 Next: Questions
               </Button>
             </div>
@@ -146,11 +199,26 @@ export default function NewTestPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => document.querySelector('[data-value="details"]')?.click()}
+                onClick={() =>
+                  (
+                    document.querySelector(
+                      '[data-value="details"]'
+                    ) as HTMLElement
+                  )?.click()
+                }
               >
                 Back: Details
               </Button>
-              <Button type="button" onClick={() => document.querySelector('[data-value="scoring"]')?.click()}>
+              <Button
+                type="button"
+                onClick={() =>
+                  (
+                    document.querySelector(
+                      '[data-value="scoring"]'
+                    ) as HTMLElement
+                  )?.click()
+                }
+              >
                 Next: Scoring
               </Button>
             </div>
@@ -160,7 +228,9 @@ export default function NewTestPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Scoring Configuration</CardTitle>
-                <CardDescription>Define how the test will be scored and results presented</CardDescription>
+                <CardDescription>
+                  Define how the test will be scored and results presented
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -170,9 +240,15 @@ export default function NewTestPage() {
                       <SelectValue placeholder="Select scoring method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="simple">Simple (Equal weights)</SelectItem>
-                      <SelectItem value="weighted">Weighted (Custom weights)</SelectItem>
-                      <SelectItem value="dimensional">Dimensional (Multiple factors)</SelectItem>
+                      <SelectItem value="simple">
+                        Simple (Equal weights)
+                      </SelectItem>
+                      <SelectItem value="weighted">
+                        Weighted (Custom weights)
+                      </SelectItem>
+                      <SelectItem value="dimensional">
+                        Dimensional (Multiple factors)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -185,7 +261,9 @@ export default function NewTestPage() {
                     <SelectContent>
                       <SelectItem value="simple">Simple Score</SelectItem>
                       <SelectItem value="categories">Categorized</SelectItem>
-                      <SelectItem value="detailed">Detailed Analysis</SelectItem>
+                      <SelectItem value="detailed">
+                        Detailed Analysis
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -200,7 +278,13 @@ export default function NewTestPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => document.querySelector('[data-value="questions"]')?.click()}
+                onClick={() =>
+                  (
+                    document.querySelector(
+                      '[data-value="questions"]'
+                    ) as HTMLElement
+                  )?.click()
+                }
               >
                 Back: Questions
               </Button>
@@ -212,5 +296,5 @@ export default function NewTestPage() {
         </form>
       </Tabs>
     </div>
-  )
+  );
 }
