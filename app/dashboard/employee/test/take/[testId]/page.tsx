@@ -227,8 +227,8 @@ export default function TestPage({ params }: { params: { testId: string } }) {
               <CardContent>
                 <RadioGroup
                   value={answers[question.id] || ""}
-                  onValueChange={handleAnswer}
-                  className="space-y-4"
+                  onValueChange={(value) => handleAnswer(value)}
+                  className="flex space-x-4"
                 >
                   {options.map((option) => (
                     <motion.div

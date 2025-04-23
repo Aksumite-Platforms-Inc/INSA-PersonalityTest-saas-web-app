@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { enneagramTest } from "@/data/tests/enneagram";
 import {
   Card,
@@ -10,11 +11,15 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { X } from "lucide-react";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const questionsPerGroup = 9; // Enneagram test groups 9 questions per page
   const questions = enneagramTest.questions;
+  const router = useRouter();
 
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
@@ -33,6 +38,13 @@ export default function EnneagramPage() {
     }
   };
 
+  const handleAnswer = (questionId: number, value: string) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: value,
+    }));
+  };
+
   return (
     <div className="container mx-auto py-6">
       <Card>
@@ -45,14 +57,14 @@ export default function EnneagramPage() {
               Page {currentGroup + 1} of{" "}
               {Math.ceil(questions.length / questionsPerGroup)}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Showing questions {currentGroup * questionsPerGroup + 1} to{" "}
-              {Math.min(
-                (currentGroup + 1) * questionsPerGroup,
-                questions.length
-              )}{" "}
-              of {questions.length}
-            </p>
+            <Progress
+              value={
+                ((currentGroup + 1) /
+                  Math.ceil(questions.length / questionsPerGroup)) *
+                100
+              }
+              className="h-2 rounded-lg"
+            />
           </div>
           <p className="text-muted-foreground mb-4">
             {enneagramTest.description}
@@ -60,21 +72,27 @@ export default function EnneagramPage() {
           {currentQuestions.map((question) => (
             <div key={question.id} className="mb-4">
               <p className="font-medium mb-2">{question.text}</p>
-              {question.options?.map((option) => (
-                <label key={option.value} className="block">
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={option.value}
-                    className="mr-2"
-                  />
-                  {option.label}
-                </label>
-              )) || (
-                <p className="text-sm text-muted-foreground">
-                  No options available
-                </p>
-              )}
+              <div className="flex space-x-4">
+                {question.options?.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${question.id}`}
+                      value={option.value}
+                      className="mr-2"
+                      onChange={() => handleAnswer(question.id, option.value)}
+                    />
+                    {option.label}
+                  </label>
+                )) || (
+                  <p className="text-sm text-muted-foreground">
+                    No options available
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </CardContent>
@@ -84,13 +102,18 @@ export default function EnneagramPage() {
           </Button>
           <Button
             onClick={handleNextGroup}
-            disabled={
-              (currentGroup + 1) * questionsPerGroup >= questions.length
-            }
+            disabled={currentQuestions.some((q) => !answers[q.id])}
           >
             Next
           </Button>
         </CardFooter>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push("/dashboard/employee/test/select")}
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </Card>
     </div>
   );
