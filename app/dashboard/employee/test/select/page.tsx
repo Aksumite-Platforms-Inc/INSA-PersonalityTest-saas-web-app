@@ -95,20 +95,21 @@ export default function TestSelectionPage() {
   };
 
   return (
-    <div className="space-y-6">
+    // Ensure consistent spacing and typography
+    <div className="space-y-6 px-4 py-6">
       <PageTitle
         title={t("test.selectTitle")}
         description={t("test.selectDescription")}
       />
 
-      <Alert>
+      <Alert className="rounded-lg">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>{t("test.importantNote")}</AlertTitle>
         <AlertDescription>{t("test.oneTimeOnly")}</AlertDescription>
       </Alert>
 
       <motion.div
-        className="grid gap-4 md:grid-cols-2"
+        className="grid gap-6 md:grid-cols-2"
         variants={container}
         initial="hidden"
         animate="show"
@@ -116,7 +117,7 @@ export default function TestSelectionPage() {
         {availableTests.map((test) => (
           <motion.div key={test.id} variants={item}>
             <Card
-              className={`cursor-pointer transition-all hover:shadow-md ${
+              className={`cursor-pointer transition-all hover:shadow-lg ${
                 selectedTest === test.id
                   ? "border-primary ring-2 ring-primary ring-opacity-50"
                   : ""
@@ -125,7 +126,9 @@ export default function TestSelectionPage() {
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{test.title}</CardTitle>
+                  <CardTitle className="text-lg font-semibold">
+                    {test.title}
+                  </CardTitle>
                   <span className="text-3xl">{test.icon}</span>
                 </div>
                 <CardDescription>{test.description}</CardDescription>

@@ -187,7 +187,7 @@ export default function TestPage({ params }: { params: { testId: string } }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/80 flex flex-col px-4 py-6">
       <header className="p-4 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">{test.title}</h1>
@@ -205,7 +205,7 @@ export default function TestPage({ params }: { params: { testId: string } }) {
       </header>
 
       <div className="w-full px-4">
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-2 rounded-lg" />
       </div>
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -220,7 +220,9 @@ export default function TestPage({ params }: { params: { testId: string } }) {
           >
             <Card className="border-none shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl">{question.text}</CardTitle>
+                <CardTitle className="text-2xl font-semibold">
+                  {question.text}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <RadioGroup
