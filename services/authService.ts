@@ -1,25 +1,31 @@
+// services/authService.ts
 import api from "./api";
+import { APIResponse } from "@/types/api";
+import { handleApiError } from "@/lib/errorHandler";
 
-export const login = async (credentials: {
-  email: string;
-  password: string;
-}) => {
+export const login = async (
+  email: string,
+  password: string
+): Promise<APIResponse<any>> => {
   try {
-    const response = await api.post("/sso/login", credentials);
-    return response.data;
-  } catch (error) {
-    console.error("Error during login:", error);
-    throw error;
+    const response = await api.post("/sso/login", { email, password });
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
   }
 };
 
-export const logout = async () => {
+export const resetPassword = async (
+  email: string
+): Promise<APIResponse<null>> => {
   try {
-    // Perform logout logic if needed
-    localStorage.removeItem("authToken");
-    window.location.href = "/login";
-  } catch (error) {
-    console.error("Error during logout:", error);
-    throw error;
+    await api.post("/organization/members/resetpassword", { email });
+    return { success: true, error: null, data: null };
+  } catch (error: any) {
+    return handleApiError(error);
   }
+};
+
+export const logout = () => {
+  localStorage.removeItem("authToken");
 };

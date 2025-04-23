@@ -1,26 +1,15 @@
+// services/testService.ts
 import api from "./api";
+import { APIResponse } from "@/types/api";
+import { handleApiError } from "@/lib/errorHandler";
 
-export const calculateScores = async (testType: string, answers: any) => {
+export const getResults = async (userId: string): Promise<APIResponse<any>> => {
   try {
-    const response = await api.post(
-      `/organization/personalityTest/${testType}/calculateScores`,
-      answers
+    const response = await api.get(
+      `/organization/personalityTest/getResults?user_id=${userId}`
     );
-    return response.data;
-  } catch (error) {
-    console.error("Error calculating scores:", error);
-    throw error;
-  }
-};
-
-export const getTestResults = async (userId: string) => {
-  try {
-    const response = await api.get(`/organization/personalityTest/getResults`, {
-      params: { user_id: userId },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching test results:", error);
-    throw error;
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
   }
 };

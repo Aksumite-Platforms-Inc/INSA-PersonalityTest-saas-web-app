@@ -1,27 +1,32 @@
+// services/userService.ts
 import api from "./api";
+import { APIResponse } from "@/types/api";
+import { handleApiError } from "@/lib/errorHandler";
 
-export const getEmployeeTests = async (employeeId: string) => {
+// Updated error handling to ensure compatibility with APIResponse<any[]>
+export const getAllOrgMembers = async (
+  orgId: number
+): Promise<APIResponse<any[]>> => {
   try {
-    const response = await api.get(`/organization/${employeeId}/tests`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching employee tests:", error);
-    throw error;
+    const response = await api.get<any[]>(`/organization/${orgId}/members`);
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return {
+      data: [],
+      error: error.response?.data?.message || "An unexpected error occurred",
+      success: false,
+    };
   }
 };
 
-export const submitTestAnswers = async (
-  testId: string,
-  answers: Record<number, string>
-) => {
+export const deleteOrgMember = async (
+  orgId: number,
+  memberId: number
+): Promise<APIResponse<null>> => {
   try {
-    const response = await api.post(
-      `/organization/personalityTest/${testId}/submit`,
-      { answers }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error submitting test answers:", error);
-    throw error;
+    await api.delete(`/organization/${orgId}/members/${memberId}`);
+    return { data: null, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
   }
 };
