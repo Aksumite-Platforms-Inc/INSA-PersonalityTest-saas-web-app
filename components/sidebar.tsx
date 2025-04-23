@@ -97,13 +97,6 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/employees")}
                 open={open}
               />
-              <SidebarItem
-                href="/dashboard/organization/tests"
-                icon={LineChart}
-                label={t("sidebar.testMonitoring")}
-                active={pathname.includes("/tests")}
-                open={open}
-              />
             </>
           )}
 
