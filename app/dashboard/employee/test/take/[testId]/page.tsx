@@ -58,6 +58,7 @@ export default function TestPage({ params }: { params: { testId: string } }) {
   }
 
   const questions = test.questions;
+  const options = "options" in test ? test.options : [];
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
@@ -227,7 +228,7 @@ export default function TestPage({ params }: { params: { testId: string } }) {
                   onValueChange={handleAnswer}
                   className="space-y-4"
                 >
-                  {question.options.map((option) => (
+                  {options.map((option) => (
                     <motion.div
                       key={option.value}
                       className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent cursor-pointer"
