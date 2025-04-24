@@ -58,7 +58,7 @@ export default function DISCPage() {
             </p>
             <Progress
               value={((currentGroup + 1) / questions.length) * 100}
-              className="h-3 rounded-lg bg-gray-200"
+              className="h-3 rounded-lg bg-gray-500"
             />
           </div>
           <p className="text-muted-foreground mb-4">{discTest.description}</p>

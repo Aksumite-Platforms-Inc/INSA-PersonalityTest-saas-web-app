@@ -57,7 +57,7 @@ export default function MBTITestPage() {
             <div className="flex items-center justify-between">
               <Progress
                 value={((currentGroup + 1) / 2) * 100}
-                className="h-2 rounded-lg bg-gray-200 flex-1"
+                className="h-2 rounded-lg bg-gray-500 flex-1"
               />
               <span className="ml-2 text-sm text-gray-500">
                 {Math.round(((currentGroup + 1) / 2) * 100)}% Complete
@@ -67,7 +67,7 @@ export default function MBTITestPage() {
           {currentQuestions.map((question) => (
             <div
               key={question.id}
-              className="mb-6 p-4 border rounded-lg bg-white shadow-sm"
+              className="mb-6 p-4 border rounded-lg  shadow-sm"
             >
               <p className="font-medium mb-8 text-center">{question.text}</p>
               <div className="flex items-center space-x-4">

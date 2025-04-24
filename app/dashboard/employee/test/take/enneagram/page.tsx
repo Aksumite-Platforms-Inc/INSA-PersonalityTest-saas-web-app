@@ -63,16 +63,19 @@ export default function EnneagramPage() {
                   Math.ceil(questions.length / questionsPerGroup)) *
                 100
               }
-              className="h-3 rounded-lg bg-gray-200"
+              className="h-3 rounded-lg bg-gray-500 "
             />
           </div>
           <p className="text-muted-foreground mb-4">
             {enneagramTest.description}
           </p>
           {currentQuestions.map((question) => (
-            <div key={question.id} className="mb-4">
+            <div
+              key={question.id}
+              className="mb-4 p-4 border rounded-lg shadow-sm"
+            >
               <p className="font-medium mb-2">{question.text}</p>
-              <div className="flex space-x-4">
+              <div className="flex flex-col space-y-2">
                 {question.options?.map((option) => (
                   <label
                     key={option.value}
