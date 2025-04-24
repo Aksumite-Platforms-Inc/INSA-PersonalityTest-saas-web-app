@@ -56,28 +56,25 @@ export default function MBTITestPage() {
             <p className="text-lg font-medium">Page {currentGroup + 1} of 2</p>
             <Progress
               value={((currentGroup + 1) / 2) * 100}
-              className="h-2 rounded-lg"
+              className="h-3 rounded-lg bg-gray-200"
             />
           </div>
-          <p className="text-muted-foreground mb-4">{mbtiTest.description}</p>
           {currentQuestions.map((question) => (
             <div key={question.id} className="mb-4">
               <p className="font-medium mb-2">{question.text}</p>
               <div className="flex space-x-4">
                 {question.options.map((option) => (
-                  <label
+                  <div
                     key={option.value}
-                    className="flex items-center space-x-2"
+                    className={`border p-4 rounded-lg cursor-pointer ${
+                      answers[question.id] === option.value
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
+                    onClick={() => handleAnswer(question.id, option.value)}
                   >
-                    <input
-                      type="radio"
-                      name={`question-${question.id}`}
-                      value={option.value}
-                      className="mr-2"
-                      onChange={() => handleAnswer(question.id, option.value)}
-                    />
                     {option.label}
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>
@@ -97,6 +94,7 @@ export default function MBTITestPage() {
         <Button
           variant="ghost"
           size="icon"
+          className="absolute top-4 right-4"
           onClick={() => router.push("/dashboard/employee/test/select")}
         >
           <X className="h-5 w-5" />

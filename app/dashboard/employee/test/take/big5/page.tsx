@@ -10,11 +10,16 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Big5TestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const questionsPerGroup = 12; // Updated grouping logic
   const questions = big5Test.questions;
+  const router = useRouter();
 
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
@@ -33,6 +38,13 @@ export default function Big5TestPage() {
     }
   };
 
+  const handleAnswer = (questionId: number, value: string) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: value,
+    }));
+  };
+
   return (
     <div className="container mx-auto py-6">
       <Card>
@@ -45,30 +57,34 @@ export default function Big5TestPage() {
               Page {currentGroup + 1} of{" "}
               {Math.ceil(questions.length / questionsPerGroup)}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Showing questions {currentGroup * questionsPerGroup + 1} to{" "}
-              {Math.min(
-                (currentGroup + 1) * questionsPerGroup,
-                questions.length
-              )}{" "}
-              of {questions.length}
-            </p>
+            <Progress
+              value={
+                ((currentGroup + 1) /
+                  Math.ceil(questions.length / questionsPerGroup)) *
+                100
+              }
+              className="h-3 rounded-lg bg-gray-200"
+            />
           </div>
           <p className="text-muted-foreground mb-4">{big5Test.description}</p>
           {currentQuestions.map((question) => (
             <div key={question.id} className="mb-4">
               <p className="font-medium mb-2">{question.text}</p>
-              {question.options.map((option) => (
-                <label key={option.value} className="block">
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={option.value}
-                    className="mr-2"
-                  />
-                  {option.label}
-                </label>
-              ))}
+              <div className="flex space-x-4">
+                {question.options.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`border p-4 rounded-lg cursor-pointer ${
+                      answers[question.id] === option.value
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
+                    onClick={() => handleAnswer(question.id, option.value)}
+                  >
+                    {option.label}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </CardContent>
@@ -78,13 +94,19 @@ export default function Big5TestPage() {
           </Button>
           <Button
             onClick={handleNextGroup}
-            disabled={
-              (currentGroup + 1) * questionsPerGroup >= questions.length
-            }
+            disabled={currentQuestions.some((q) => !answers[q.id])}
           >
             Next
           </Button>
         </CardFooter>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4"
+          onClick={() => router.push("/dashboard/employee/test/select")}
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </Card>
     </div>
   );

@@ -198,14 +198,18 @@ export default function TestPage({ params }: { params: { testId: string } }) {
             })}
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={handleExitTest}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4"
+          onClick={() => router.push("/dashboard/employee/test/select")}
+        >
           <X className="h-5 w-5" />
-          <span className="sr-only">{t("test.exit")}</span>
         </Button>
       </header>
 
       <div className="w-full px-4">
-        <Progress value={progress} className="h-2 rounded-lg" />
+        <Progress value={progress} className="h-3 rounded-lg bg-gray-200" />
       </div>
 
       <main className="flex-1 flex items-center justify-center p-4">

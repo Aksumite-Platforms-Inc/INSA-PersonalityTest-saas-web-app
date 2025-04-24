@@ -63,7 +63,7 @@ export default function EnneagramPage() {
                   Math.ceil(questions.length / questionsPerGroup)) *
                 100
               }
-              className="h-2 rounded-lg"
+              className="h-3 rounded-lg bg-gray-200"
             />
           </div>
           <p className="text-muted-foreground mb-4">
@@ -110,6 +110,7 @@ export default function EnneagramPage() {
         <Button
           variant="ghost"
           size="icon"
+          className="absolute top-4 right-4"
           onClick={() => router.push("/dashboard/employee/test/select")}
         >
           <X className="h-5 w-5" />

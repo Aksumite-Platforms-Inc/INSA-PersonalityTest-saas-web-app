@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { discTest } from "@/data/tests/disc";
 import {
@@ -10,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function DISCPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -56,7 +58,7 @@ export default function DISCPage() {
             </p>
             <Progress
               value={((currentGroup + 1) / questions.length) * 100}
-              className="h-2 rounded-lg"
+              className="h-3 rounded-lg bg-gray-200"
             />
           </div>
           <p className="text-muted-foreground mb-4">{discTest.description}</p>
@@ -97,6 +99,7 @@ export default function DISCPage() {
         <Button
           variant="ghost"
           size="icon"
+          className="absolute top-4 right-4"
           onClick={() => router.push("/dashboard/employee/test/select")}
         >
           <X className="h-5 w-5" />
