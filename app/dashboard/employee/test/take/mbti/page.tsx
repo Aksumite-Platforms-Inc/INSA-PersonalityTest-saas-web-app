@@ -14,20 +14,26 @@ import { Progress } from "@/components/ui/progress";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+// Define the type for the pages in mbtiTest
+interface MBTIPages {
+  page1: { id: number; left: string; right: string }[];
+  page2: { id: number; trait: string; text: string }[];
+}
+
+const mbtiTestTyped: { pages: MBTIPages } = mbtiTest;
+
 export default function MBTITestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, number>>({});
   const router = useRouter();
   const questionsPerGroup = currentGroup === 0 ? 32 : 28; // MBTI test groups 32 questions on the first page and 28 on the second
-  const questions = mbtiTest.questions;
-
-  const currentQuestions = questions.slice(
-    currentGroup * questionsPerGroup,
-    (currentGroup + 1) * questionsPerGroup
-  );
+  const questions =
+    currentGroup === 0
+      ? mbtiTestTyped.pages.page1 ?? []
+      : mbtiTestTyped.pages.page2 ?? [];
 
   const handleNextGroup = () => {
-    if ((currentGroup + 1) * questionsPerGroup < questions.length) {
+    if (currentGroup < 1) {
       setCurrentGroup(currentGroup + 1);
     }
   };
@@ -38,7 +44,7 @@ export default function MBTITestPage() {
     }
   };
 
-  const handleAnswer = (questionId: number, value: string) => {
+  const handleAnswer = (questionId: number, value: number) => {
     setAnswers((prevAnswers) => ({
       ...prevAnswers,
       [questionId]: value,
@@ -64,31 +70,59 @@ export default function MBTITestPage() {
               </span>
             </div>
           </div>
-          {currentQuestions.map((question) => (
+          {questions.map((question) => (
             <div
               key={question.id}
-              className="mb-6 p-4 border rounded-lg  shadow-sm"
+              className="mb-6 p-4 border rounded-lg shadow-sm flex items-center justify-between"
             >
-              <p className="font-medium mb-8 text-center">{question.text}</p>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-500">Strongly Disagree</span>
-                <div className="flex justify-between w-full">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <div
-                      key={value}
-                      className={`w-8 h-8 rounded-full border-2 cursor-pointer flex items-center justify-center mx-1 ${
-                        answers[question.id] === value.toString()
-                          ? "border-blue-500 bg-blue-100"
-                          : "border-gray-300"
-                      }`}
-                      onClick={() =>
-                        handleAnswer(question.id, value.toString())
-                      }
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500">Strongly Agree</span>
-              </div>
+              {currentGroup === 0 ? (
+                // Layout for the first group
+                <>
+                  <span className="text-sm font-medium ">
+                    {"left" in question ? question.left : ""}
+                  </span>
+                  <div className="flex items-center justify-center space-x-2 w-full">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <label key={value} className="flex flex-col items-center">
+                        <input
+                          type="radio"
+                          name={`question-${question.id}`}
+                          value={value}
+                          checked={answers[question.id] === value}
+                          onChange={() => handleAnswer(question.id, value)}
+                          className="form-radio h-4 w-4 text-blue-600"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium">
+                    {"right" in question ? question.right : ""}
+                  </span>
+                </>
+              ) : (
+                // Layout for the second group
+                <>
+                  <span className="text-sm font-medium flex-1">
+                    {"text" in question ? question.text : ""}
+                  </span>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm font-medium">Disagree</span>
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <label key={value} className="flex flex-col items-center">
+                        <input
+                          type="radio"
+                          name={`question-${question.id}`}
+                          value={value}
+                          checked={answers[question.id] === value}
+                          onChange={() => handleAnswer(question.id, value)}
+                          className="form-radio h-4 w-4 text-blue-600"
+                        />
+                      </label>
+                    ))}
+                    <span className="text-sm font-medium">Agree</span>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </CardContent>
@@ -98,7 +132,7 @@ export default function MBTITestPage() {
           </Button>
           <Button
             onClick={handleNextGroup}
-            disabled={currentQuestions.some((q) => !answers[q.id])}
+            // disabled={Object.keys(answers).length < questions.length}
           >
             Next
           </Button>
