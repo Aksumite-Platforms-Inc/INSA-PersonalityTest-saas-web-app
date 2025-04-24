@@ -22,7 +22,7 @@ import { motion } from "framer-motion";
 const availableTests = [
   {
     id: "mbti",
-    title: "Personality Type Indicator",
+    title: "MBTI Personality Type Indicator",
     description:
       "Discover your personality type and how it influences your behavior and interactions with others.",
     duration: "20-25 minutes",
@@ -35,7 +35,7 @@ const availableTests = [
     description:
       "Evaluate your personality across five major dimensions: openness, conscientiousness, extraversion, agreeableness, and neuroticism.",
     duration: "15-20 minutes",
-    questions: 50,
+    questions: 60,
     icon: "⭐",
   },
   {
@@ -52,8 +52,8 @@ const availableTests = [
     title: "Enneagram Profile",
     description:
       "Identify your core motivations and personality type according to the Enneagram system.",
-    duration: "25-30 minutes",
-    questions: 70,
+    duration: "35-50 minutes",
+    questions: 108,
     icon: "🔹",
   },
 ];

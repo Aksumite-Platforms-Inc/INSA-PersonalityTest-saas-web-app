@@ -57,33 +57,50 @@ export default function Big5TestPage() {
               Page {currentGroup + 1} of{" "}
               {Math.ceil(questions.length / questionsPerGroup)}
             </p>
-            <Progress
-              value={
-                ((currentGroup + 1) /
-                  Math.ceil(questions.length / questionsPerGroup)) *
-                100
-              }
-              className="h-3 rounded-lg bg-gray-200"
-            />
+            <div className="flex items-center justify-between">
+              <Progress
+                value={
+                  ((currentGroup + 1) /
+                    Math.ceil(questions.length / questionsPerGroup)) *
+                  100
+                }
+                className="h-2 rounded-lg bg-gray-200 flex-1"
+              />
+              <span className="ml-2 text-sm text-gray-500">
+                {Math.round(
+                  ((currentGroup + 1) /
+                    Math.ceil(questions.length / questionsPerGroup)) *
+                    100
+                )}
+                % Complete
+              </span>
+            </div>
           </div>
           <p className="text-muted-foreground mb-4">{big5Test.description}</p>
           {currentQuestions.map((question) => (
-            <div key={question.id} className="mb-4">
-              <p className="font-medium mb-2">{question.text}</p>
-              <div className="flex space-x-4">
-                {question.options.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`border p-4 rounded-lg cursor-pointer ${
-                      answers[question.id] === option.value
-                        ? "border-blue-500"
-                        : "border-gray-300"
-                    }`}
-                    onClick={() => handleAnswer(question.id, option.value)}
-                  >
-                    {option.label}
-                  </div>
-                ))}
+            <div
+              key={question.id}
+              className="mb-6 p-4 border rounded-lg bg-white shadow-sm"
+            >
+              <p className="font-medium mb-8 text-center">{question.text}</p>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500">Strongly Disagree</span>
+                <div className="flex justify-between w-full">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <div
+                      key={value}
+                      className={`w-8 h-8 rounded-full border-2 cursor-pointer flex items-center justify-center mx-1 ${
+                        answers[question.id] === value.toString()
+                          ? "border-blue-500 bg-blue-100"
+                          : "border-gray-300"
+                      }`}
+                      onClick={() =>
+                        handleAnswer(question.id, value.toString())
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-500">Strongly Agree</span>
               </div>
             </div>
           ))}
