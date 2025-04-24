@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description:
     "A cloud-native multi-tenant SaaS web application for psychology-based internal testing",
   generator: "INSA-PersonalityTest",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

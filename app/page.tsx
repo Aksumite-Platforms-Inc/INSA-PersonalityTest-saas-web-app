@@ -358,7 +358,7 @@ export default function LoginPage() {
                 <Brain className="h-12 w-12 mb-4 text-primary" />
                 <h3 className="text-xl font-bold">Multiple Test Types</h3>
                 <p className="text-sm text-muted-foreground">
-                  MBTI-style, Big Five, DISC, and Enneagram assessments
+                  MBTI-style, Big Five, RIASEC, and Enneagram assessments
                   available.
                 </p>
               </CardContent>

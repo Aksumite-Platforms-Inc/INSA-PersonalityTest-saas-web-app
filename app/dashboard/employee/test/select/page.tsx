@@ -39,13 +39,13 @@ const availableTests = [
     icon: "⭐",
   },
   {
-    id: "disc",
-    title: "Behavioral Style Assessment",
+    id: "riasec",
+    title: "RIASEC Career Interest Assessment",
     description:
-      "Understand your behavioral style in terms of dominance, influence, steadiness, and conscientiousness.",
-    duration: "10-15 minutes",
-    questions: 40,
-    icon: "🔄",
+      "Explore your career interests based on the RIASEC model: Realistic, Investigative, Artistic, Social, Enterprising, and Conventional.",
+    duration: "20-30 minutes",
+    questions: 42,
+    icon: "⚒️",
   },
   {
     id: "enneagram",

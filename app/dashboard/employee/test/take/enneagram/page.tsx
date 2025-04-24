@@ -85,7 +85,7 @@ export default function EnneagramPage() {
                       type="radio"
                       name={`question-${question.id}`}
                       value={option.value}
-                      className="mr-2"
+                      className="mr-2 w-6 h-6"
                       onChange={() => handleAnswer(question.id, option.value)}
                     />
                     {option.label}

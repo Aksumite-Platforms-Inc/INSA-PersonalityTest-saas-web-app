@@ -28,13 +28,13 @@ import {
 
 import { mbtiTest } from "@/data/tests/mbti";
 import { big5Test } from "@/data/tests/big5";
-import { discTest } from "@/data/tests/riasec";
+import { riasecTest } from "@/data/tests/riasec";
 import { enneagramTest } from "@/data/tests/enneagram";
 
 const testData = {
   mbti: mbtiTest,
   big5: big5Test,
-  disc: discTest,
+  riasec: riasecTest,
   enneagram: enneagramTest,
 };
 
