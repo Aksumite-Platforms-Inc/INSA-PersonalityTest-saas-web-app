@@ -28,7 +28,7 @@ import {
 
 import { mbtiTest } from "@/data/tests/mbti";
 import { big5Test } from "@/data/tests/big5";
-import { discTest } from "@/data/tests/disc";
+import { discTest } from "@/data/tests/riasec";
 import { enneagramTest } from "@/data/tests/enneagram";
 
 const testData = {
