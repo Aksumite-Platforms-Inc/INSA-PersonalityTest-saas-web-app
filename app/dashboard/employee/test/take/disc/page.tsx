@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { discTest } from "@/data/tests/disc";
+import { riasecTest } from "@/data/tests/riasec";
 import {
   Card,
   CardHeader,
@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation";
 export default function DISCPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const questionsPerGroup = 1; // DISC test groups one question per page
-  const questions = discTest.questions;
+  const questionsPerGroup = 6; // DISC test groups one question per page
+  const questions = riasecTest.questions;
   const router = useRouter();
 
   const currentQuestions = questions.slice(
@@ -49,23 +49,28 @@ export default function DISCPage() {
     <div className="container mx-auto py-6">
       <Card>
         <CardHeader>
-          <CardTitle>{discTest.title}</CardTitle>
+          <CardTitle>{riasecTest.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center mb-4">
             <p className="text-lg font-medium">
-              Page {currentGroup + 1} of {questions.length}
+              Page {currentGroup + 1} of{" "}
+              {Math.ceil(questions.length / questionsPerGroup)}
             </p>
             <Progress
               value={((currentGroup + 1) / questions.length) * 100}
               className="h-3 rounded-lg bg-gray-500"
             />
           </div>
-          <p className="text-muted-foreground mb-4">{discTest.description}</p>
+          <p className="text-muted-foreground mb-4">{riasecTest.description}</p>
           {currentQuestions.map((question) => (
-            <div key={question.id} className="mb-4">
+            <div
+              key={question.id}
+              className=" flex justify-between items-center mb-6 p-4 border rounded-lg shadow-sm"
+            >
               <p className="font-medium mb-2">{question.text}</p>
-              <div className="flex space-x-4">
+              <input type="checkbox" />
+              {/* <div className="flex space-x-4">
                 {question.options.map((option) => (
                   <label
                     key={option.value}
@@ -81,7 +86,7 @@ export default function DISCPage() {
                     {option.label}
                   </label>
                 ))}
-              </div>
+              </div> */}
             </div>
           ))}
         </CardContent>
@@ -91,7 +96,7 @@ export default function DISCPage() {
           </Button>
           <Button
             onClick={handleNextGroup}
-            disabled={currentQuestions.some((q) => !answers[q.id])}
+            // disabled={currentQuestions.some((q) => !answers[q.id])}
           >
             Next
           </Button>
