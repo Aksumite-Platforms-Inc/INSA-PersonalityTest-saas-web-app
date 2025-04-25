@@ -12,7 +12,7 @@ export default function OrganizationDashboard() {
       />
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -45,17 +45,6 @@ export default function OrganizationDashboard() {
             <div className="text-2xl font-bold">78.5%</div>
             <p className="text-xs text-muted-foreground">
               +5.2% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Score</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">72.3</div>
-            <p className="text-xs text-muted-foreground">
-              +1.8 from last month
             </p>
           </CardContent>
         </Card>
