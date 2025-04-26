@@ -138,6 +138,14 @@ export default function TestPage({ params }: { params: { testId: string } }) {
       return;
     }
 
+    //paylaod for big5 test answers
+    const adjustedAnswers = {
+      answers: Object.fromEntries(
+        Object.entries(answers).map(([key, value]) => [key, Number(value)])
+      ),
+    };
+    const payload = JSON.stringify(adjustedAnswers);
+
     setIsSubmitting(true);
 
     // Simulate API call
