@@ -192,11 +192,18 @@ export function OrganizationsTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => onEdit(org)}>
+                        <DropdownMenuItem onClick={() => onEdit(org.id)}>
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
-
+                        <DropdownMenuItem
+                          onClick={() =>
+                            (window.location.href = `/dashboard/superadmin/organizations/${org.id}`)
+                          }
+                        >
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Details</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Compliance</span>
