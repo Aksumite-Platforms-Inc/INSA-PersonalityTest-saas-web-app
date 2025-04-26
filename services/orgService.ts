@@ -1,51 +1,11 @@
-// import api from "./api";
-// import { APIResponse } from "@/types/api";
-// import { handleApiError } from "@/lib/errorHandler";
-
-// export const createOrganization = async (
-//   name: string,
-//   adminId: number
-// ): Promise<APIResponse<any>> => {
-//   try {
-//     const response = await api.post("/sys/organization", { name, adminId });
-//     return { data: response.data, error: null, success: true };
-//   } catch (error: any) {
-//     return handleApiError(error);
-//   }
-// };
-
-// export const getOrganizations = async (): Promise<APIResponse<any[]>> => {
-//   try {
-//     const response = await api.get<any[]>("/sys/organization");
-//     return { data: response.data, error: null, success: true };
-//   } catch (error: any) {
-//     return {
-//       data: [],
-//       error: error.response?.data?.message || "An unexpected error occurred",
-//       success: false,
-//     };
-//   }
-// };
-
-// export const deleteOrganization = async (
-//   orgId: number
-// ): Promise<APIResponse<null>> => {
-//   try {
-//     await api.delete(`/sys/organization/${orgId}`);
-//     return { data: null, error: null, success: true };
-//   } catch (error: any) {
-//     return handleApiError(error);
-//   }
-// };
-
-interface OrganizationData {
+export interface OrganizationData {
   id: number;
   name: string;
   sector: string;
   status: string;
+  complianceStatus: string;
   users: number;
   testsCompleted: number;
-  complianceStatus: string;
   createdAt: string;
 }
 
@@ -159,5 +119,39 @@ export const orgService = {
     const deletedOrg = organizations.splice(orgIndex, 1);
 
     return deletedOrg[0];
+  },
+
+  async getOrganizationById(orgId: number) {
+    // Mock implementation, replace with actual API call
+    return {
+      id: orgId,
+      name: "Example Organization",
+      sector: "Technology",
+      status: "Active",
+      complianceStatus: "Compliant",
+      users: 100,
+      testsCompleted: 50,
+      createdAt: "2025-01-01",
+    };
+  },
+
+  async getAllOrgMembers(orgId: number) {
+    // Mock implementation, replace with actual API call
+    return [
+      {
+        id: 1,
+        branchName: "Headquarters",
+        name: "John Doe",
+        email: "john.doe@example.com",
+        phone: "123-456-7890",
+      },
+      {
+        id: 2,
+        branchName: "Branch A",
+        name: "Jane Smith",
+        email: "jane.smith@example.com",
+        phone: "987-654-3210",
+      },
+    ];
   },
 };
