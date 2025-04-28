@@ -126,9 +126,6 @@ export default function OrganizationDetailsPage() {
         <p>
           <strong>Status:</strong> {organization?.status}
         </p>
-        <p>
-          <strong>Compliance:</strong> {organization?.complianceStatus}
-        </p>
       </div>
 
       <div className="space-y-4">

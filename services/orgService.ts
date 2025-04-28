@@ -3,7 +3,6 @@ export interface OrganizationData {
   name: string;
   sector: string;
   status: string;
-  complianceStatus: string;
   users: number;
   testsCompleted: number;
   createdAt: string;
@@ -17,7 +16,6 @@ let organizations: OrganizationData[] = [
     status: "active",
     users: 245,
     testsCompleted: 189,
-    complianceStatus: "compliant",
     createdAt: "2023-01-15",
   },
   {
@@ -27,7 +25,6 @@ let organizations: OrganizationData[] = [
     status: "active",
     users: 312,
     testsCompleted: 278,
-    complianceStatus: "compliant",
     createdAt: "2023-02-03",
   },
   {
@@ -37,7 +34,6 @@ let organizations: OrganizationData[] = [
     status: "active",
     users: 156,
     testsCompleted: 98,
-    complianceStatus: "warning",
     createdAt: "2023-03-21",
   },
   {
@@ -47,7 +43,6 @@ let organizations: OrganizationData[] = [
     status: "active",
     users: 203,
     testsCompleted: 175,
-    complianceStatus: "compliant",
     createdAt: "2023-04-10",
   },
   {
@@ -57,7 +52,6 @@ let organizations: OrganizationData[] = [
     status: "active",
     users: 178,
     testsCompleted: 145,
-    complianceStatus: "compliant",
     createdAt: "2023-05-05",
   },
   {
@@ -67,7 +61,6 @@ let organizations: OrganizationData[] = [
     status: "suspended",
     users: 220,
     testsCompleted: 0,
-    complianceStatus: "non-compliant",
     createdAt: "2023-06-18",
   },
 ];
@@ -82,7 +75,6 @@ export const orgService = {
       status: "active", // default
       users: 0,
       testsCompleted: 0,
-      complianceStatus: "Compliant", // default
       createdAt: new Date().toISOString(),
     };
     organizations.push(newOrganization);
@@ -128,7 +120,6 @@ export const orgService = {
       name: "Example Organization",
       sector: "Technology",
       status: "Active",
-      complianceStatus: "Compliant",
       users: 100,
       testsCompleted: 50,
       createdAt: "2025-01-01",

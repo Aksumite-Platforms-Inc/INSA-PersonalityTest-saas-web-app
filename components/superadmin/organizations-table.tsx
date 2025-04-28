@@ -37,7 +37,6 @@ interface Organization {
   status: string;
   users: number;
   testsCompleted: number;
-  complianceStatus: string;
   createdAt: string;
 }
 
@@ -95,41 +94,6 @@ export function OrganizationsTable({
     }
   };
 
-  // Function to render compliance status badge with appropriate variant
-  const renderComplianceBadge = (status: string) => {
-    switch (status) {
-      case "compliant":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
-          >
-            Compliant
-          </Badge>
-        );
-      case "warning":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-50 text-yellow-700 border-yellow-200"
-          >
-            Warning
-          </Badge>
-        );
-      case "non-compliant":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            Non-Compliant
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center">
@@ -153,7 +117,6 @@ export function OrganizationsTable({
               <TableHead>Status</TableHead>
               <TableHead>Users</TableHead>
               <TableHead>Tests Completed</TableHead>
-              <TableHead>Compliance</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="w-[80px]"></TableHead>
             </TableRow>
@@ -176,9 +139,7 @@ export function OrganizationsTable({
                   <TableCell>{renderStatusBadge(org.status)}</TableCell>
                   <TableCell>{org.users}</TableCell>
                   <TableCell>{org.testsCompleted}</TableCell>
-                  <TableCell>
-                    {renderComplianceBadge(org.complianceStatus)}
-                  </TableCell>
+
                   <TableCell>
                     {new Date(org.createdAt).toLocaleDateString()}
                   </TableCell>
@@ -204,10 +165,7 @@ export function OrganizationsTable({
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Details</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Shield className="mr-2 h-4 w-4" />
-                          <span>Compliance</span>
-                        </DropdownMenuItem>
+
                         <DropdownMenuSeparator />
                         {org.status === "active" ? (
                           <DropdownMenuItem className="text-red-600">

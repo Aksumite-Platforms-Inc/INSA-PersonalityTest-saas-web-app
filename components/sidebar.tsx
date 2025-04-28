@@ -71,13 +71,6 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/tests")}
                 open={open}
               />
-              <SidebarItem
-                href="/dashboard/superadmin/compliance"
-                icon={Shield}
-                label={t("sidebar.compliance")}
-                active={pathname.includes("/compliance")}
-                open={open}
-              />
             </>
           )}
 

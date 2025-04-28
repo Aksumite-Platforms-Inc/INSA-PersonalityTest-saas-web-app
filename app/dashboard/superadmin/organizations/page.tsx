@@ -99,7 +99,6 @@ interface OrganizationData {
   status: string;
   users: number;
   testsCompleted: number;
-  complianceStatus: string;
   createdAt: string;
 }
 
@@ -143,9 +142,12 @@ export default function OrganizationsPage() {
     setShowModal(true);
   };
 
-  const handleEditOrganization = (org: OrganizationData) => {
-    setFormData({ id: org.id, name: org.name, sector: org.sector });
-    setShowModal(true);
+  const handleEditOrganization = (id: number) => {
+    const org = organizations.find((org) => org.id === id);
+    if (org) {
+      setFormData({ id: org.id, name: org.name, sector: org.sector });
+      setShowModal(true);
+    }
   };
 
   const handleSaveOrganization = async (data: {
@@ -162,7 +164,12 @@ export default function OrganizationsPage() {
         );
         setSuccessMessage("Organization updated successfully!");
       } else {
-        await orgService.createOrganization(data);
+        await orgService.createOrganization({
+          ...data,
+          status: "active", // default status
+          users: 0, // default users count
+          testsCompleted: 0, // default tests completed count
+        });
         const updatedList = await orgService.getAllOrganizations();
         setOrganizations(updatedList);
         setSuccessMessage("Organization created successfully!");

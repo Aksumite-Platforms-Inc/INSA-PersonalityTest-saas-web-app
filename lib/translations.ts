@@ -34,7 +34,6 @@ export const translations = {
       testProgress: "Test Progress",
       takeTest: "Take Test",
       results: "Results",
-      compliance: "Compliance",
       settings: "Settings",
       open: "Open sidebar",
       close: "Close sidebar",
@@ -52,7 +51,8 @@ export const translations = {
     },
     test: {
       title: "Personality Assessment",
-      description: "Please answer all questions honestly for the most accurate results",
+      description:
+        "Please answer all questions honestly for the most accurate results",
       questionNumber: "Question {current} of {total}",
       progress: "{percent}% Complete",
       pleaseSelect: "Please select an option",
@@ -65,7 +65,8 @@ export const translations = {
       submitSuccess: "Test Submitted",
       submitDescription: "Your test has been submitted successfully",
       selectTitle: "Select a Personality Test",
-      selectDescription: "Choose one of the available tests to begin your assessment",
+      selectDescription:
+        "Choose one of the available tests to begin your assessment",
       importantNote: "Important Note",
       oneTimeOnly: "Each test can only be taken once. Please choose carefully.",
       duration: "Duration",
@@ -76,7 +77,8 @@ export const translations = {
       pleaseSelectTest: "Please select a test before proceeding",
       exit: "Exit Test",
       exitConfirmTitle: "Exit Test?",
-      exitConfirmDescription: "Your progress will be lost if you exit now. Are you sure you want to continue?",
+      exitConfirmDescription:
+        "Your progress will be lost if you exit now. Are you sure you want to continue?",
       continue: "Continue Test",
       exitTest: "Exit Test",
     },
@@ -115,16 +117,21 @@ export const translations = {
       testType: "Test Type",
       completionDate: "Completion Date",
       personalityType: "Personality Type",
-      personalityProfileDescription: "Visual representation of personality traits",
+      personalityProfileDescription:
+        "Visual representation of personality traits",
       coreTraits: "Core Traits",
       trait1Title: "Analytical Thinker",
-      trait1Description: "You excel at breaking down complex problems and finding logical solutions.",
+      trait1Description:
+        "You excel at breaking down complex problems and finding logical solutions.",
       trait2Title: "Independent Worker",
-      trait2Description: "You're comfortable working on your own and taking initiative without supervision.",
+      trait2Description:
+        "You're comfortable working on your own and taking initiative without supervision.",
       trait3Title: "Detail-Oriented",
-      trait3Description: "You notice small details that others might miss and value precision in your work.",
+      trait3Description:
+        "You notice small details that others might miss and value precision in your work.",
       personalInsights: "Personal Insights",
-      insightsDescription: "Deeper understanding of your personality patterns and behaviors.",
+      insightsDescription:
+        "Deeper understanding of your personality patterns and behaviors.",
       insight1Title: "Communication Style",
       insight1Text:
         "You tend to communicate in a direct and logical manner, focusing on facts rather than emotions. This can be effective in professional settings but may sometimes come across as detached in personal interactions.",
@@ -135,23 +142,32 @@ export const translations = {
       insight3Text:
         "Under stress, you tend to withdraw and process internally rather than seeking external support. Developing strategies to reach out to others during challenging times could enhance your resilience.",
       professionalDevelopment: "Professional Development",
-      professional1: "Consider leadership training to enhance your ability to guide and motivate teams.",
-      professional2: "Seek opportunities to present your ideas to groups to improve public speaking skills.",
-      professional3: "Explore project management methodologies to leverage your organizational strengths.",
+      professional1:
+        "Consider leadership training to enhance your ability to guide and motivate teams.",
+      professional2:
+        "Seek opportunities to present your ideas to groups to improve public speaking skills.",
+      professional3:
+        "Explore project management methodologies to leverage your organizational strengths.",
       teamDynamics: "Team Dynamics",
-      team1: "You work best in teams that value autonomy and clear communication.",
-      team2: "You can serve as a stabilizing force in high-pressure situations.",
+      team1:
+        "You work best in teams that value autonomy and clear communication.",
+      team2:
+        "You can serve as a stabilizing force in high-pressure situations.",
       team3: "You excel at providing thoughtful analysis to group discussions.",
       personalGrowth: "Personal Growth",
-      growth1: "Practice active listening to deepen your connections with others.",
-      growth2: "Explore mindfulness techniques to help manage overthinking tendencies.",
-      growth3: "Challenge yourself to step outside your comfort zone in social situations.",
+      growth1:
+        "Practice active listening to deepen your connections with others.",
+      growth2:
+        "Explore mindfulness techniques to help manage overthinking tendencies.",
+      growth3:
+        "Challenge yourself to step outside your comfort zone in social situations.",
     },
     employee: {
       dashboardTitle: "Employee Dashboard",
       dashboardDescription: "View your test status and results",
       pendingTest: "Pending Personality Test",
-      pendingTestDescription: "You have been assigned a personality test that needs to be completed.",
+      pendingTestDescription:
+        "You have been assigned a personality test that needs to be completed.",
       takeTest: "Take Test",
       testStatus: "Test Status",
       assignedTest: "Assigned Test",
@@ -162,19 +178,23 @@ export const translations = {
       viewResults: "View Results",
       startTest: "Start Test",
       insights: "Personal Insights",
-      insightsAvailable: "Based on your test results, we've identified the following insights:",
+      insightsAvailable:
+        "Based on your test results, we've identified the following insights:",
       insight1: "You excel at analytical thinking and problem-solving",
-      insight2: "You prefer working independently but can adapt to team settings",
+      insight2:
+        "You prefer working independently but can adapt to team settings",
       insight3: "You approach tasks with attention to detail and precision",
       insightsUnavailable: "No insights available yet",
-      completeTestForInsights: "Complete your assigned test to view personalized insights",
+      completeTestForInsights:
+        "Complete your assigned test to view personalized insights",
       exploreInsights: "Explore Insights",
     },
     branches: {
       title: "Branches Management",
       description: "Manage all branches in your organization",
       newBranch: "Add New Branch",
-      newBranchDescription: "Create a new branch and assign a branch administrator",
+      newBranchDescription:
+        "Create a new branch and assign a branch administrator",
       branchDetails: "Branch Details",
       branchDetailsDescription: "Enter the basic information about the branch",
       branchName: "Branch Name",
@@ -188,14 +208,16 @@ export const translations = {
       email: "Email",
       emailPlaceholder: "branch@example.com",
       branchAdmin: "Branch Administrator",
-      branchAdminDescription: "Assign an administrator who will manage this branch",
+      branchAdminDescription:
+        "Assign an administrator who will manage this branch",
       adminEmail: "Admin Email",
       adminEmailPlaceholder: "admin@example.com",
       adminEmailHelp: "An invitation will be sent to this email address",
       adminName: "Admin Name",
       adminNamePlaceholder: "e.g., Abebe Kebede",
       missingFields: "Missing Required Fields",
-      provideMandatoryFields: "Please provide all required fields marked with *",
+      provideMandatoryFields:
+        "Please provide all required fields marked with *",
       branchCreated: "Branch Created",
       branchAdminInvited: "Branch administrator has been invited via email",
     },
@@ -206,7 +228,8 @@ export const translations = {
       addEmployee: "Add Employee",
       addEmployeeDescription: "Add a new employee to the system",
       employeeDetails: "Employee Details",
-      employeeDetailsDescription: "Enter the basic information about the employee",
+      employeeDetailsDescription:
+        "Enter the basic information about the employee",
       firstName: "First Name",
       lastName: "Last Name",
       email: "Email",
@@ -217,10 +240,12 @@ export const translations = {
       employeeId: "Employee ID",
       sendInviteEmail: "Send invitation email with login credentials",
       missingFields: "Missing Required Fields",
-      provideMandatoryFields: "Please provide all required fields marked with *",
+      provideMandatoryFields:
+        "Please provide all required fields marked with *",
       employeeAdded: "Employee Added",
       inviteSent: "Invitation has been sent to {email}",
-      employeeAddedNoInvite: "Employee has been added without sending an invitation",
+      employeeAddedNoInvite:
+        "Employee has been added without sending an invitation",
       search: "Search employees...",
       name: "Name",
       testStatus: "Test Status",
@@ -255,7 +280,8 @@ export const translations = {
       downloadTemplate: "Download Template",
       validationResults: "Validation Results",
       validationSuccess: "File validated successfully with some warnings",
-      validationFailed: "File validation failed. Please fix the errors and try again.",
+      validationFailed:
+        "File validation failed. Please fix the errors and try again.",
       totalRows: "Total Rows",
       validRows: "Valid Rows",
       errorRows: "Error Rows",
@@ -371,7 +397,8 @@ export const translations = {
       title: "የፈተና ውጤቶችዎ",
       description: "የግል ባህሪ ግምገማ ውጤቶችዎን ይመልከቱ",
       personalityProfile: "የግል ባህሪ መገለጫ",
-      profileDescription: "በምላሾችዎ መሰረት፣ ዋና ዋና ባህሪያትዎን የሚያሳይ የግል ባህሪ መገለጫ ፈጥረናል።",
+      profileDescription:
+        "በምላሾችዎ መሰረት፣ ዋና ዋና ባህሪያትዎን የሚያሳይ የግል ባህሪ መገለጫ ፈጥረናል።",
       summary: "ማጠቃለያ",
       summaryText1:
         "ውጤቶችዎ በትንታኔ አስተሳሰብ እና በችግር አፈታት ጠንካራ ጎኖች ያለው የተመጣጠነ የግል ባህሪ መገለጫ እንዳለዎት ያሳያሉ። የበለጠ ውስጣዊ እና ለብቻዎ መስራትን የሚመርጡ ሲሆኑ፣ ሆኖም ግን ተላማጅ ነዎት እና በቡድን ቦታዎች ሲያስፈልግ በጥሩ ሁኔታ መስራት ይችላሉ። ለዝርዝሮች ትኩረት መስጠትዎ እና ስልታዊ አቀራረብዎ ትክክለኛነት እና ጥንቃቄ ያለው ትንታኔ ለሚፈልጉ ሚናዎች ተስማሚ ያደርግዎታል።",
@@ -408,7 +435,8 @@ export const translations = {
       trait2Title: "ራስ ወ ደድ ሰራተኛ",
       trait2Description: "ለብቻህ መስራት እና ያለ ቁጥጥር ተነሳሽነት መውሰድ ምቾት ይሰጥሃል።",
       trait3Title: "ለዝርዝር ትኩረት የሚሰጥ",
-      trait3Description: "ሌሎች ሊያመልጧቸው የሚችሉ ትናንሽ ዝርዝሮችን ትገነዘባለህ እና በስራህ ትክክለኛነትን ታከብራለህ።",
+      trait3Description:
+        "ሌሎች ሊያመልጧቸው የሚችሉ ትናንሽ ዝርዝሮችን ትገነዘባለህ እና በስራህ ትክክለኛነትን ታከብራለህ።",
       personalInsights: "የግል ግንዛቤዎች",
       insightsDescription: "የግል ባህሪ ስርዓቶችን እና ባህሪዎችን የበለጠ ግንዛቤ።",
       insight1Title: "የመግባቢያ ዘይቤ",
@@ -421,7 +449,8 @@ export const translations = {
       insight3Text:
         "በጭንቀት ስር፣ ከውጫዊ ድጋፍ መፈለግ ይልቅ ወደ ውስጥ መሳብ እና በውስጥ ማስተናገድ ትመርጣለህ። በአስቸጋሪ ጊዜያት ወደ ሌሎች ለመድረስ ስልቶችን ማዳበር የመቋቋም ችሎታህን ሊያሻሽል ይችላል።",
       professionalDevelopment: "ሙያዊ እድገት",
-      professional1: "ቡድኖችን የመምራት እና የማነሳሳት ችሎታህን ለማሻሻል የአመራር ስልጠና ግምት ውስጥ አስገባ።",
+      professional1:
+        "ቡድኖችን የመምራት እና የማነሳሳት ችሎታህን ለማሻሻል የአመራር ስልጠና ግምት ውስጥ አስገባ።",
       professional2: "የህዝብ ንግግር ክህሎቶችን ለማሻሻል ሃሳቦችህን ለቡድኖች የማቅረብ እድሎችን ፈልግ።",
       professional3: "የአደረጃጀት ጥንካሬዎችህን ለመጠቀም የፕሮጀክት አስተዳደር ዘዴዎችን አስስ።",
       teamDynamics: "የቡድን ዲናሚክስ",
@@ -534,7 +563,8 @@ export const translations = {
       validate: "ፋይል አረጋግጥ",
       template: "የፋይል አብነት",
       templateDescription: "ትክክለኛ ቅርጸት ለማረጋገጥ አብነቱን ያውርዱ",
-      templateInstructions: "ውሂብዎ በትክክል መቀረጹን ለማረጋገጥ ከታች ያለውን አብነት ይጠቀሙ። የመጀመሪያው ረድፍ የአምድ ራስጌዎችን መያዝ አለበት።",
+      templateInstructions:
+        "ውሂብዎ በትክክል መቀረጹን ለማረጋገጥ ከታች ያለውን አብነት ይጠቀሙ። የመጀመሪያው ረድፍ የአምድ ራስጌዎችን መያዝ አለበት።",
       requiredColumns: "የሚያስፈልጉ አምዶች",
       optionalColumns: "አማራጭ አምዶች",
       downloadTemplate: "አብነት አውርድ",
@@ -571,4 +601,4 @@ export const translations = {
       rights: "መብቱ በህግ የተጠበቀ ነው።",
     },
   },
-}
+};
