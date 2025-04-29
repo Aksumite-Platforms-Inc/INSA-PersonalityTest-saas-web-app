@@ -146,6 +146,16 @@ export default function TestPage({ params }: { params: { testId: string } }) {
     };
     const payload = JSON.stringify(adjustedAnswers);
 
+    
+    const adjustedAnswers2 = {
+      answers: Object.entries(answers).map(([key, value]) => ({
+        type: questions.find((q) => q.id === Number(key))?.type || "default",
+        answer: Number(value),
+      })),
+    };
+
+    const enneagramPayload = JSON.stringify(adjustedAnswers2);
+
     setIsSubmitting(true);
 
     // Simulate API call
