@@ -24,14 +24,19 @@ const mbtiTestTyped: { pages: MBTIPages } = mbtiTest;
 
 export default function MBTITestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
-  const [aAnswers, setAAnswers] = useState<Record<number, number>>(() => {
-    const stored = localStorage.getItem("aAnswers");
-    return stored ? JSON.parse(stored) : {};
-  });
-  const [bAnswers, setBAnswers] = useState<Record<number, number>>(() => {
-    const stored = localStorage.getItem("bAnswers");
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [aAnswers, setAAnswers] = useState<Record<number, number>>({});
+  const [bAnswers, setBAnswers] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedA = localStorage.getItem("aAnswers");
+      const storedB = localStorage.getItem("bAnswers");
+
+      if (storedA) setAAnswers(JSON.parse(storedA));
+      if (storedB) setBAnswers(JSON.parse(storedB));
+    }
+  }, []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,14 +50,6 @@ export default function MBTITestPage() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
-
-  useEffect(() => {
-    if (currentGroup === 0) {
-      setAAnswers(aAnswers);
-    } else {
-      setBAnswers(bAnswers);
-    }
-  }, [currentGroup, aAnswers, bAnswers]);
 
   const questions =
     currentGroup === 0 ? mbtiTestTyped.pages.page1 : mbtiTestTyped.pages.page2;

@@ -16,7 +16,6 @@ const employees = [
     position: "Accountant",
     testStatus: "completed",
     lastActivity: "2023-03-15",
-    score: 85,
   },
   {
     id: 2,
@@ -25,7 +24,6 @@ const employees = [
     position: "HR Specialist",
     testStatus: "in-progress",
     lastActivity: "2023-03-14",
-    score: null,
   },
   {
     id: 3,
@@ -34,7 +32,6 @@ const employees = [
     position: "Systems Administrator",
     testStatus: "completed",
     lastActivity: "2023-03-12",
-    score: 78,
   },
   {
     id: 4,
@@ -43,7 +40,6 @@ const employees = [
     position: "Operations Manager",
     testStatus: "not-started",
     lastActivity: null,
-    score: null,
   },
   {
     id: 5,
@@ -52,7 +48,6 @@ const employees = [
     position: "Marketing Specialist",
     testStatus: "completed",
     lastActivity: "2023-03-10",
-    score: 92,
   },
   {
     id: 6,
@@ -61,7 +56,6 @@ const employees = [
     position: "Financial Analyst",
     testStatus: "completed",
     lastActivity: "2023-03-09",
-    score: 96,
   },
   {
     id: 7,
@@ -70,7 +64,6 @@ const employees = [
     position: "Project Manager",
     testStatus: "completed",
     lastActivity: "2023-03-08",
-    score: 94,
   },
   {
     id: 8,
@@ -79,7 +72,6 @@ const employees = [
     position: "Research Specialist",
     testStatus: "in-progress",
     lastActivity: "2023-03-15",
-    score: null,
   },
   {
     id: 9,
@@ -88,7 +80,6 @@ const employees = [
     position: "Operations Lead",
     testStatus: "completed",
     lastActivity: "2023-03-07",
-    score: 90,
   },
   {
     id: 10,
@@ -97,7 +88,6 @@ const employees = [
     position: "Technical Specialist",
     testStatus: "completed",
     lastActivity: "2023-03-06",
-    score: 89,
   },
 ]
 
@@ -166,7 +156,6 @@ export function EmployeeList() {
               <TableHead>Position</TableHead>
               <TableHead>Test Status</TableHead>
               <TableHead>Last Activity</TableHead>
-              <TableHead>Score</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -186,7 +175,6 @@ export function EmployeeList() {
                   <TableCell>
                     {employee.lastActivity ? new Date(employee.lastActivity).toLocaleDateString() : "N/A"}
                   </TableCell>
-                  <TableCell>{employee.score !== null ? employee.score : "N/A"}</TableCell>
                 </TableRow>
               ))
             )}

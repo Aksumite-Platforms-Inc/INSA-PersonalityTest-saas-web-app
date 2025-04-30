@@ -18,31 +18,11 @@ export default function BranchSettingsPage() {
   const [branchPhone, setBranchPhone] = useState("+251 111 234567")
   const [branchAddress, setBranchAddress] = useState("Addis Ababa, Ethiopia")
   const [branchManager, setBranchManager] = useState("Abebe Kebede")
-  const [notifyTestCompletion, setNotifyTestCompletion] = useState(true)
-  const [notifyLowScores, setNotifyLowScores] = useState(true)
-  const [reminderFrequency, setReminderFrequency] = useState("weekly")
-  const [testTimeLimit, setTestTimeLimit] = useState("60")
-  const [allowRetakes, setAllowRetakes] = useState(true)
-  const [maxRetakes, setMaxRetakes] = useState("2")
-
+  
   const handleSaveProfile = () => {
     toast({
       title: "Settings saved",
       description: "Branch profile has been updated successfully.",
-    })
-  }
-
-  const handleSaveNotifications = () => {
-    toast({
-      title: "Settings saved",
-      description: "Notification settings have been updated successfully.",
-    })
-  }
-
-  const handleSaveTests = () => {
-    toast({
-      title: "Settings saved",
-      description: "Test settings have been updated successfully.",
     })
   }
 
@@ -53,8 +33,6 @@ export default function BranchSettingsPage() {
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
           <TabsTrigger value="profile">Branch Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="tests">Test Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
@@ -92,85 +70,6 @@ export default function BranchSettingsPage() {
             </CardContent>
             <CardFooter>
               <Button onClick={handleSaveProfile}>Save Changes</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Configure when and how you receive notifications</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="notify-test-completion"
-                  checked={notifyTestCompletion}
-                  onCheckedChange={setNotifyTestCompletion}
-                />
-                <Label htmlFor="notify-test-completion">Notify on test completion</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch id="notify-low-scores" checked={notifyLowScores} onCheckedChange={setNotifyLowScores} />
-                <Label htmlFor="notify-low-scores">Notify on low test scores</Label>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reminder-frequency">Test Reminder Frequency</Label>
-                <Select value={reminderFrequency} onValueChange={setReminderFrequency}>
-                  <SelectTrigger id="reminder-frequency">
-                    <SelectValue placeholder="Select frequency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="biweekly">Bi-weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="never">Never</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveNotifications}>Save Changes</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tests" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Test Configuration</CardTitle>
-              <CardDescription>Configure test settings for your branch</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="time-limit">Test Time Limit (minutes)</Label>
-                <Input
-                  id="time-limit"
-                  type="number"
-                  value={testTimeLimit}
-                  onChange={(e) => setTestTimeLimit(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch id="allow-retakes" checked={allowRetakes} onCheckedChange={setAllowRetakes} />
-                <Label htmlFor="allow-retakes">Allow test retakes</Label>
-              </div>
-              {allowRetakes && (
-                <div className="space-y-2">
-                  <Label htmlFor="max-retakes">Maximum Retakes</Label>
-                  <Input
-                    id="max-retakes"
-                    type="number"
-                    value={maxRetakes}
-                    onChange={(e) => setMaxRetakes(e.target.value)}
-                  />
-                </div>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveTests}>Save Changes</Button>
             </CardFooter>
           </Card>
         </TabsContent>

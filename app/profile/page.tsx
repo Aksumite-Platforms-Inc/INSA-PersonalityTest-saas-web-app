@@ -59,7 +59,6 @@ export default function ProfilePage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
