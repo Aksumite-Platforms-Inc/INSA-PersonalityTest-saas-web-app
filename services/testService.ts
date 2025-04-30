@@ -13,6 +13,21 @@ export const getResults = async (userId: string): Promise<APIResponse<any>> => {
     return handleApiError(error);
   }
 };
+export const submitRIASECAnswers = async (
+  answers: boolean[]
+): Promise<APIResponse<any>> => {
+  const payload = { answers };
+
+  try {
+    const response = await api.post(
+      "/personalityTest/riasec/calculateScores",
+      payload
+    );
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+};
 
 export const submitBig5TestAnswers = async (payload: string) => {
   try {
