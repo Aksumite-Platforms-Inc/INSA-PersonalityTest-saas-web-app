@@ -1,9 +1,35 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getBranchStats } from "@/services/branchService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeProgressChart } from "@/components/branch/employee-progress-chart";
 import { EmployeeList } from "@/components/branch/employee-list";
 
 export default function BranchDashboard() {
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    testsCompleted: 0,
+    completionRate: 0,
+    changeInEmployees: 0,
+    changeInTests: 0,
+    changeInCompletionRate: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const { data, success, error } = await getBranchStats();
+      if (success) {
+        setStats(data);
+      } else {
+        console.error("Failed to fetch branch stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="space-y-6">
       <PageTitle
@@ -20,8 +46,13 @@ export default function BranchDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
-            <p className="text-xs text-muted-foreground">+4 from last month</p>
+            <div className="text-2xl font-bold">{stats.totalEmployees}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.changeInEmployees > 0
+                ? `+${stats.changeInEmployees}`
+                : stats.changeInEmployees}{" "}
+              from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -31,8 +62,13 @@ export default function BranchDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">423</div>
-            <p className="text-xs text-muted-foreground">+18 from last week</p>
+            <div className="text-2xl font-bold">{stats.testsCompleted}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.changeInTests > 0
+                ? `+${stats.changeInTests}`
+                : stats.changeInTests}{" "}
+              from last week
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -42,9 +78,12 @@ export default function BranchDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">82.4%</div>
+            <div className="text-2xl font-bold">{stats.completionRate}%</div>
             <p className="text-xs text-muted-foreground">
-              +3.6% from last month
+              {stats.changeInCompletionRate > 0
+                ? `+${stats.changeInCompletionRate}%`
+                : stats.changeInCompletionRate}
+              % from last month
             </p>
           </CardContent>
         </Card>

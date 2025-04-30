@@ -224,3 +224,42 @@ export const deleteBranch = async (
     };
   }
 };
+
+// Mocked function to get branch statistics
+// This function should ideally fetch data from an API endpoint
+// but for testing purposes, we are using static data.
+export const getBranchStats = async (): Promise<APIResponse<any>> => {
+  try {
+    const totalEmployees = branches.reduce(
+      (sum, branch) => sum + branch.employees,
+      0
+    );
+    const testsCompleted = branches.reduce(
+      (sum, branch) => sum + branch.testsCompleted,
+      0
+    );
+    const completionRate = (
+      (testsCompleted / (totalEmployees * 100)) *
+      100
+    ).toFixed(2);
+
+    return {
+      data: {
+        totalEmployees,
+        testsCompleted,
+        completionRate: parseFloat(completionRate),
+        changeInEmployees: 5, // Mocked change value
+        changeInTests: 100, // Mocked change value
+        changeInCompletionRate: 2.5, // Mocked change value
+      },
+      error: null,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: "Failed to fetch branch stats.",
+      success: false,
+    };
+  }
+};

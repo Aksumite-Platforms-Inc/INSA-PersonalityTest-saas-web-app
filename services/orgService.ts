@@ -146,3 +146,49 @@ export const orgService = {
     ];
   },
 };
+
+// Mock API response structure
+// This should match the structure of your actual API response
+// for better type safety and consistency across your application.
+interface APIResponse<T> {
+  data: T | null;
+  error: string | null;
+  success: boolean;
+}
+
+export const getOrganizationStats = async (): Promise<APIResponse<any>> => {
+  try {
+    const totalBranches = organizations.length;
+    const totalEmployees = organizations.reduce(
+      (sum, org) => sum + org.users,
+      0
+    );
+    const testsCompleted = organizations.reduce(
+      (sum, org) => sum + org.testsCompleted,
+      0
+    );
+    const completionRate = (
+      (testsCompleted / (totalEmployees * 100)) *
+      100
+    ).toFixed(2);
+
+    return {
+      data: {
+        totalBranches,
+        totalEmployees,
+        completionRate: parseFloat(completionRate),
+        changeInBranches: 1, // Mocked change value
+        changeInEmployees: 15, // Mocked change value
+        changeInCompletionRate: 3.2, // Mocked change value
+      },
+      error: null,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: "Failed to fetch organization stats.",
+      success: false,
+    };
+  }
+};
