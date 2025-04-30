@@ -113,7 +113,6 @@ export default function EmployeeSettingsPage() {
             </CardFooter>
           </Card>
         </TabsContent>
-
         <TabsContent value="notifications" className="space-y-4">
           <Card>
           
