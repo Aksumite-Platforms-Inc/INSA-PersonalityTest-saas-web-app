@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -12,8 +11,6 @@ import {
   Users,
   ClipboardList,
   Settings,
-  Shield,
-  LineChart,
   Home,
 } from "lucide-react";
 
@@ -38,14 +35,16 @@ export function Sidebar({ open }: SidebarProps) {
     >
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-2">
-          {/* Common navigation items */}
-          <SidebarItem
-            href={`/dashboard/${role}`}
-            icon={Home}
-            label={t("sidebar.dashboard")}
-            active={pathname === `/dashboard/${role}`}
-            open={open}
-          />
+          {/* Common navigation items (exclude Dashboard for employee) */}
+          {role !== "employee" && (
+            <SidebarItem
+              href={`/dashboard/${role}`}
+              icon={Home}
+              label={t("sidebar.dashboard")}
+              active={pathname === `/dashboard/${role}`}
+              open={open}
+            />
+          )}
 
           {/* Role-specific navigation items */}
           {role === "superadmin" && (

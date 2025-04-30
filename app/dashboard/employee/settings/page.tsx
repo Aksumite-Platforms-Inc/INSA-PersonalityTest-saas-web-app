@@ -71,8 +71,6 @@ export default function EmployeeSettingsPage() {
       <Tabs defaultValue="password" className="space-y-4">
         <TabsList>
           <TabsTrigger value="password">Password</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
         </TabsList>
 
         <TabsContent value="password" className="space-y-4">
@@ -118,10 +116,8 @@ export default function EmployeeSettingsPage() {
 
         <TabsContent value="notifications" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Configure when and how you receive notifications</CardDescription>
-            </CardHeader>
+          
+          
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
@@ -144,10 +140,8 @@ export default function EmployeeSettingsPage() {
 
         <TabsContent value="privacy" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Privacy Settings</CardTitle>
-              <CardDescription>Control how your information is used</CardDescription>
-            </CardHeader>
+          
+      
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Switch id="result-sharing" checked={resultSharing} onCheckedChange={setResultSharing} />
