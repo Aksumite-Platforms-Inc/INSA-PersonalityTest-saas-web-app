@@ -23,7 +23,6 @@ import { login } from "@/services/authService";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("employee/test");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -217,28 +216,6 @@ export default function LoginPage() {
                 required
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
-            </div>
-
-            <div
-              className="space-y-2"
-              ref={(el) => {
-                formFieldsRef.current[2] = el;
-              }}
-            >
-              <label htmlFor="role" className="text-sm font-medium">
-                Role
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                <option value="employee/test">Employee</option>
-                <option value="branch">Branch Manager</option>
-                <option value="organization">Organization Admin</option>
-                <option value="superadmin">Super Admin</option>
-              </select>
             </div>
 
             <Button
