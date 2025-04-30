@@ -83,13 +83,14 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/branches")}
                 open={open}
               />
-              <SidebarItem
+
+              {/* <SidebarItem
                 href="/dashboard/organization/employees"
                 icon={Users}
                 label={t("sidebar.employees")}
                 active={pathname.includes("/employees")}
                 open={open}
-              />
+              /> */}
             </>
           )}
 

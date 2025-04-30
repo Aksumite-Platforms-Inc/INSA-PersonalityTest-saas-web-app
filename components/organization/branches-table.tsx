@@ -159,10 +159,27 @@ export function BranchesTable() {
                           <span>Edit</span>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push("/dashboard/organization/employees")
+                          }
+                        >
                           <Users className="mr-2 h-4 w-4" />
                           <span>Manage Employees</span>
                         </DropdownMenuItem>
+
+                        {/* //to fetch employees of the branch */}
+                        {/* <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/organization/branches/${branch.id}/employees`
+                            )
+                          }
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Manage Employees</span>
+                        </DropdownMenuItem> */}
+
                         <DropdownMenuSeparator />
                         {branch.status === "active" ? (
                           <DropdownMenuItem className="text-red-600">
