@@ -117,10 +117,6 @@ export default function UsersPage() {
     })
   }
 
-  const handleViewResults = (employeeId: number) => {
-    router.push(`/dashboard/branch/users/${employeeId}/results`)
-  }
-
   const renderTestStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -216,13 +212,6 @@ export default function UsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>{t("common.actions")}</DropdownMenuLabel>
-
-                        {employee.testStatus === "completed" && (
-                          <DropdownMenuItem onClick={() => handleViewResults(employee.id)}>
-                            <ClipboardList className="mr-2 h-4 w-4" />
-                            <span>{t("users.viewResults")}</span>
-                          </DropdownMenuItem>
-                        )}
 
                         {employee.testStatus === "not_started" && (
                           <DropdownMenuItem onClick={() => handleResendInvite(employee.id, employee.name)}>

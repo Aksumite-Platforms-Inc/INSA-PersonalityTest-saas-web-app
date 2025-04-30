@@ -102,13 +102,7 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/users")}
                 open={open}
               />
-              <SidebarItem
-                href="/dashboard/branch/"
-                icon={BarChart3}
-                label={t("sidebar.testProgress")}
-                active={pathname.includes("/tests")}
-                open={open}
-              />
+              
             </>
           )}
 
