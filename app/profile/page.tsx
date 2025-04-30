@@ -49,10 +49,7 @@ export default function ProfilePage() {
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-2 flex-1">
-              <Label htmlFor="avatar">Profile Picture</Label>
-              <Input id="avatar" type="file" accept="image/*" onChange={(e) => setAvatarUrl(e.target.value)} />
-            </div>
+         
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -62,7 +59,7 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
@@ -78,16 +75,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={4}
-              placeholder="Tell us about yourself"
-            />
-          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={() => router.back()}>
