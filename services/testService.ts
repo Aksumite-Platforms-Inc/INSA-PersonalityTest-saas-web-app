@@ -29,6 +29,20 @@ export const submitRIASECAnswers = async (
   }
 };
 
+export const submitBig5TestAnswers = async (payload: string) => {
+  try {
+    //Make the API request
+    const response = await api.post(
+      "/organization/personalityTest/bigfive/calculateScores",
+      payload
+    );
+    // console.log(payload);
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+};
+
 // Function to submit MBTI answers
 export const submitMBTIAnswers = async (
   aAnswers: Record<number, number>,
