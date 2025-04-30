@@ -56,8 +56,23 @@
 //     return handleApiError(error);
 //   }
 // };
-// services/branchService.ts
+
+//delete branch through API call
+// export const deleteBranch = async (
+//   branchId: number
+// ): Promise<APIResponse<null>> => {
+//   try {
+//     const response = await api.delete(`/organization/branches/${branchId}`);
+//     return { data: null, error: null, success: true };
+//   } catch (error: any) {
+//     return handleApiError(error);
+//   }
+// };
+
+//for testing purposes only-crud operations through API calls are done above on this file
+import { handleApiError } from "@/lib/errorHandler";
 import { APIResponse } from "@/types/api";
+import api from "./api";
 
 // Dummy data for testing
 const branches = [
@@ -179,3 +194,33 @@ export async function updateBranch(id: number, branch: BranchData) {
     return { success: false, error: "Failed to update branch." };
   }
 }
+
+// Delete branch functionality for testing purposes only
+export const deleteBranch = async (
+  branchId: number
+): Promise<APIResponse<null>> => {
+  try {
+    const index = branches.findIndex((b) => b.id === branchId);
+
+    if (index === -1) {
+      return {
+        data: null,
+        error: "Branch not found.",
+        success: false,
+      };
+    }
+
+    branches.splice(index, 1); // Remove the branch
+    return {
+      data: null,
+      error: null,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: "Failed to delete branch.",
+      success: false,
+    };
+  }
+};

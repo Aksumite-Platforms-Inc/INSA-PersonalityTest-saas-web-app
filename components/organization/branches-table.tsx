@@ -30,7 +30,7 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getAllBranches } from "@/services/branchService"; // Import the service
+import { deleteBranch, getAllBranches } from "@/services/branchService"; // Import the service
 
 export function BranchesTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,6 +75,18 @@ export function BranchesTable() {
         );
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const handleDelete = async (branchId: number) => {
+    if (!confirm("Are you sure you want to delete this branch?")) return;
+
+    const { success, error } = await deleteBranch(branchId);
+
+    if (success) {
+      setBranches((prev) => prev.filter((b) => b.id !== branchId));
+    } else {
+      alert("Failed to delete branch: " + error);
     }
   };
 
@@ -163,7 +175,10 @@ export function BranchesTable() {
                             <span>Activate</span>
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDelete(branch.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           <span>Delete</span>
                         </DropdownMenuItem>
