@@ -18,18 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-// Mock auth function for now
-const mockLogin = async (email: string, password: string, role: string) => {
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Simple validation
-  if (email && password) {
-    return { success: true, user: { email, role } };
-  }
-  throw new Error("Invalid credentials");
-};
+import { login } from "@/services/authService";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -117,19 +106,27 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await mockLogin(email, password, role);
+      const response = await login(email, password);
 
-      // Animate form submission
-      gsap.to(formRef.current, {
-        y: -20,
-        opacity: 0,
-        duration: 0.5,
-        onComplete: () => {
-          router.push(`/dashboard/${role}`);
-        },
-      });
-    } catch (error) {
-      setError("Invalid credentials. Please try again.");
+      if (response.success) {
+        const userRole = response.data.role;
+
+        // Validate role and redirect
+        if (
+          ["employee/test", "branch", "organization", "superadmin"].includes(
+            userRole
+          )
+        ) {
+          localStorage.setItem("authToken", response.data.token); // Store token securely
+          router.push(`/dashboard/${userRole}`);
+        } else {
+          throw new Error("Unauthorized role");
+        }
+      } else {
+        throw new Error(response.error || "Login failed");
+      }
+    } catch (error: any) {
+      setError(error.message || "Invalid credentials. Please try again.");
 
       // Shake animation for error
       gsap.fromTo(
