@@ -11,16 +11,25 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+//based on the test page
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
+import { submitBig5TestAnswers } from "@/services/testService";
 
 export default function Big5TestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+
+  const router = useRouter();
+  const { toast } = useToast();
+  const { t } = useTranslation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const questionsPerGroup = 12; // Updated grouping logic
   const questions = big5Test.questions;
-  const router = useRouter();
-
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
     (currentGroup + 1) * questionsPerGroup
@@ -43,6 +52,53 @@ export default function Big5TestPage() {
       ...prevAnswers,
       [questionId]: value,
     }));
+  };
+
+  const handleSubmit = async () => {
+    // Check if all questions are answered
+    if (Object.keys(answers).length < questions.length) {
+      toast({
+        title: t("test.incompleteTitle"),
+        description: t("test.incompleteDescription"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    //paylaod for big5 test answers
+    const adjustedAnswers = {
+      answers: Object.fromEntries(
+        Object.entries(answers).map(([key, value]) => [key, Number(value)])
+      ),
+    };
+    const payload = JSON.stringify(adjustedAnswers);
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await submitBig5TestAnswers(payload);
+
+      if (response.success) {
+        toast({
+          title: t("test.submitSuccess"),
+          description: t("test.submitDescription"),
+        });
+      }
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+
+      router.push("/dashboard/employee/results");
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,7 +140,9 @@ export default function Big5TestPage() {
             >
               <p className="font-medium mb-8 text-center">{question.text}</p>
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-500">Strongly Disagree</span>
+                <span className="text-sm text-gray-500 whitespace-nowrap">
+                  IN ACCURATE
+                </span>
                 <div className="flex justify-between w-full">
                   {[1, 2, 3, 4, 5].map((value) => (
                     <div
@@ -100,7 +158,7 @@ export default function Big5TestPage() {
                     />
                   ))}
                 </div>
-                <span className="text-sm text-gray-500">Strongly Agree</span>
+                <span className="text-sm text-gray-500">ACCURATE</span>
               </div>
             </div>
           ))}
@@ -109,13 +167,34 @@ export default function Big5TestPage() {
           <Button onClick={handlePreviousGroup} disabled={currentGroup === 0}>
             Previous
           </Button>
-          <Button
-            onClick={handleNextGroup}
-            disabled={currentQuestions.some((q) => !answers[q.id])}
-          >
-            Next
-          </Button>
+          {currentGroup ===
+          Math.ceil(questions.length / questionsPerGroup) - 1 ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                currentQuestions.some((q) => !answers[q.id]) || isSubmitting
+              }
+              className="flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  {t("test.submitting")}
+                </>
+              ) : (
+                t("test.submit")
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNextGroup}
+              disabled={currentQuestions.some((q) => !answers[q.id])}
+            >
+              Next
+            </Button>
+          )}
         </CardFooter>
+
         <Button
           variant="ghost"
           size="icon"
