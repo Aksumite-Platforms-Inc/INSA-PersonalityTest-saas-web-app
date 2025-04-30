@@ -28,3 +28,22 @@ export const submitRIASECAnswers = async (
     return handleApiError(error);
   }
 };
+
+// Function to submit MBTI answers
+export const submitMBTIAnswers = async (
+  aAnswers: Record<number, number>,
+  bAnswers: Record<number, number>
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await api.post(
+      "/organization/personalityTest/oejts/calculateScores",
+      {
+        a_answers: aAnswers,
+        b_answers: bAnswers,
+      }
+    );
+    return { data: response.data, error: null, success: true };
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+};
