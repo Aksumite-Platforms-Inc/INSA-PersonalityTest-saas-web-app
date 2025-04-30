@@ -57,20 +57,6 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/organizations")}
                 open={open}
               />
-              <SidebarItem
-                href="/dashboard/superadmin/users"
-                icon={Users}
-                label={t("sidebar.users")}
-                active={pathname.includes("/users")}
-                open={open}
-              />
-              <SidebarItem
-                href="/dashboard/superadmin/tests"
-                icon={ClipboardList}
-                label={t("sidebar.tests")}
-                active={pathname.includes("/tests")}
-                open={open}
-              />
             </>
           )}
 
