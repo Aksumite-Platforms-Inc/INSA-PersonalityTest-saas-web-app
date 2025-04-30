@@ -32,3 +32,13 @@ export const submitMBTIAnswers = async (
     return handleApiError(error);
   }
 };
+
+export async function submitEnneagramAnswers(payload: {
+  answers: { type: string; answer: number }[];
+}) {
+  const response = await api.post(
+    "/personalityTest/ennegram/calculateScores",
+    payload
+  );
+  return response.data;
+}

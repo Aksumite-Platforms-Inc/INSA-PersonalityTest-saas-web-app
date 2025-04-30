@@ -13,18 +13,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X } from "lucide-react";
+import { submitEnneagramAnswers } from "@/services/testService";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const questionsPerGroup = 9; // Enneagram test groups 9 questions per page
-  const questions = enneagramTest.questions;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const questionsPerGroup = 9;
+  const questions = enneagramTest.questions;
 
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
     (currentGroup + 1) * questionsPerGroup
   );
+
+  const handleAnswer = (questionId: number, value: string) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: value,
+    }));
+  };
 
   const handleNextGroup = () => {
     if ((currentGroup + 1) * questionsPerGroup < questions.length) {
@@ -38,11 +49,30 @@ export default function EnneagramPage() {
     }
   };
 
-  const handleAnswer = (questionId: number, value: string) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionId]: value,
-    }));
+  const handleSubmit = async () => {
+    if (Object.keys(answers).length !== questions.length) {
+      setError("Please answer all questions before submitting.");
+      return;
+    }
+
+    const payload = {
+      answers: questions.map((q) => ({
+        type: q.type, // Ensure `type` field exists in your data
+        answer: Number(answers[q.id]),
+      })),
+    };
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await submitEnneagramAnswers(payload);
+      setLoading(false);
+      router.push("/dashboard/employee/test/result");
+    } catch (err) {
+      setLoading(false);
+      setError("An error occurred during submission. Please try again.");
+    }
   };
 
   return (
@@ -63,12 +93,13 @@ export default function EnneagramPage() {
                   Math.ceil(questions.length / questionsPerGroup)) *
                 100
               }
-              className="h-3 rounded-lg bg-gray-500 "
+              className="h-3 rounded-lg bg-gray-500"
             />
           </div>
           <p className="text-muted-foreground mb-4">
             {enneagramTest.description}
           </p>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
           {currentQuestions.map((question) => (
             <div
               key={question.id}
@@ -103,12 +134,22 @@ export default function EnneagramPage() {
           <Button onClick={handlePreviousGroup} disabled={currentGroup === 0}>
             Previous
           </Button>
-          <Button
-            onClick={handleNextGroup}
-            disabled={currentQuestions.some((q) => !answers[q.id])}
-          >
-            Next
-          </Button>
+
+          {(currentGroup + 1) * questionsPerGroup < questions.length ? (
+            <Button
+              onClick={handleNextGroup}
+              disabled={currentQuestions.some((q) => !answers[q.id])}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={currentQuestions.some((q) => !answers[q.id]) || loading}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </Button>
+          )}
         </CardFooter>
         <Button
           variant="ghost"
