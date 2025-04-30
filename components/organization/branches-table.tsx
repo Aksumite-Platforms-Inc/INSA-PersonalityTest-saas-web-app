@@ -1,124 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Search, MoreHorizontal, Edit, Trash2, Shield, Ban, Users } from "lucide-react"
-
-// Demo data
-const branches = [
-  {
-    id: 1,
-    name: "Addis Ababa HQ",
-    manager: "Abebe Kebede",
-    employees: 78,
-    testsCompleted: 245,
-    status: "active",
-    createdAt: "2023-01-15",
-  },
-  {
-    id: 2,
-    name: "Bahir Dar",
-    manager: "Tigist Haile",
-    employees: 45,
-    testsCompleted: 132,
-    status: "active",
-    createdAt: "2023-02-03",
-  },
-  {
-    id: 3,
-    name: "Hawassa",
-    manager: "Dawit Tadesse",
-    employees: 32,
-    testsCompleted: 98,
-    status: "active",
-    createdAt: "2023-03-21",
-  },
-  {
-    id: 4,
-    name: "Mekelle",
-    manager: "Hiwot Girma",
-    employees: 28,
-    testsCompleted: 76,
-    status: "inactive",
-    createdAt: "2023-04-10",
-  },
-  {
-    id: 5,
-    name: "Dire Dawa",
-    manager: "Solomon Tesfaye",
-    employees: 35,
-    testsCompleted: 105,
-    status: "active",
-    createdAt: "2023-05-05",
-  },
-  {
-    id: 6,
-    name: "Adama",
-    manager: "Meron Alemu",
-    employees: 42,
-    testsCompleted: 118,
-    status: "active",
-    createdAt: "2023-06-18",
-  },
-  {
-    id: 7,
-    name: "Gondar",
-    manager: "Yonas Bekele",
-    employees: 30,
-    testsCompleted: 85,
-    status: "active",
-    createdAt: "2023-07-22",
-  },
-  {
-    id: 8,
-    name: "Jimma",
-    manager: "Sara Tesfaye",
-    employees: 25,
-    testsCompleted: 72,
-    status: "active",
-    createdAt: "2023-08-14",
-  },
-]
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Shield,
+  Ban,
+  Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { deleteBranch, getAllBranches } from "@/services/branchService"; // Import the service
 
 export function BranchesTable() {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [branches, setBranches] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      const response = await getAllBranches();
+      if (response.success) {
+        setBranches(response.data || []);
+      }
+    };
+    fetchBranches();
+  }, []);
 
   const filteredBranches = branches.filter(
     (branch) =>
       branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.manager.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      branch.manager.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Function to render status badge with appropriate variant
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case "active":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             Active
           </Badge>
-        )
+        );
       case "inactive":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             Inactive
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
+
+  const handleDelete = async (branchId: number) => {
+    if (!confirm("Are you sure you want to delete this branch?")) return;
+
+    const { success, error } = await deleteBranch(branchId);
+
+    if (success) {
+      setBranches((prev) => prev.filter((b) => b.id !== branchId));
+    } else {
+      alert("Failed to delete branch: " + error);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -150,7 +120,10 @@ export function BranchesTable() {
           <TableBody>
             {filteredBranches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No branches found
                 </TableCell>
               </TableRow>
@@ -162,7 +135,9 @@ export function BranchesTable() {
                   <TableCell>{branch.employees}</TableCell>
                   <TableCell>{branch.testsCompleted}</TableCell>
                   <TableCell>{renderStatusBadge(branch.status)}</TableCell>
-                  <TableCell>{new Date(branch.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(branch.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -173,14 +148,38 @@ export function BranchesTable() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/organization/branches/${branch.id}`
+                            )
+                          }
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push("/dashboard/organization/employees")
+                          }
+                        >
                           <Users className="mr-2 h-4 w-4" />
                           <span>Manage Employees</span>
                         </DropdownMenuItem>
+
+                        {/* //to fetch employees of the branch */}
+                        {/* <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/organization/branches/${branch.id}/employees`
+                            )
+                          }
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Manage Employees</span>
+                        </DropdownMenuItem> */}
+
                         <DropdownMenuSeparator />
                         {branch.status === "active" ? (
                           <DropdownMenuItem className="text-red-600">
@@ -193,7 +192,10 @@ export function BranchesTable() {
                             <span>Activate</span>
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDelete(branch.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           <span>Delete</span>
                         </DropdownMenuItem>
@@ -207,5 +209,5 @@ export function BranchesTable() {
         </Table>
       </div>
     </div>
-  )
+  );
 }
