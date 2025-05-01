@@ -8,8 +8,13 @@ export const login = async (
   password: string
 ): Promise<APIResponse<any>> => {
   try {
-    const response = await api.post("/sso/login", { email, password });
-    return { data: response.data, error: null, success: true };
+    const response = await api.post("/sys/login", { email, password });
+    return {
+      data: response.data,
+      success: true,
+      message: "Login successful",
+      code: 200,
+    };
   } catch (error: any) {
     return handleApiError(error);
   }

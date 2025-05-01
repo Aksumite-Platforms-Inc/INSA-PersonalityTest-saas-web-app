@@ -72,7 +72,117 @@
 //for testing purposes only-crud operations through API calls are done above on this file
 import { handleApiError } from "@/lib/errorHandler";
 import { APIResponse } from "@/types/api";
-import api from "./api";
+// import api from "./api";
+
+// import {
+//   CreateBranch,
+//   GetAllBranches,
+//   DeleteBranch,
+//   GetBranchById,
+//   AssignBranchAdmin,
+//   GetAllBranchMembers,
+// } from "./api";
+
+// const performCreateBranch = async (orgId: number, name: string) => {
+//   try {
+//     const newBranch = await CreateBranch(orgId, name);
+//     return {
+//       success: true,
+//       message: "Branch created successfully",
+//       data: newBranch,
+//     };
+//   } catch (error: any) {
+//     return {
+//       success: false,
+//       message: error.message || "Branch creation failed. Please try again.",
+//     };
+//   }
+// };
+
+// const performGetAllBranches = async () => {
+//   try {
+//     const branches: any[] = await GetAllBranches();
+//     const transformedBranches = branches.map((branch) => ({
+//       id: branch.id,
+//       name: branch.name || "N/A",
+//       orgId: branch.org_id,
+//       createdAt: branch.created_at,
+//     }));
+//     return {
+//       success: true,
+//       data: transformedBranches,
+//     };
+//   } catch (error) {
+//     return {
+//       success: false,
+//       message: error.message || "An unexpected error occurred",
+//     };
+//   }
+// };
+
+// const performDeleteBranch = async (branchId: number) => {
+//   try {
+//     await DeleteBranch(branchId);
+//     return {
+//       success: true,
+//       message: "Branch deleted successfully",
+//     };
+//   } catch (error: any) {
+//     return {
+//       success: false,
+//       message: "Branch deletion failed. Please try again.",
+//     };
+//   }
+// };
+
+// const performGetBranchDetails = async (orgId: number, branchId: number) => {
+//   try {
+//     const branchDetails = await GetBranchById(orgId, branchId);
+//     return {
+//       success: true,
+//       data: branchDetails,
+//     };
+//   } catch (error) {
+//     return {
+//       success: false,
+//       message: error.message || "An unexpected error occurred",
+//     };
+//   }
+// };
+
+// const performGetBranchMembers = async (orgId: number, branchId: number) => {
+//   try {
+//     const members = await GetAllBranchMembers(orgId, branchId);
+//     return {
+//       success: true,
+//       data: members,
+//     };
+//   } catch (error: any) {
+//     return {
+//       success: false,
+//       message: error.message || "Failed to fetch branch members.",
+//     };
+//   }
+// };
+
+// const performAssignBranchAdmin = async (
+//   orgId: number,
+//   branchId: number,
+//   email: string
+// ) => {
+//   try {
+//     await AssignBranchAdmin(orgId, branchId, email);
+//     return {
+//       success: true,
+//       message: "Admin assigned successfully.",
+//     };
+//   } catch (error: any) {
+//     return {
+//       success: false,
+//       message: error.message || "Failed to assign branch admin.",
+//     };
+//   }
+// };
 
 // Dummy data for testing
 const branches = [
@@ -263,3 +373,12 @@ export const getBranchStats = async (): Promise<APIResponse<any>> => {
     };
   }
 };
+
+// export {
+//   performCreateBranch,
+//   performGetAllBranches,
+//   performDeleteBranch,
+//   performGetBranchDetails,
+//   performGetBranchMembers,
+//   performAssignBranchAdmin,
+// };
