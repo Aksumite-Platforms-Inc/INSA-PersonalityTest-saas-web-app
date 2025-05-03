@@ -65,7 +65,7 @@ The INSA Personality Testing Platform is designed to replace traditional paper-b
 
 ## Project Structure
 
-\`\`\`
+```
 insa-personality-testing/
 ├── app/ # Next.js App Router
 │ ├── dashboard/ # Dashboard routes
@@ -86,40 +86,44 @@ insa-personality-testing/
 │ ├── translations.ts # Translation strings
 │ └── utils.ts # Helper functions
 └── public/ # Static assets
-\`\`\`
+```
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18.x or later
-- npm or yarn
+- npm or yarn or bun
 
 ### Installation
 
 1. Clone the repository:
-   \`\`\`bash
+   ```bash
    git clone https://github.com/Aksumite-Platforms-Inc/INSA-PersonalityTest-saas-web-app.git
    cd INSA-PersonalityTest-saas-web-app
-   \`\`\`
+   ```
 
 2. Install dependencies:
-   \`\`\`bash
+   ```bash
    npm install
 
    # or
 
    yarn install
-   \`\`\`
+
+   # or
+
+   bun install
+   ```
 
 3. Run the development server:
-   \`\`\`bash
+   ```bash
    npm run dev
 
    # or
 
    yarn dev
-   \`\`\`
+   ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
@@ -195,4 +199,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - INSA for the project requirements and domain expertise
 - The shadcn/ui team for the excellent component library
 - The Next.js team for the powerful framework
-  \`\`\`
