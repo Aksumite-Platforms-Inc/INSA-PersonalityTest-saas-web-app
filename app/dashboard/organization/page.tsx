@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrganizationStats } from "@/services/orgService";
+// import { getOrganizationStats } from "@/services/orgService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart";
@@ -17,18 +17,18 @@ export default function OrganizationDashboard() {
     changeInCompletionRate: 0,
   });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const { data, success, error } = await getOrganizationStats();
-      if (success) {
-        setStats(data);
-      } else {
-        console.error("Failed to fetch organization stats:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     const { data, success, error } = await getOrganizationStats();
+  //     if (success) {
+  //       setStats(data);
+  //     } else {
+  //       console.error("Failed to fetch organization stats:", error);
+  //     }
+  //   };
 
-    fetchStats();
-  }, []);
+  //   fetchStats();
+  // }, []);
 
   return (
     <div className="space-y-6">

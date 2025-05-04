@@ -130,12 +130,7 @@ export default function OrganizationsPage() {
           title="Organizations Management"
           description="Manage all organizations in the platform"
         />
-        <Button
-          onClick={() =>
-            (window.location.href = `/dashboard/superadmin/organizations/new`)
-          }
-          disabled={loading}
-        >
+        <Button onClick={() => handleOpenModal()} disabled={loading}>
           <PlusCircle className="mr-2 h-4 w-4" />
           {loading ? "Loading..." : "Add Organization"}
         </Button>
