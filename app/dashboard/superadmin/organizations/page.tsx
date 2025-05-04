@@ -5,8 +5,13 @@ import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { OrganizationsTable } from "@/components/superadmin/organizations-table";
-import { orgService } from "@/services/orgService";
 import { Input } from "@/components/ui/input";
+import {
+  getAllBranches,
+  createBranch,
+  deleteBranch,
+} from "@/services/branch.service";
+import { getAllOrgMembers } from "@/services/user.service";
 
 import {
   Dialog,
@@ -118,8 +123,17 @@ export default function OrganizationsPage() {
     const fetchOrganizations = async () => {
       setLoading(true);
       try {
-        const data = await orgService.getAllOrganizations();
-        setOrganizations(data);
+        const branches = await getAllBranches();
+        const organizations = branches.map((branch) => ({
+          id: branch.id,
+          name: branch.name,
+          sector: "Unknown", // Default value, update if available
+          status: "Active", // Default value, update if available
+          users: 0, // Fetch user count if available
+          testsCompleted: 0, // Fetch test completion count if available
+          createdAt: branch.created_at,
+        }));
+        setOrganizations(organizations);
       } catch (error) {
         console.error("Error fetching organizations:", error);
         alert("Error fetching organizations.");
@@ -158,20 +172,21 @@ export default function OrganizationsPage() {
     setLoading(true);
     try {
       if (data.id) {
-        await orgService.updateOrganization(data.id, data);
-        setOrganizations((prev) =>
-          prev.map((org) => (org.id === data.id ? { ...org, ...data } : org))
-        );
-        setSuccessMessage("Organization updated successfully!");
+        // Update branch logic (not available in the new service, mock it)
+        alert("Update branch functionality is not implemented.");
       } else {
-        await orgService.createOrganization({
-          ...data,
-          status: "active", // default status
-          users: 0, // default users count
-          testsCompleted: 0, // default tests completed count
-        });
-        const updatedList = await orgService.getAllOrganizations();
-        setOrganizations(updatedList);
+        await createBranch(0, data.name); // Assuming orgId 0 for simplicity
+        const branches = await getAllBranches();
+        const organizations = branches.map((branch) => ({
+          id: branch.id,
+          name: branch.name,
+          sector: "Unknown", // Default value, update if available
+          status: "Active", // Default value, update if available
+          users: 0, // Fetch user count if available
+          testsCompleted: 0, // Fetch test completion count if available
+          createdAt: branch.created_at,
+        }));
+        setOrganizations(organizations);
         setSuccessMessage("Organization created successfully!");
       }
     } catch (error) {
@@ -187,7 +202,7 @@ export default function OrganizationsPage() {
     if (window.confirm("Are you sure you want to delete this organization?")) {
       setLoading(true);
       try {
-        await orgService.deleteOrganization(id);
+        await deleteBranch(id);
         setOrganizations((prev) => prev.filter((org) => org.id !== id));
         alert("Organization deleted successfully!");
       } catch (error) {

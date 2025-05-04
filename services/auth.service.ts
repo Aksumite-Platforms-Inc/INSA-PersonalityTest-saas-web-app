@@ -8,13 +8,17 @@ const TOKEN_KEY = "authToken";
  * Logs in a user and stores the access token.
  * @param email - User email
  * @param password - User password
+ * @param isSystemAdmin - Determines the login endpoint
  */
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
+  isSystemAdmin: boolean
 ): Promise<{ token: string; message?: string }> => {
+  const endpoint = isSystemAdmin ? "/sys/login" : "/sso/login";
+
   const response = await apiClient.post<ApiResponse<{ token: string }>>(
-    "/sso/login",
+    endpoint,
     { email, password },
     { withCredentials: true } // Ensures refresh token cookie is set
   );

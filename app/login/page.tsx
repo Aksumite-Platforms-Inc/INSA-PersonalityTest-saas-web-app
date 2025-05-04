@@ -24,6 +24,7 @@ import { decodeToken } from "@/utils/tokenUtils";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -95,7 +96,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { token } = await loginUser(email, password);
+      const { token } = await loginUser(email, password, isSystemAdmin);
       localStorage.setItem("authToken", token);
 
       const user = decodeToken();
@@ -209,6 +210,24 @@ export default function LoginPage() {
                 required
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
+            </div>
+
+            <div
+              className="space-y-2"
+              ref={(el) => {
+                formFieldsRef.current[2] = el;
+              }}
+            >
+              <label htmlFor="isSystemAdmin" className="text-sm font-medium">
+                <input
+                  id="isSystemAdmin"
+                  type="checkbox"
+                  checked={isSystemAdmin}
+                  onChange={(e) => setIsSystemAdmin(e.target.checked)}
+                  className="mr-2"
+                />
+                Login as System Admin
+              </label>
             </div>
 
             <Button

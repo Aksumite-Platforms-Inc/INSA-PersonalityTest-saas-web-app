@@ -16,7 +16,10 @@ export interface Branch {
  */
 export const getAllBranches = async (): Promise<Branch[]> => {
   const token = getAccessToken();
-  if (!token) throw new Error("Authorization token is missing.");
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
 
   const response = await apiClient.get<ApiResponse<Branch[]>>(
     `/organization/branches`
@@ -39,7 +42,10 @@ export const createBranch = async (
   name: string
 ): Promise<Branch> => {
   const token = getAccessToken();
-  if (!token) throw new Error("Authorization token is missing.");
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
 
   const response = await apiClient.post<ApiResponse<Branch>>(
     `/organization/${orgId}/branches`,
@@ -63,7 +69,10 @@ export const getBranchById = async (
   branchId: number
 ): Promise<Branch> => {
   const token = getAccessToken();
-  if (!token) throw new Error("Authorization token is missing.");
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
 
   const response = await apiClient.get<ApiResponse<Branch>>(
     `/organization/${orgId}/branches/${branchId}`
@@ -84,7 +93,10 @@ export const deleteBranch = async (
   branchId: number
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
-  if (!token) throw new Error("Authorization token is missing.");
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
 
   const response = await apiClient.delete<ApiResponse<null>>(
     `/organization/branches/${branchId}`
@@ -109,7 +121,10 @@ export const assignBranchAdmin = async (
   email: string
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
-  if (!token) throw new Error("Authorization token is missing.");
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
 
   const response = await apiClient.post<ApiResponse<null>>(
     `/organization/${orgId}/branches/${branchId}/admin`,

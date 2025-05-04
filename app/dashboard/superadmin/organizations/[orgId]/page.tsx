@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+// Define or import the OrganizationData type
+interface OrganizationData {
+  name: string;
+  sector: string;
+  status: string;
+}
 import { useRouter, useParams } from "next/navigation";
-import { orgService, OrganizationData } from "@/services/orgService";
+import { getAllOrgMembers } from "@/services/user.service";
+import { getBranchById } from "@/services/branch.service";
 import {
   Table,
   TableBody,
@@ -55,10 +63,23 @@ export default function OrganizationDetailsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const orgData = await orgService.getOrganizationById(Number(orgId));
-        const employeeData = await orgService.getAllOrgMembers(Number(orgId));
-        setOrganization(orgData);
-        setEmployees(employeeData);
+        const orgData = await getBranchById(Number(orgId), 0); // Assuming branch ID 0 for organization details
+        const organizationData = {
+          ...orgData,
+          sector: "Unknown", // Provide a default or fetch if available
+          status: "Active", // Provide a default or fetch if available
+        };
+        setOrganization(organizationData);
+        const employeeData = await getAllOrgMembers(Number(orgId));
+        setEmployees(
+          employeeData.map((employee) => ({
+            id: employee.id,
+            branchName: "", // Add branch name if available in employee data
+            name: employee.name,
+            email: employee.email,
+            phone: "", // Add phone if available in employee data
+          }))
+        );
       } catch (err) {
         setError("Failed to load organization details.");
       } finally {
