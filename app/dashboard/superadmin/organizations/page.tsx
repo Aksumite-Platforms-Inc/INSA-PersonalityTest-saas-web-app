@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { OrganizationsTable } from "@/components/superadmin/organizations-table";
 import { Input } from "@/components/ui/input";
-import {
-  getAllBranches,
-  createBranch,
-  deleteBranch,
-} from "@/services/branch.service";
+import { createBranch, deleteBranch } from "@/services/branch.service";
 import { getAllOrgMembers } from "@/services/user.service";
+import {
+  listOrganizations,
+  Organization,
+  createOrganization,
+} from "@/services/organization.service";
 
 import {
   Dialog,
@@ -97,19 +98,13 @@ export const ManualOrgModal = ({
   );
 };
 
-interface OrganizationData {
-  id: number;
-  name: string;
-  sector: string;
-  status: string;
+interface OrganizationWithDetails extends Organization {
   users: number;
   testsCompleted: number;
-  createdAt: string;
 }
 
 export default function OrganizationsPage() {
   const [successMessage, setSuccessMessage] = useState("");
-
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<{
     id?: number;
@@ -117,26 +112,24 @@ export default function OrganizationsPage() {
     sector: string;
   }>({ id: undefined, name: "", sector: "" });
   const [loading, setLoading] = useState(false);
-  const [organizations, setOrganizations] = useState<OrganizationData[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationWithDetails[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       setLoading(true);
       try {
-        const branches = await getAllBranches();
-        const organizations = branches.map((branch) => ({
-          id: branch.id,
-          name: branch.name,
-          sector: "Unknown", // Default value, update if available
-          status: "Active", // Default value, update if available
-          users: 0, // Fetch user count if available
-          testsCompleted: 0, // Fetch test completion count if available
-          createdAt: branch.created_at,
+        const orgs = await listOrganizations();
+        const detailedOrgs = orgs.map((org) => ({
+          ...org,
+          users: 0, // Default value, update if available
+          testsCompleted: 0, // Default value, update if available
         }));
-        setOrganizations(organizations);
+        setOrganizations(detailedOrgs);
       } catch (error) {
         console.error("Error fetching organizations:", error);
-        alert("Error fetching organizations.");
+        // alert("Error fetching organizations.");
       } finally {
         setLoading(false);
       }
@@ -144,6 +137,7 @@ export default function OrganizationsPage() {
 
     fetchOrganizations();
   }, []);
+
   useEffect(() => {
     if (successMessage) {
       const timeout = setTimeout(() => setSuccessMessage(""), 3000);
@@ -176,17 +170,13 @@ export default function OrganizationsPage() {
         alert("Update branch functionality is not implemented.");
       } else {
         await createBranch(0, data.name); // Assuming orgId 0 for simplicity
-        const branches = await getAllBranches();
-        const organizations = branches.map((branch) => ({
-          id: branch.id,
-          name: branch.name,
-          sector: "Unknown", // Default value, update if available
-          status: "Active", // Default value, update if available
-          users: 0, // Fetch user count if available
-          testsCompleted: 0, // Fetch test completion count if available
-          createdAt: branch.created_at,
+        const orgs = await listOrganizations();
+        const detailedOrgs = orgs.map((org) => ({
+          ...org,
+          users: 0, // Default value, update if available
+          testsCompleted: 0, // Default value, update if available
         }));
-        setOrganizations(organizations);
+        setOrganizations(detailedOrgs);
         setSuccessMessage("Organization created successfully!");
       }
     } catch (error) {
@@ -195,6 +185,27 @@ export default function OrganizationsPage() {
     } finally {
       setLoading(false);
       setShowModal(false);
+    }
+  };
+
+  const handleCreateOrganization = async (data: {
+    name: string;
+    sector: string;
+  }) => {
+    setLoading(true);
+    try {
+      const newOrg = await createOrganization(data);
+      setOrganizations((prev) => [
+        ...prev,
+        { ...newOrg, users: 0, testsCompleted: 0 },
+      ]);
+      setSuccessMessage("Organization created successfully!");
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error creating organization:", error);
+      alert("Error creating organization.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -230,7 +241,13 @@ export default function OrganizationsPage() {
         open={showModal}
         onClose={() => setShowModal(false)}
         initialData={formData}
-        onSubmit={handleSaveOrganization}
+        onSubmit={(data) => {
+          if (formData.id) {
+            handleSaveOrganization(data); // Update existing organization
+          } else {
+            handleCreateOrganization(data); // Create new organization
+          }
+        }}
       />
       <OrganizationsTable
         organizations={organizations}
