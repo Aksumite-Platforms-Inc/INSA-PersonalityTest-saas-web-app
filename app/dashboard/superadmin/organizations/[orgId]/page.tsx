@@ -16,6 +16,8 @@ import { ArrowLeft, Building, Mail, MapPin, Phone, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { OrganizationEmployeesTable } from "@/components/superadmin/organization-employees-table";
 import { getOrganizationById } from "@/services/organization.service";
+import { getAllBranches } from "@/services/branch.service";
+import { getAllOrgMembers } from "@/services/user.service";
 import { use } from "react";
 
 interface Organization {
@@ -29,12 +31,12 @@ interface Organization {
   phone_number: string;
   created_at: Date; //------
   updated_at: Date;
-  description: string;
-  website: string;
-  totalEmployees: number;
-  totalBranches: number;
-  testsCompleted: number;
-  complianceStatus: string;
+  // description: string;
+  // website: string;
+  // totalEmployees: number;
+  // totalBranches: number;
+  // testsCompleted: number;
+  // complianceStatus: string;
 }
 
 export default function OrganizationDetailsPage({
@@ -49,6 +51,8 @@ export default function OrganizationDetailsPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [totalBranches, setTotalBranches] = useState<number | null>(null);
+  const [totalEmployees, setTotalEmployees] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchOrganization = async () => {
@@ -62,6 +66,37 @@ export default function OrganizationDetailsPage({
       }
     };
     fetchOrganization();
+  }, [orgId]);
+
+  useEffect(() => {
+    const fetchTotalBranches = async () => {
+      try {
+        if (orgId) {
+          const branches = await getAllBranches(Number(orgId));
+          setTotalBranches(branches.length);
+          console.log("Total branches:", branches.length);
+        }
+      } catch (err) {
+        console.error("Failed to fetch total branches:", err);
+      }
+    };
+
+    fetchTotalBranches();
+  }, [orgId]);
+
+  useEffect(() => {
+    const fetchTotalEmployees = async () => {
+      try {
+        if (orgId) {
+          const members = await getAllOrgMembers(Number(orgId));
+          setTotalEmployees(members.length);
+        }
+      } catch (err) {
+        console.error("Failed to fetch total employees:", err);
+      }
+    };
+
+    fetchTotalEmployees();
   }, [orgId]);
 
   const renderStatusBadge = (status: string) => {
@@ -98,7 +133,7 @@ export default function OrganizationDetailsPage({
       <div className="flex items-center justify-between">
         <PageTitle
           title={organization.name}
-          description={`${organization.sector} organization with ${organization.totalEmployees} employees`}
+          description={`${organization.sector} organization with ${totalEmployees} employees`}
         />
         <Button variant="outline" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -137,11 +172,9 @@ export default function OrganizationDetailsPage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {organization.totalEmployees}
-                </div>
+                <div className="text-2xl font-bold">{totalEmployees}</div>
                 <p className="text-xs text-muted-foreground">
-                  Across {organization.totalBranches} branches
+                  Across {totalBranches} branches
                 </p>
               </CardContent>
             </Card>
@@ -152,17 +185,15 @@ export default function OrganizationDetailsPage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                {/* <div className="text-2xl font-bold">
                   {organization.testsCompleted}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {Math.round(
-                    (organization.testsCompleted /
-                      organization.totalEmployees) *
-                      100
+                    (organization.testsCompleted / (totalEmployees ?? 0)) * 100
                   )}
                   % completion rate
-                </p>
+                </p> */}
               </CardContent>
             </Card>
             <Card>
@@ -207,13 +238,13 @@ export default function OrganizationDetailsPage({
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Description</p>
                   <p className="text-sm text-muted-foreground">
-                    {organization.description}
+                    {/* {organization.description} */}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Compliance Status</p>
                   <p className="text-sm text-muted-foreground">
-                    {organization.complianceStatus}
+                    {/* {organization.complianceStatus} */}
                   </p>
                 </div>
               </div>

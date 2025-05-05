@@ -17,11 +17,15 @@ import {
 interface OrganizationWithDetails {
   id: number;
   name: string;
-  sector: string;
+  email: string;
+  agreement: string;
   status: string;
-  createdAt: string;
-  users: number;
-  testsCompleted: number;
+  address: string;
+  sector: string;
+  phone_number: string;
+  created_at: Date; //------
+  updated_at: Date;
+  // testsCompleted: number;
 }
 
 export default function OrganizationsPage() {
