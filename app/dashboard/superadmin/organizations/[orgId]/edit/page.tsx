@@ -26,7 +26,7 @@ export default function EditOrganizationPage() {
   const params = useParams();
   const { toast } = useToast();
 
-  const orgId = Number(params.id);
+  const orgId = parseInt(params?.orgId, 10);
 
   const [orgData, setOrgData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,8 @@ export default function EditOrganizationPage() {
   const [address, setAddress] = useState("");
 
   useEffect(() => {
+    console.log("orgId:", orgId);
+    console.log("Fetching organization data...");
     const fetchData = async () => {
       try {
         const data = await getOrganizationById(orgId);
@@ -46,6 +48,7 @@ export default function EditOrganizationPage() {
         setSector(data.sector || "");
         setEmail(data.email || "");
         setAddress(data.address || "");
+        console.log("data", data);
       } catch (err) {
         toast({
           title: "Error loading organization",

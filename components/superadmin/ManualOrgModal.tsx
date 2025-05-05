@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { updateOrganization } from "@/services/organization.service";
 
 interface ManualOrgModalProps {
   open: boolean;
