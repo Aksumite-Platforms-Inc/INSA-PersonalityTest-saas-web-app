@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBranchStats } from "@/services/branchService";
+// import { getBranchStats } from "@/services/branchService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeProgressChart } from "@/components/branch/employee-progress-chart";
@@ -17,18 +17,18 @@ export default function BranchDashboard() {
     changeInCompletionRate: 0,
   });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const { data, success, error } = await getBranchStats();
-      if (success) {
-        setStats(data);
-      } else {
-        console.error("Failed to fetch branch stats:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     const { data, success, error } = await getBranchStats();
+  //     if (success) {
+  //       setStats(data);
+  //     } else {
+  //       console.error("Failed to fetch branch stats:", error);
+  //     }
+  //   };
 
-    fetchStats();
-  }, []);
+  //   fetchStats();
+  // }, []);
 
   return (
     <div className="space-y-6">

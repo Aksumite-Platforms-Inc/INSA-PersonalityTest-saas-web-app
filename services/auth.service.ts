@@ -12,10 +12,12 @@ const TOKEN_KEY = "authToken";
  */
 export const loginUser = async (
   email: string,
-  password: string,
-  isSystemAdmin: boolean
+  password: string
+  //   isSystemAdmin: boolean
+  // ): Promise<{ token: string; message?: string }> => {
+  //   const endpoint = isSystemAdmin ? "/sys/login" : "/sso/login";
 ): Promise<{ token: string; message?: string }> => {
-  const endpoint = isSystemAdmin ? "/sys/login" : "/sso/login";
+  const endpoint = "/sso/login";
 
   const response = await apiClient.post<ApiResponse<{ token: string }>>(
     endpoint,

@@ -9,6 +9,9 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  status: string;
+  department: string;
+  position: string;
   org_id: number;
   branch_id: number;
   created_at: string;

@@ -28,6 +28,7 @@ import {
   Shield,
   Ban,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Define the props for the table
 interface Organization {
@@ -52,6 +53,7 @@ export function OrganizationsTable({
   onDelete,
 }: OrganizationsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   const filteredOrganizations = organizations.filter(
     (org) =>
@@ -159,7 +161,9 @@ export function OrganizationsTable({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            (window.location.href = `/dashboard/superadmin/organizations/${org.id}`)
+                            router.push(
+                              `/dashboard/superadmin/organizations/${org.id}`
+                            )
                           }
                         >
                           <Shield className="mr-2 h-4 w-4" />

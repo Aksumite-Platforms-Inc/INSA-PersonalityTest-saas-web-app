@@ -14,7 +14,7 @@ export interface Branch {
 /**
  * Fetches all branches for the logged-in user's organization
  */
-export const getAllBranches = async (): Promise<Branch[]> => {
+export const getAllBranches = async (orgId: number): Promise<Branch[]> => {
   const token = getAccessToken();
   if (!token) {
     console.error("Authorization token is missing. Please log in again.");
@@ -22,7 +22,7 @@ export const getAllBranches = async (): Promise<Branch[]> => {
   }
 
   const response = await apiClient.get<ApiResponse<Branch[]>>(
-    `/organization/branches`
+    `/organization/${orgId}/branches`
   );
 
   if (!response.data.success) {

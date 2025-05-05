@@ -6,9 +6,14 @@ import { ApiResponse } from "@/types/api-response.type";
 export interface Organization {
   id: number;
   name: string;
-  sector: string;
+  email: string;
+  agreement: string;
   status: string;
-  createdAt: string;
+  address: string;
+  sector: string;
+  phone_number: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 /** Create a new organization */
@@ -66,6 +71,8 @@ export const getOrganizationById = async (
   const response = await apiClient.get<ApiResponse<Organization>>(
     `/sys/organization/${id}`
   );
+
+  console.log("API Response for getOrganizationById:", response.data);
 
   if (!response.data?.success) {
     console.error("Fetch Org By ID Error:", response.data);

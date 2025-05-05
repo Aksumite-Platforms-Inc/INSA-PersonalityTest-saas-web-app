@@ -96,7 +96,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { token } = await loginUser(email, password, isSystemAdmin);
+      const { token } = await loginUser(email, password);
       localStorage.setItem("authToken", token);
 
       const user = decodeToken();
@@ -218,7 +218,7 @@ export default function LoginPage() {
                 formFieldsRef.current[2] = el;
               }}
             >
-              <label htmlFor="isSystemAdmin" className="text-sm font-medium">
+              {/* <label htmlFor="isSystemAdmin" className="text-sm font-medium">
                 <input
                   id="isSystemAdmin"
                   type="checkbox"
@@ -227,7 +227,7 @@ export default function LoginPage() {
                   className="mr-2"
                 />
                 Login as System Admin
-              </label>
+              </label> */}
             </div>
 
             <Button
