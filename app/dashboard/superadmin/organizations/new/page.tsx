@@ -83,10 +83,10 @@ export default function NewOrganizationPage() {
       });
 
       // Call the API to assign the administrator
-      await assignAdminToOrganization(organization.id, {
-        name: adminName,
-        email: adminEmail,
-      });
+      // await assignAdminToOrganization(organization.id, {
+      //   name: adminName,
+      //   email: adminEmail,
+      // });
 
       toast({
         title: "Administrator assigned",
