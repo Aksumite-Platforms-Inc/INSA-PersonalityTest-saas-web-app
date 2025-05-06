@@ -164,7 +164,7 @@ export default function OrganizationDetailsPage({
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
@@ -178,14 +178,14 @@ export default function OrganizationDetailsPage({
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            {/* <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
                   Tests Completed
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {/* <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold">
                   {organization.testsCompleted}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -193,9 +193,9 @@ export default function OrganizationDetailsPage({
                     (organization.testsCompleted / (totalEmployees ?? 0)) * 100
                   )}
                   % completion rate
-                </p> */}
+                </p>
               </CardContent>
-            </Card>
+            </Card> */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
