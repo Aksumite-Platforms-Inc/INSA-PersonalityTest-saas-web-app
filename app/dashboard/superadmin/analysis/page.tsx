@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { getOrganizations } from "@/services/orgService";
-import { uploadFile } from "@/services/fileService";
+import { getOrganizations } from "@/services/org.service";
+import { uploadFile } from "@/services/file.service";
 import toast from "react-hot-toast";
 
 const AnalysisUploadPage = () => {

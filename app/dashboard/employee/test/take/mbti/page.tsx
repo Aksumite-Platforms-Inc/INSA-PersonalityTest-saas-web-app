@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { mbtiTest } from "@/data/tests/mbti";
-import { submitMBTIAnswers } from "@/services/testService";
+import { submitMBTIAnswers } from "@/services/test.service";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

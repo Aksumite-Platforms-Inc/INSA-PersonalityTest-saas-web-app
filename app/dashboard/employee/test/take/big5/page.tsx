@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 //based on the test page
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
-import { submitBig5TestAnswers } from "@/services/testService";
+import { submitBig5TestAnswers } from "@/services/test.service";
 
 export default function Big5TestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -32,7 +32,7 @@ export default function Big5TestPage() {
   const questions = big5Test.questions;
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
-    (currentGroup + 1) * questionsPerGroup
+    (currentGroup + 1) * questionsPerGroup,
   );
 
   const handleNextGroup = () => {
@@ -68,7 +68,7 @@ export default function Big5TestPage() {
     //paylaod for big5 test answers
     const adjustedAnswers = {
       answers: Object.fromEntries(
-        Object.entries(answers).map(([key, value]) => [key, Number(value)])
+        Object.entries(answers).map(([key, value]) => [key, Number(value)]),
       ),
     };
     const payload = JSON.stringify(adjustedAnswers);
@@ -126,7 +126,7 @@ export default function Big5TestPage() {
                 {Math.round(
                   ((currentGroup + 1) /
                     Math.ceil(questions.length / questionsPerGroup)) *
-                    100
+                    100,
                 )}
                 % Complete
               </span>

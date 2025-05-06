@@ -30,7 +30,7 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { deleteBranch, getAllBranches } from "@/services/branchService"; // Import the service
+import { deleteBranch, getAllBranches } from "@/services/branch.service"; // Import the service
 
 export function BranchesTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,7 +50,7 @@ export function BranchesTable() {
   const filteredBranches = branches.filter(
     (branch) =>
       branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.manager.toLowerCase().includes(searchTerm.toLowerCase())
+      branch.manager.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const renderStatusBadge = (status: string) => {
@@ -151,7 +151,7 @@ export function BranchesTable() {
                         <DropdownMenuItem
                           onClick={() =>
                             router.push(
-                              `/dashboard/organization/branches/${branch.id}`
+                              `/dashboard/organization/branches/${branch.id}`,
                             )
                           }
                         >

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { riasecTest } from "@/data/tests/riasec";
-import { submitRIASECAnswers } from "@/services/testService";
+import { submitRIASECAnswers } from "@/services/test.service";
 import {
   Card,
   CardHeader,
@@ -21,7 +21,7 @@ export default function RIASECPage() {
   const questions = riasecTest.questions;
   const categories = Object.keys(questions);
   const maxQuestions = Math.max(
-    ...categories.map((cat) => questions[cat].length)
+    ...categories.map((cat) => questions[cat].length),
   );
   const router = useRouter();
 

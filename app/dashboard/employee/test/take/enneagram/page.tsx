@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X } from "lucide-react";
-import { submitEnneagramAnswers } from "@/services/testService";
+import { submitEnneagramAnswers } from "@/services/test.service";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -27,7 +27,7 @@ export default function EnneagramPage() {
 
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
-    (currentGroup + 1) * questionsPerGroup
+    (currentGroup + 1) * questionsPerGroup,
   );
 
   const handleAnswer = (questionId: number, value: string) => {
