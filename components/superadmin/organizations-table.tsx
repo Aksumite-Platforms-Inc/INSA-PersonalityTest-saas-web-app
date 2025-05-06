@@ -47,13 +47,11 @@ interface Organization {
 
 interface OrganizationsTableProps {
   organizations: Organization[];
-  onEdit: (id: number) => void;
   onDelete: (id: number) => void;
 }
 
 export function OrganizationsTable({
   organizations,
-  onEdit,
   onDelete,
 }: OrganizationsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");

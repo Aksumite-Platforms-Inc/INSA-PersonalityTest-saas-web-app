@@ -19,8 +19,13 @@ export interface Organization {
 /** Create a new organization */
 export const createOrganization = async (data: {
   name: string;
+  email: string;
+  status: string;
+  address: string;
   sector: string;
+  phone_number: string;
 }): Promise<Organization> => {
+  console.log("Payload for createOrganization:", data);
   const response = await apiClient.post<ApiResponse<Organization>>(
     "/sys/organization",
     data

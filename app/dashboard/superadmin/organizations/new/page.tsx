@@ -25,6 +25,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import {
+  createOrganization,
+  assignAdminToOrganization,
+} from "@/services/organization.service";
 
 export default function NewOrganizationPage() {
   const router = useRouter();
@@ -34,12 +38,12 @@ export default function NewOrganizationPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name || !sector || !email || !adminName || !adminEmail) {
@@ -51,17 +55,52 @@ export default function NewOrganizationPage() {
       return;
     }
 
+    if (!/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/.test(phone)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Call the API to create the organization
+      const organization = await createOrganization({
+        name,
+        sector,
+        email,
+        phone_number: phone,
+        address,
+        status,
+      });
+
       toast({
         title: "Organization created",
-        description: `${name} has been created successfully.`,
+        description: `${organization.name} has been created successfully.`,
       });
-      router.push("/dashboard/superadmin/organizations");
-    }, 1500);
+
+      // Call the API to assign the administrator
+      await assignAdminToOrganization(organization.id, {
+        name: adminName,
+        email: adminEmail,
+      });
+
+      toast({
+        title: "Administrator assigned",
+        description: `Admin ${adminName} has been assigned successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,13 +177,16 @@ export default function NewOrganizationPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                />
+                <Label htmlFor="status">Status *</Label>
+                <Select value={status} onValueChange={setStatus} required>
+                  <SelectTrigger id="status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
