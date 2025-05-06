@@ -5,197 +5,84 @@ import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { OrganizationsTable } from "@/components/superadmin/organizations-table";
-import { orgService } from "@/services/orgService";
-import { Input } from "@/components/ui/input";
+import { ManualOrgModal } from "@/components/superadmin/ManualOrgModal";
+import { useRouter } from "next/navigation";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { set } from "react-hook-form";
+  listOrganizations,
+  createOrganization,
+  deleteOrganization,
+  updateOrganization,
+} from "@/services/organization.service";
 
-interface OrgModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (formData: { id?: number; name: string; sector: string }) => void;
-  initialData: { id?: number; name: string; sector: string };
-}
-
-export const ManualOrgModal = ({
-  open,
-  onClose,
-  onSubmit,
-  initialData,
-}: OrgModalProps) => {
-  const [formData, setFormData] = useState({
-    id: initialData?.id ?? undefined,
-    name: initialData?.name ?? "",
-    sector: initialData?.sector ?? "",
-  });
-
-  useEffect(() => {
-    setFormData({
-      id: initialData?.id ?? undefined,
-      name: initialData?.name ?? "",
-      sector: initialData?.sector ?? "",
-    });
-  }, [initialData]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = () => {
-    if (!formData.name || !formData.sector) {
-      alert("All fields are required.");
-      return;
-    }
-    onSubmit(formData);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {formData.id ? "Edit Organization" : "Add Organization"}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <Input
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Organization Name"
-          />
-          <Input
-            name="sector"
-            value={formData.sector}
-            onChange={handleChange}
-            placeholder="Sector"
-          />
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              {formData.id ? "Update" : "Create"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-interface OrganizationData {
+interface OrganizationWithDetails {
   id: number;
   name: string;
-  sector: string;
+  email: string;
+  agreement: string;
   status: string;
-  users: number;
-  testsCompleted: number;
-  createdAt: string;
+  address: string;
+  sector: string;
+  phone_number: string;
+  created_at: Date; //------
+  updated_at: Date;
+  // testsCompleted: number;
 }
 
 export default function OrganizationsPage() {
+  const [organizations, setOrganizations] = useState<OrganizationWithDetails[]>(
+    []
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<{
     id?: number;
     name: string;
     sector: string;
-  }>({ id: undefined, name: "", sector: "" });
-  const [loading, setLoading] = useState(false);
-  const [organizations, setOrganizations] = useState<OrganizationData[]>([]);
+  }>({
+    id: undefined,
+    name: "",
+    sector: "",
+  });
 
-  useEffect(() => {
-    const fetchOrganizations = async () => {
-      setLoading(true);
-      try {
-        const data = await orgService.getAllOrganizations();
-        setOrganizations(data);
-      } catch (error) {
-        console.error("Error fetching organizations:", error);
-        alert("Error fetching organizations.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const router = useRouter();
 
-    fetchOrganizations();
-  }, []);
-  useEffect(() => {
-    if (successMessage) {
-      const timeout = setTimeout(() => setSuccessMessage(""), 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [successMessage]);
-
-  const handleAddOrganization = () => {
-    setFormData({ id: undefined, name: "", sector: "" });
-    setShowModal(true);
-  };
-
-  const handleEditOrganization = (id: number) => {
-    const org = organizations.find((org) => org.id === id);
-    if (org) {
-      setFormData({ id: org.id, name: org.name, sector: org.sector });
-      setShowModal(true);
-    }
-  };
-
-  const handleSaveOrganization = async (data: {
-    id?: number;
-    name: string;
-    sector: string;
-  }) => {
-    setLoading(true);
+  const fetchAllOrganizations = async () => {
     try {
-      if (data.id) {
-        await orgService.updateOrganization(data.id, data);
-        setOrganizations((prev) =>
-          prev.map((org) => (org.id === data.id ? { ...org, ...data } : org))
-        );
-        setSuccessMessage("Organization updated successfully!");
-      } else {
-        await orgService.createOrganization({
-          ...data,
-          status: "active", // default status
-          users: 0, // default users count
-          testsCompleted: 0, // default tests completed count
-        });
-        const updatedList = await orgService.getAllOrganizations();
-        setOrganizations(updatedList);
-        setSuccessMessage("Organization created successfully!");
-      }
-    } catch (error) {
-      console.error("Error saving organization:", error);
-      alert("Error saving organization.");
+      setLoading(true);
+      setError("");
+      const orgs = await listOrganizations(); // assumes this returns Organization[]
+      const detailed = orgs.map((org) => ({
+        ...org,
+        users: 0,
+        testsCompleted: 0,
+      }));
+      setOrganizations(detailed);
+    } catch (err) {
+      setError("Failed to fetch organizations.");
+      console.error("List Organizations Error:", err);
     } finally {
       setLoading(false);
-      setShowModal(false);
     }
   };
 
-  const handleDeleteOrganization = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this organization?")) {
-      setLoading(true);
-      try {
-        await orgService.deleteOrganization(id);
-        setOrganizations((prev) => prev.filter((org) => org.id !== id));
-        alert("Organization deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting organization:", error);
-        alert("Error deleting organization.");
-      } finally {
-        setLoading(false);
-      }
+  useEffect(() => {
+    fetchAllOrganizations();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this organization?")) return;
+    setLoading(true);
+    try {
+      await deleteOrganization(id);
+      setOrganizations((prev) => prev.filter((o) => o.id !== id));
+      setSuccessMessage("Organization deleted.");
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Error deleting organization.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -206,25 +93,28 @@ export default function OrganizationsPage() {
           title="Organizations Management"
           description="Manage all organizations in the platform"
         />
-        <Button onClick={handleAddOrganization} disabled={loading}>
+        <Button
+          onClick={() => router.push("/dashboard/superadmin/organizations/new")}
+          disabled={loading}
+        >
           <PlusCircle className="mr-2 h-4 w-4" />
-          {loading ? "Adding..." : "Add Organization"}
+          {loading ? "Loading..." : "Add Organization"}
         </Button>
       </div>
-      <ManualOrgModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        initialData={formData}
-        onSubmit={handleSaveOrganization}
-      />
+
       <OrganizationsTable
         organizations={organizations}
-        onEdit={handleEditOrganization}
-        onDelete={handleDeleteOrganization}
+        onDelete={handleDelete}
       />
+
       {successMessage && (
-        <div className="fixed top-10 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-all duration-300">
+        <div className="fixed top-10 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {successMessage}
+        </div>
+      )}
+      {error && (
+        <div className="fixed top-20 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
+          {error}
         </div>
       )}
     </div>

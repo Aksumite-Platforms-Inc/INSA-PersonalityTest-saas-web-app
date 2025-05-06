@@ -1,11 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Demo data
 const employees = [
@@ -89,49 +96,61 @@ const employees = [
     testStatus: "completed",
     lastActivity: "2023-03-06",
   },
-]
+];
 
 export function EmployeeList() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const filteredEmployees = employees.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      employee.position.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedEmployees = filteredEmployees.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEmployees = filteredEmployees.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   // Function to render status badge with appropriate variant
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             Completed
           </Badge>
-        )
+        );
       case "in-progress":
         return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          <Badge
+            variant="outline"
+            className="bg-yellow-50 text-yellow-700 border-yellow-200"
+          >
             In Progress
           </Badge>
-        )
+        );
       case "not-started":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             Not Started
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -161,7 +180,10 @@ export function EmployeeList() {
           <TableBody>
             {paginatedEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No employees found
                 </TableCell>
               </TableRow>
@@ -171,9 +193,13 @@ export function EmployeeList() {
                   <TableCell className="font-medium">{employee.name}</TableCell>
                   <TableCell>{employee.department}</TableCell>
                   <TableCell>{employee.position}</TableCell>
-                  <TableCell>{renderStatusBadge(employee.testStatus)}</TableCell>
                   <TableCell>
-                    {employee.lastActivity ? new Date(employee.lastActivity).toLocaleDateString() : "N/A"}
+                    {renderStatusBadge(employee.testStatus)}
+                  </TableCell>
+                  <TableCell>
+                    {employee.lastActivity
+                      ? new Date(employee.lastActivity).toLocaleDateString()
+                      : "N/A"}
                   </TableCell>
                 </TableRow>
               ))
@@ -199,7 +225,9 @@ export function EmployeeList() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
@@ -207,5 +235,5 @@ export function EmployeeList() {
         </div>
       )}
     </div>
-  )
+  );
 }

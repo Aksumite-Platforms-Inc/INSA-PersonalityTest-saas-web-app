@@ -1,9 +1,35 @@
+"use client";
+
+import { useEffect, useState } from "react";
+// import { getOrganizationStats } from "@/services/orgService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart";
 import { RecentEmployeeActivity } from "@/components/organization/recent-employee-activity";
 
 export default function OrganizationDashboard() {
+  const [stats, setStats] = useState({
+    totalBranches: 0,
+    totalEmployees: 0,
+    completionRate: 0,
+    changeInBranches: 0,
+    changeInEmployees: 0,
+    changeInCompletionRate: 0,
+  });
+
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     const { data, success, error } = await getOrganizationStats();
+  //     if (success) {
+  //       setStats(data);
+  //     } else {
+  //       console.error("Failed to fetch organization stats:", error);
+  //     }
+  //   };
+
+  //   fetchStats();
+  // }, []);
+
   return (
     <div className="space-y-6">
       <PageTitle
@@ -20,8 +46,13 @@ export default function OrganizationDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">+1 from last month</p>
+            <div className="text-2xl font-bold">{stats.totalBranches}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.changeInBranches > 0
+                ? `+${stats.changeInBranches}`
+                : stats.changeInBranches}{" "}
+              from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -31,8 +62,13 @@ export default function OrganizationDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,245</div>
-            <p className="text-xs text-muted-foreground">+32 from last month</p>
+            <div className="text-2xl font-bold">{stats.totalEmployees}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.changeInEmployees > 0
+                ? `+${stats.changeInEmployees}`
+                : stats.changeInEmployees}{" "}
+              from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -42,9 +78,12 @@ export default function OrganizationDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">78.5%</div>
+            <div className="text-2xl font-bold">{stats.completionRate}%</div>
             <p className="text-xs text-muted-foreground">
-              +5.2% from last month
+              {stats.changeInCompletionRate > 0
+                ? `+${stats.changeInCompletionRate}%`
+                : stats.changeInCompletionRate}
+              % from last month
             </p>
           </CardContent>
         </Card>

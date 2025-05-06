@@ -1,11 +1,37 @@
+"use client";
+
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrganizationsChart } from "@/components/dashboard/organizations-chart";
 import { TestsCompletedChart } from "@/components/dashboard/tests-completed-chart";
-import { RegionalHeatmap } from "@/components/dashboard/regional-heatmap";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { listOrganizations } from "@/services/organization.service";
+import { useEffect, useState } from "react";
+// import { listTests } from "@/services/test.service";
 
 export default function SuperadminDashboard() {
+  const [totalOrganizations, setTotalOrganizations] = useState(0);
+  const [testsCompleted, setTestsCompleted] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const organizations = await listOrganizations();
+        setTotalOrganizations(organizations.length);
+
+        // const tests = await listTests();
+        // const completedTests = tests.filter(
+        //   (test) => test.status === "completed"
+        // );
+        // setTestsCompleted(completedTests.length);
+      } catch (error) {
+        console.error("Error fetching data for dashboard:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="space-y-6">
       <PageTitle
@@ -22,7 +48,7 @@ export default function SuperadminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{totalOrganizations}</div>
             <p className="text-xs text-muted-foreground">+2 from last month</p>
           </CardContent>
         </Card>
@@ -33,23 +59,10 @@ export default function SuperadminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,345</div>
-            <p className="text-xs text-muted-foreground">
-              +15% from last month
-            </p>
+            <div className="text-2xl font-bold">{testsCompleted}</div>
+            <p className="text-xs text-muted-foreground">__% from last month</p>
           </CardContent>
         </Card>
-        {/* <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Avg. Test Duration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24m 32s</div>
-            <p className="text-xs text-muted-foreground">-2m from last month</p>
-          </CardContent>
-        </Card> */}
       </div>
 
       {/* Charts */}
@@ -71,16 +84,6 @@ export default function SuperadminDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Regional Heatmap */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Regional Participation</CardTitle>
-        </CardHeader>
-        <CardContent className="h-96">
-          <RegionalHeatmap />
-        </CardContent>
-      </Card> */}
 
       {/* Recent Activity */}
       <Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -28,30 +28,52 @@ import {
   Shield,
   Ban,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { getAllOrgMembers } from "@/services/user.service";
 
 // Define the props for the table
 interface Organization {
   id: number;
   name: string;
-  sector: string;
+  email: string;
+  agreement: string;
   status: string;
-  users: number;
-  testsCompleted: number;
-  createdAt: string;
+  address: string;
+  sector: string;
+  phone_number: string;
+  created_at: Date; //------
+  updated_at: Date;
 }
 
 interface OrganizationsTableProps {
   organizations: Organization[];
-  onEdit: (id: number) => void;
   onDelete: (id: number) => void;
 }
 
 export function OrganizationsTable({
   organizations,
-  onEdit,
   onDelete,
 }: OrganizationsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [userCounts, setUserCounts] = useState<Record<number, number>>({});
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserCounts = async () => {
+      try {
+        const counts: Record<number, number> = {};
+        for (const org of organizations) {
+          const members = await getAllOrgMembers(org.id);
+          counts[org.id] = members.length;
+        }
+        setUserCounts(counts);
+      } catch (err) {
+        console.error("Failed to fetch user counts:", err);
+      }
+    };
+
+    fetchUserCounts();
+  }, [organizations]);
 
   const filteredOrganizations = organizations.filter(
     (org) =>
@@ -116,7 +138,7 @@ export function OrganizationsTable({
               <TableHead>Sector</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Users</TableHead>
-              <TableHead>Tests Completed</TableHead>
+              {/* <TableHead>Tests Completed</TableHead> */}
               <TableHead>Created</TableHead>
               <TableHead className="w-[80px]"></TableHead>
             </TableRow>
@@ -137,11 +159,11 @@ export function OrganizationsTable({
                   <TableCell className="font-medium">{org.name}</TableCell>
                   <TableCell>{org.sector}</TableCell>
                   <TableCell>{renderStatusBadge(org.status)}</TableCell>
-                  <TableCell>{org.users}</TableCell>
-                  <TableCell>{org.testsCompleted}</TableCell>
+                  <TableCell>{userCounts[org.id] || 0}</TableCell>
+                  {/* <TableCell>{org.testsCompleted}</TableCell> */}
 
                   <TableCell>
-                    {new Date(org.createdAt).toLocaleDateString()}
+                    {new Date(org.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -153,13 +175,21 @@ export function OrganizationsTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => onEdit(org.id)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/superadmin/organizations/${org.id}/edit`
+                            )
+                          }
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            (window.location.href = `/dashboard/superadmin/organizations/${org.id}`)
+                            router.push(
+                              `/dashboard/superadmin/organizations/${org.id}`
+                            )
                           }
                         >
                           <Shield className="mr-2 h-4 w-4" />

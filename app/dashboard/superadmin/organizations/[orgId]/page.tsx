@@ -1,226 +1,343 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { orgService, OrganizationData } from "@/services/orgService";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
-import { Spinner } from "@/components/ui/spinner";
-import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Building, Mail, MapPin, Phone, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { OrganizationEmployeesTable } from "@/components/superadmin/organization-employees-table";
+import { getOrganizationById } from "@/services/organization.service";
+import { getAllBranches } from "@/services/branch.service";
+import { getAllOrgMembers } from "@/services/user.service";
+import { use } from "react";
 
-export default function OrganizationDetailsPage() {
+interface Organization {
+  id: number;
+  name: string;
+  email: string;
+  agreement: string;
+  status: string;
+  address: string;
+  sector: string;
+  phone_number: string;
+  created_at: Date; //------
+  updated_at: Date;
+  // description: string;
+  // website: string;
+  // totalEmployees: number;
+  // totalBranches: number;
+  // testsCompleted: number;
+  // complianceStatus: string;
+}
+
+export default function OrganizationDetailsPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
+  const { orgId } = use(params);
+
   const router = useRouter();
-  const { orgId } = useParams();
-
-  const [organization, setOrganization] = useState<OrganizationData | null>(
-    null
-  );
-  const [employees, setEmployees] = useState<
-    {
-      id: number;
-      branchName: string;
-      name: string;
-      email: string;
-      phone: string;
-    }[]
-  >([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [filter, setFilter] = useState("");
-  const [sortColumn, setSortColumn] = useState<
-    keyof (typeof employees)[0] | null
-  >(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const handleBack = () => {
-    router.back();
-  };
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [totalBranches, setTotalBranches] = useState<number | null>(null);
+  const [totalEmployees, setTotalEmployees] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!orgId) return;
-
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchOrganization = async () => {
       try {
-        const orgData = await orgService.getOrganizationById(Number(orgId));
-        const employeeData = await orgService.getAllOrgMembers(Number(orgId));
-        setOrganization(orgData);
-        setEmployees(employeeData);
+        const organizationData = await getOrganizationById(Number(orgId));
+        setOrganization(organizationData);
       } catch (err) {
-        setError("Failed to load organization details.");
+        setError("Organization not found.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    fetchOrganization();
   }, [orgId]);
 
-  const filteredEmployees = employees.filter((employee) =>
-    Object.values(employee).some((value) =>
-      value.toString().toLowerCase().includes(filter.toLowerCase())
-    )
-  );
+  useEffect(() => {
+    const fetchTotalBranches = async () => {
+      try {
+        if (orgId) {
+          const branches = await getAllBranches(Number(orgId));
+          setTotalBranches(branches.length);
+          console.log("Total branches:", branches.length);
+        }
+      } catch (err) {
+        console.error("Failed to fetch total branches:", err);
+      }
+    };
 
-  const sortedEmployees = [...filteredEmployees].sort((a, b) => {
-    if (!sortColumn) return 0;
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
+    fetchTotalBranches();
+  }, [orgId]);
 
-    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+  useEffect(() => {
+    const fetchTotalEmployees = async () => {
+      try {
+        if (orgId) {
+          const members = await getAllOrgMembers(Number(orgId));
+          setTotalEmployees(members.length);
+        }
+      } catch (err) {
+        console.error("Failed to fetch total employees:", err);
+      }
+    };
 
-  const paginatedEmployees = sortedEmployees.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    fetchTotalEmployees();
+  }, [orgId]);
 
-  const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
-
-  const handleSort = (column: keyof (typeof employees)[0]) => {
-    if (sortColumn === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortOrder("asc");
-    }
+  const renderStatusBadge = (status: string) => {
+    const badgeMap: Record<string, string> = {
+      active: "bg-green-50 text-green-700 border-green-200",
+      suspended: "bg-red-50 text-red-700 border-red-200",
+      pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    };
+    const style = badgeMap[status] || "";
+    return (
+      <Badge variant="outline" className={style}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  if (loading) return <Spinner />;
-  if (error) return <Alert>{error}</Alert>;
+  if (loading) return <p>Loading organization...</p>;
+  if (error || !organization) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Error</h2>
+          <p className="text-muted-foreground mt-2">{error}</p>
+          <Button className="mt-4" onClick={() => router.back()}>
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <Button variant="outline" onClick={handleBack}>
-        Back
-      </Button>
-      <PageTitle
-        title={organization?.name || "Organization Details"}
-        description="View organization information and employees"
-      />
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Organization Information</h2>
-        <p>
-          <strong>Sector:</strong> {organization?.sector}
-        </p>
-        <p>
-          <strong>Status:</strong> {organization?.status}
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Employees</h2>
-        <input
-          type="text"
-          placeholder="Filter employees..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="mb-4 p-2 border rounded w-full"
+      <div className="flex items-center justify-between">
+        <PageTitle
+          title={organization.name}
+          description={`${organization.sector} organization with ${totalEmployees} employees`}
         />
-        <Table className="border rounded-lg shadow-md">
-          <TableHeader className="bg-gray-100">
-            <TableRow>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-200"
-                onClick={() => handleSort("branchName")}
-              >
-                Branch Name
-                {sortColumn === "branchName" &&
-                  (sortOrder === "asc" ? (
-                    <ChevronUp className="inline ml-2 h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="inline ml-2 h-4 w-4" />
-                  ))}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-200"
-                onClick={() => handleSort("name")}
-              >
-                Employee Name
-                {sortColumn === "name" &&
-                  (sortOrder === "asc" ? (
-                    <ChevronUp className="inline ml-2 h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="inline ml-2 h-4 w-4" />
-                  ))}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-200"
-                onClick={() => handleSort("email")}
-              >
-                Email
-                {sortColumn === "email" &&
-                  (sortOrder === "asc" ? (
-                    <ChevronUp className="inline ml-2 h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="inline ml-2 h-4 w-4" />
-                  ))}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-200"
-                onClick={() => handleSort("phone")}
-              >
-                Phone Number
-                {sortColumn === "phone" &&
-                  (sortOrder === "asc" ? (
-                    <ChevronUp className="inline ml-2 h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="inline ml-2 h-4 w-4" />
-                  ))}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedEmployees.map((employee) => (
-              <TableRow key={employee.id} className="hover:bg-gray-500">
-                <TableCell>{employee.branchName}</TableCell>
-                <TableCell>{employee.name}</TableCell>
-                <TableCell>{employee.email}</TableCell>
-                <TableCell>{employee.phone}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        <Button variant="outline" onClick={() => router.back()}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Organizations
+        </Button>
       </div>
+
+      <div className="flex items-center space-x-2">
+        {renderStatusBadge(organization.status)}
+        <Badge
+          variant="outline"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        >
+          {organization.sector}
+        </Badge>
+      </div>
+
+      <Tabs
+        defaultValue="overview"
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="employees">Employees</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Employees
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalEmployees}</div>
+                <p className="text-xs text-muted-foreground">
+                  Across {totalBranches} branches
+                </p>
+              </CardContent>
+            </Card>
+            {/* <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Tests Completed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {organization.testsCompleted}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {Math.round(
+                    (organization.testsCompleted / (totalEmployees ?? 0)) * 100
+                  )}
+                  % completion rate
+                </p>
+              </CardContent>
+            </Card> */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Member Since
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {organization.created_at ? (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {new Date(organization.created_at).toLocaleDateString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {Math.floor(
+                        (new Date().getTime() -
+                          new Date(organization.created_at).getTime()) /
+                          (1000 * 60 * 60 * 24 * 30)
+                      )}{" "}
+                      months
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Date not available
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Organization Information</CardTitle>
+              <CardDescription>
+                Detailed information about {organization.name}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Description</p>
+                  <p className="text-sm text-muted-foreground">
+                    {/* {organization.description} */}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Compliance Status</p>
+                  <p className="text-sm text-muted-foreground">
+                    {/* {organization.complianceStatus} */}
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium flex items-center">
+                    <MapPin className="mr-2 h-4 w-4" /> Address
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {organization.address}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium flex items-center">
+                    <Phone className="mr-2 h-4 w-4" /> Phone
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {organization.phone_number}
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium flex items-center">
+                    <Mail className="mr-2 h-4 w-4" /> Email
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {organization.email}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium flex items-center">
+                    <Building className="mr-2 h-4 w-4" /> Website
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    https://www.********{/* {organization.website} */}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="employees" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Employees</CardTitle>
+                <CardDescription>
+                  Manage employees in this organization
+                </CardDescription>
+              </div>
+              <Button size="sm">
+                <Users className="mr-2 h-4 w-4" />
+                Export List
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <OrganizationEmployeesTable organizationId={organization.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+              <CardDescription>
+                Shared documents will be shown here.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                No documents have been shared with this organization yet.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Settings</CardTitle>
+              <CardDescription>Manage organization settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Settings functionality will be added later.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

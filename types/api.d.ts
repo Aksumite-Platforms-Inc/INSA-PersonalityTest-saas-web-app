@@ -1,6 +1,7 @@
 // types/api.d.ts
 export type APIResponse<T> = {
-  data: T | null;
-  error: string | null;
   success: boolean;
+  data: T | null;
+  message: string | null;
+  code: number | null;
 };

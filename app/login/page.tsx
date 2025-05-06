@@ -1,12 +1,11 @@
 "use client";
 
-import type React from "react";
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ArrowLeft, Shield } from "lucide-react";
+
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -18,16 +17,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { login } from "@/services/authService";
+
+import { loginUser } from "@/services/auth.service";
+import { decodeToken } from "@/utils/tokenUtils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
   const router = useRouter();
 
-  // Refs for animations
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const formFieldsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -37,31 +39,24 @@ export default function LoginPage() {
   const buttonRef = useRef(null);
   const footerRef = useRef(null);
 
-  // Initialize animations
   useEffect(() => {
     const tl = gsap.timeline();
 
-    // Container animation
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.5 }
     );
-
-    // Logo animation
     tl.fromTo(
       logoRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.5 }
     );
-
-    // Title and description animations
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.5 }
     );
-
     tl.fromTo(
       descriptionRef.current,
       { opacity: 0, y: -20 },
@@ -69,7 +64,6 @@ export default function LoginPage() {
       "-=0.3"
     );
 
-    // Form fields animations
     formFieldsRef.current.forEach((field, index) => {
       tl.fromTo(
         field,
@@ -79,14 +73,11 @@ export default function LoginPage() {
       );
     });
 
-    // Button animation
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.5 }
     );
-
-    // Footer animation
     tl.fromTo(
       footerRef.current,
       { opacity: 0 },
@@ -105,35 +96,38 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await login(email, password);
+      const { token } = await loginUser(email, password);
+      localStorage.setItem("authToken", token);
 
-      if (response.success) {
-        const userRole = response.data.role;
+      const user = decodeToken();
+      const role = user?.role;
 
-        // Validate role and redirect
-        if (
-          ["employee/test", "branch", "organization", "superadmin"].includes(
-            userRole
-          )
-        ) {
-          localStorage.setItem("authToken", response.data.token); // Store token securely
-          router.push(`/dashboard/${userRole}`);
-        } else {
-          throw new Error("Unauthorized role");
-        }
-      } else {
-        throw new Error(response.error || "Login failed");
-      }
+      if (!role) throw new Error("Invalid token. No role found.");
+
+      const allowedRoles = [
+        "org_member",
+        "branch_admin",
+        "org_admin",
+        "super_admin",
+      ];
+      if (!allowedRoles.includes(role)) throw new Error("Unauthorized role.");
+
+      const redirectPath = {
+        org_member: "employee/test",
+        branch_admin: "branch",
+        org_admin: "organization",
+        super_admin: "superadmin",
+      }[role];
+
+      router.push(`/dashboard/${redirectPath}`);
     } catch (error: any) {
       setError(error.message || "Invalid credentials. Please try again.");
 
-      // Shake animation for error
       gsap.fromTo(
         formRef.current,
         { x: -10 },
         { x: 0, duration: 0.1, repeat: 5, yoyo: true }
       );
-
       setIsLoading(false);
     }
   };
@@ -216,6 +210,24 @@ export default function LoginPage() {
                 required
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
+            </div>
+
+            <div
+              className="space-y-2"
+              ref={(el) => {
+                formFieldsRef.current[2] = el;
+              }}
+            >
+              {/* <label htmlFor="isSystemAdmin" className="text-sm font-medium">
+                <input
+                  id="isSystemAdmin"
+                  type="checkbox"
+                  checked={isSystemAdmin}
+                  onChange={(e) => setIsSystemAdmin(e.target.checked)}
+                  className="mr-2"
+                />
+                Login as System Admin
+              </label> */}
             </div>
 
             <Button
