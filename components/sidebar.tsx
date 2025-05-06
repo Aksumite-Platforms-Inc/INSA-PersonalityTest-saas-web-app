@@ -9,6 +9,7 @@ import {
   BarChart3,
   Building2,
   Users,
+  Folder,
   ClipboardList,
   Settings,
   Home,
@@ -62,20 +63,20 @@ export function Sidebar({ open }: SidebarProps) {
           {role === "organization" && (
             <>
               <SidebarItem
-                href="/dashboard/organization/branches"
+                href="/dashboard/organization/branches/"
                 icon={Building2}
                 label={t("sidebar.branches")}
                 active={pathname.includes("/branches")}
                 open={open}
               />
 
-              {/* <SidebarItem
-                href="/dashboard/organization/employees"
-                icon={Users}
-                label={t("sidebar.employees")}
-                active={pathname.includes("/employees")}
+              <SidebarItem
+                href="/dashboard/organization/documents/"
+                icon={Folder}
+                label={t("sidebar.documents")}
+                active={pathname.includes("/documents")}
                 open={open}
-              /> */}
+              />
             </>
           )}
 
@@ -88,7 +89,6 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/users")}
                 open={open}
               />
-              
             </>
           )}
 

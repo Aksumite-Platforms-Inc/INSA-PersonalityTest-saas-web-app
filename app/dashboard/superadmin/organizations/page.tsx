@@ -5,7 +5,6 @@ import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { OrganizationsTable } from "@/components/superadmin/organizations-table";
-import { ManualOrgModal } from "@/components/superadmin/ManualOrgModal";
 import { useRouter } from "next/navigation";
 
 import {
