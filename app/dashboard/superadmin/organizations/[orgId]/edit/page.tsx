@@ -26,7 +26,7 @@ export default function EditOrganizationPage() {
   const params = useParams();
   const { toast } = useToast();
 
-  const orgId = parseInt(params?.orgId, 10);
+  const orgId = parseInt(params?.orgId?.toString() || "0", 10);
 
   const [orgData, setOrgData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ export default function EditOrganizationPage() {
   const [sector, setSector] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     console.log("orgId:", orgId);
@@ -48,6 +49,7 @@ export default function EditOrganizationPage() {
         setSector(data.sector || "");
         setEmail(data.email || "");
         setAddress(data.address || "");
+        setStatus(data.status || "");
         console.log("data", data);
       } catch (err) {
         toast({
@@ -83,6 +85,7 @@ export default function EditOrganizationPage() {
         sector,
         email,
         address,
+        status,
       });
 
       toast({
@@ -138,12 +141,19 @@ export default function EditOrganizationPage() {
 
             <div className="space-y-2">
               <Label htmlFor="sector">Sector *</Label>
-              <Input
+              <select
                 id="sector"
                 value={sector}
                 onChange={(e) => setSector(e.target.value)}
                 required
-              />
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Select a sector</option>
+                <option value="finance">Finance</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="education">Education</option>
+                <option value="government">Government</option>
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -163,6 +173,21 @@ export default function EditOrganizationPage() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status *</Label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Select a status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
           </CardContent>
         </Card>

@@ -46,7 +46,15 @@ export function OrganizationEmployeesTable({
     const fetchEmployees = async () => {
       try {
         const members = await getAllOrgMembers(organizationId);
-        setEmployees(members);
+        const normalizedMembers = members.map((member) => ({
+          ...member,
+          name: member.name?.toLowerCase() || "",
+          email: member.email?.toLowerCase() || "",
+          department: member.department?.toLowerCase() || "",
+          position: member.position?.toLowerCase() || "",
+          status: member.status?.toLowerCase() || "",
+        }));
+        setEmployees(normalizedMembers);
       } catch (error) {
         console.error("Error fetching employees:", error);
       }

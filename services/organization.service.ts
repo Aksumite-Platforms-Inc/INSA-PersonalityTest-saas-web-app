@@ -37,7 +37,13 @@ export const createOrganization = async (data: {
 /** Update an organization */
 export const updateOrganization = async (
   id: number,
-  data: { name: string; sector: string; email?: string; address?: string }
+  data: {
+    name: string;
+    sector: string;
+    email?: string;
+    address?: string;
+    status: string;
+  }
 ): Promise<Organization> => {
   const response = await apiClient.put<ApiResponse<Organization>>(
     `/sys/organization/${id}`,
