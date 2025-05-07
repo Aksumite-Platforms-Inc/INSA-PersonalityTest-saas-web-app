@@ -39,11 +39,16 @@ export const getAllBranches = async (orgId: number): Promise<Branch[]> => {
 /**
  * Creates a new branch under the given organization
  * @param orgId - ID of the organization
- * @param name - Name of the new branch
+ * @param data - Data of the new branch
  */
 export const createBranch = async (
   orgId: number,
-  name: string
+  data: {
+    name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+  }
 ): Promise<Branch> => {
   const token = getAccessToken();
   if (!token) {
@@ -53,7 +58,7 @@ export const createBranch = async (
 
   const response = await apiClient.post<ApiResponse<Branch>>(
     `/organization/${orgId}/branches`,
-    { name }
+    data
   );
 
   if (!response.data.success) {

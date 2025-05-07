@@ -17,7 +17,6 @@ export default function BranchesPage() {
       console.error("Token data is missing or invalid.");
       return;
     }
-    console.log("Organization ID:", organizationId); // Log the organization ID
 
     if (!organizationId) {
       console.error("Organization ID is missing from the token.");

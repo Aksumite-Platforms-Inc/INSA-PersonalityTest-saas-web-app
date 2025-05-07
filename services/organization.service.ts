@@ -83,8 +83,6 @@ export const getOrganizationById = async (
     `/sys/organization/${id}`
   );
 
-  console.log("API Response for getOrganizationById:", response.data);
-
   if (!response.data?.success) {
     console.error("Fetch Org By ID Error:", response.data);
     throw new Error(response.data?.message || "Failed to fetch organization.");

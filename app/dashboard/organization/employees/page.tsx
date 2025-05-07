@@ -37,7 +37,7 @@ export default function BranchesPage() {
           Number(organizationId),
           Number(branchId)
         );
-        console.log("Organization response:", response);
+        // console.log("Organization response:", response);
         setBranch(response);
       } catch (error) {
         console.error("Error fetching organization:", error);

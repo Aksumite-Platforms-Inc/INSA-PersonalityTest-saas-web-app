@@ -56,7 +56,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
       try {
         const response = await getAllBranches(organizationId);
         // Assuming the response has a success property and data property
-        console.log("Branches response:", response);
+        // console.log("Branches response:", response);
         setBranches(response); // Adjust based on your API response structure
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -70,8 +70,6 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
     const fetchOrganization = async () => {
       try {
         const response = await getOrganizationById(organizationId);
-        console.log("Organization response:", response);
-        // Assuming the response has a success property and data property
         setOrganization(response); // Assuming response is a single organization object
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -181,7 +179,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
                   <TableCell className="font-medium">{branch.name}</TableCell>
                   <TableCell>{organization?.name || "N/A"}</TableCell>
                   <TableCell>{branch.address}</TableCell>
-                  <TableCell>{branch.phone}</TableCell>
+                  <TableCell>{branch.phone_number}</TableCell>
                   {/* <TableCell>{totalEmployees}</TableCell> */}
                   <TableCell>
                     {new Date(branch.created_at).toLocaleDateString()}

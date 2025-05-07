@@ -75,7 +75,7 @@ export default function BranchEditPage() {
         description: `Successfully updated ${name}`,
       });
 
-      router.push("/dashboard/superadmin/organizations");
+      router.push("/dashboard/organization/branches");
     } catch (err) {
       toast({
         title: "Update Failed",
@@ -111,8 +111,10 @@ export default function BranchEditPage() {
         <div>
           <label className="block font-medium">Branch Email</label>
           <Input
-            name="manager"
+            name="email"
+            type="email"
             value={branch?.email ?? ""}
+            placeholder="email@example.com"
             onChange={handleChange}
           />
         </div>
