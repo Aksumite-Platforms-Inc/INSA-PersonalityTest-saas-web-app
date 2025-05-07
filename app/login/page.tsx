@@ -20,6 +20,7 @@ import {
 
 import { loginUser } from "@/services/auth.service";
 import { decodeToken } from "@/utils/tokenUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const { toast } = useToast();
   const router = useRouter();
 
   const containerRef = useRef(null);
@@ -120,8 +122,17 @@ export default function LoginPage() {
       }[role];
 
       router.push(`/dashboard/${redirectPath}`);
+      toast({
+        title: "Success!",
+        description: "You have logged in successfully.",
+      });
     } catch (error: any) {
       setError(error.message || "Invalid credentials. Please try again.");
+      toast({
+        title: "Error!",
+        description: error.message || "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
 
       gsap.fromTo(
         formRef.current,
