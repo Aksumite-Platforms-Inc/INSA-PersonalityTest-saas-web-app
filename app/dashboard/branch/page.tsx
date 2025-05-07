@@ -106,7 +106,7 @@ export default function BranchDashboard() {
           <CardTitle>Employee Test Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <EmployeeList />
+          {/* <EmployeeList organizationId={} branchId={} /> */}
         </CardContent>
       </Card>
     </div>

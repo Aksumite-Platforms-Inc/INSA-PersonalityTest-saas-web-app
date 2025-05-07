@@ -1,57 +1,63 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { PageTitle } from "@/components/page-title"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { useTranslation } from "@/hooks/use-translation"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { PageTitle } from "@/components/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
+import { motion } from "framer-motion";
 
 export default function NewBranchPage() {
-  const { t } = useTranslation()
-  const router = useRouter()
-  const { toast } = useToast()
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [branchName, setBranchName] = useState("")
-  const [branchLocation, setBranchLocation] = useState("")
-  const [branchAddress, setBranchAddress] = useState("")
-  const [branchPhone, setBranchPhone] = useState("")
-  const [branchEmail, setBranchEmail] = useState("")
-  const [adminEmail, setAdminEmail] = useState("")
-  const [adminName, setAdminName] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [branchName, setBranchName] = useState("");
+  const [branchLocation, setBranchLocation] = useState("");
+  const [branchAddress, setBranchAddress] = useState("");
+  const [branchPhone, setBranchPhone] = useState("");
+  const [branchEmail, setBranchEmail] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!branchName || !branchLocation || !adminEmail) {
       toast({
         title: t("branches.missingFields"),
         description: t("branches.provideMandatoryFields"),
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
       toast({
         title: t("branches.branchCreated"),
         description: t("branches.branchAdminInvited"),
-      })
-      router.push("/dashboard/organization/branches")
-    }, 1500)
-  }
+      });
+      router.push("/dashboard/organization/branches");
+    }, 1500);
+  };
 
   return (
     <motion.div
@@ -60,18 +66,25 @@ export default function NewBranchPage() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <PageTitle title={t("branches.newBranch")} description={t("branches.newBranchDescription")} />
+      <PageTitle
+        title={t("branches.newBranch")}
+        description={t("branches.newBranchDescription")}
+      />
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{t("branches.branchDetails")}</CardTitle>
-              <CardDescription>{t("branches.branchDetailsDescription")}</CardDescription>
+              <CardDescription>
+                {t("branches.branchDetailsDescription")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="branch-name">{t("branches.branchName")} *</Label>
+                <Label htmlFor="branch-name">
+                  {t("branches.branchName")} *
+                </Label>
                 <Input
                   id="branch-name"
                   value={branchName}
@@ -82,7 +95,9 @@ export default function NewBranchPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="branch-location">{t("branches.location")} *</Label>
+                <Label htmlFor="branch-location">
+                  {t("branches.location")} *
+                </Label>
                 <Input
                   id="branch-location"
                   value={branchLocation}
@@ -131,11 +146,15 @@ export default function NewBranchPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("branches.branchAdmin")}</CardTitle>
-              <CardDescription>{t("branches.branchAdminDescription")}</CardDescription>
+              <CardDescription>
+                {t("branches.branchAdminDescription")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="admin-email">{t("branches.adminEmail")} *</Label>
+                <Label htmlFor="admin-email">
+                  {t("branches.adminEmail")} *
+                </Label>
                 <Input
                   id="admin-email"
                   type="email"
@@ -144,7 +163,9 @@ export default function NewBranchPage() {
                   placeholder={t("branches.adminEmailPlaceholder")}
                   required
                 />
-                <p className="text-sm text-muted-foreground">{t("branches.adminEmailHelp")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("branches.adminEmailHelp")}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -161,7 +182,11 @@ export default function NewBranchPage() {
         </div>
 
         <div className="mt-6 flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.push("/dashboard/organization/branches")}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/dashboard/organization/branches")}
+          >
             {t("common.cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
@@ -170,5 +195,5 @@ export default function NewBranchPage() {
         </div>
       </form>
     </motion.div>
-  )
+  );
 }

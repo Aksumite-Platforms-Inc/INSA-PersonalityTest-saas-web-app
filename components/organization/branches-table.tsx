@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import {
   Table,
   TableBody,
@@ -30,28 +30,72 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 import { deleteBranch, getAllBranches } from "@/services/branch.service"; // Import the service
+import { getOrganizationById } from "@/services/organization.service"; // Import the service
+import { getAllOrgMembers } from "@/services/user.service";
+import { set } from "react-hook-form";
+import toast from "react-hot-toast";
 
-export function BranchesTable() {
+export function BranchesTable({ organizationId }: { organizationId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [branches, setBranches] = useState<any[]>([]);
+  const [organization, setOrganization] = useState<any | null>(null);
+  const [totalEmployees, setTotalEmployees] = useState<any | null>(null);
+  const [error, setError] = useState("");
+  const { toast } = useToast();
+
   const router = useRouter();
 
   useEffect(() => {
     const fetchBranches = async () => {
-      const response = await getAllBranches();
-      if (response.success) {
-        setBranches(response.data || []);
+      try {
+        const response = await getAllBranches(organizationId);
+        // Assuming the response has a success property and data property
+        console.log("Branches response:", response);
+        setBranches(response); // Adjust based on your API response structure
+      } catch (error) {
+        console.error("Error fetching branches:", error);
       }
     };
-    fetchBranches();
-  }, []);
 
-  const filteredBranches = branches.filter(
-    (branch) =>
-      branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.manager.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+    fetchBranches();
+  }, [organizationId]);
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      try {
+        const response = await getOrganizationById(organizationId);
+        console.log("Organization response:", response);
+        // Assuming the response has a success property and data property
+        setOrganization(response); // Assuming response is a single organization object
+      } catch (error) {
+        console.error("Error fetching organization:", error);
+      }
+    };
+
+    fetchOrganization();
+  }, [organizationId]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const members = await getAllOrgMembers(organizationId);
+        setTotalEmployees(members.length); // Assuming members is an array of employees
+      } catch (error) {
+        setError((error as Error).message || "Failed to fetch employees.");
+        toast({
+          title: "Error!",
+          description: String(error),
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchEmployees();
+  }, [organizationId]);
+
+  const filteredBranches = branches.filter((branch) => branch && branch.name); // Ensure branch is not null or undefined
 
   const renderStatusBadge = (status: string) => {
     switch (status) {
@@ -81,12 +125,12 @@ export function BranchesTable() {
   const handleDelete = async (branchId: number) => {
     if (!confirm("Are you sure you want to delete this branch?")) return;
 
-    const { success, error } = await deleteBranch(branchId);
+    const { success } = await deleteBranch(branchId);
 
     if (success) {
       setBranches((prev) => prev.filter((b) => b.id !== branchId));
     } else {
-      alert("Failed to delete branch: " + error);
+      alert("Failed to delete branch: ");
     }
   };
 
@@ -109,10 +153,10 @@ export function BranchesTable() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Manager</TableHead>
-              <TableHead>Employees</TableHead>
-              <TableHead>Tests Completed</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Organization</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>PhoneNumber</TableHead>
+              <TableHead>TotalEmployees</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="w-[80px]"></TableHead>
             </TableRow>
@@ -131,10 +175,10 @@ export function BranchesTable() {
               filteredBranches.map((branch) => (
                 <TableRow key={branch.id}>
                   <TableCell className="font-medium">{branch.name}</TableCell>
-                  <TableCell>{branch.manager}</TableCell>
-                  <TableCell>{branch.employees}</TableCell>
-                  <TableCell>{branch.testsCompleted}</TableCell>
-                  <TableCell>{renderStatusBadge(branch.status)}</TableCell>
+                  <TableCell>{organization.name}</TableCell>
+                  <TableCell>{branch.address}</TableCell>
+                  <TableCell>{branch.phone}</TableCell>
+                  <TableCell>{totalEmployees}</TableCell>
                   <TableCell>
                     {new Date(branch.createdAt).toLocaleDateString()}
                   </TableCell>
@@ -151,7 +195,7 @@ export function BranchesTable() {
                         <DropdownMenuItem
                           onClick={() =>
                             router.push(
-                              `/dashboard/organization/branches/${branch.id}`,
+                              `/dashboard/organization/branches/${branch.id}`
                             )
                           }
                         >
@@ -161,27 +205,17 @@ export function BranchesTable() {
 
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push("/dashboard/organization/employees")
+                            router.push(
+                              `/dashboard/organization/employees?branchId=${branch.id}`
+                            )
                           }
                         >
                           <Users className="mr-2 h-4 w-4" />
                           <span>Manage Employees</span>
                         </DropdownMenuItem>
 
-                        {/* //to fetch employees of the branch */}
-                        {/* <DropdownMenuItem
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/organization/branches/${branch.id}/employees`
-                            )
-                          }
-                        >
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>Manage Employees</span>
-                        </DropdownMenuItem> */}
-
                         <DropdownMenuSeparator />
-                        {branch.status === "active" ? (
+                        {/* {branch.status === "active" ? (
                           <DropdownMenuItem className="text-red-600">
                             <Ban className="mr-2 h-4 w-4" />
                             <span>Deactivate</span>
@@ -191,7 +225,7 @@ export function BranchesTable() {
                             <Shield className="mr-2 h-4 w-4" />
                             <span>Activate</span>
                           </DropdownMenuItem>
-                        )}
+                        )} */}
                         <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => handleDelete(branch.id)}
