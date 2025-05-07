@@ -14,7 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { getBranchMembers } from "@/services/branch.service";
+import { getBranchById } from "@/services/branch.service";
+import { getOrganizationId } from "@/utils/tokenUtils";
 
 interface EmployeeListProps {
   organizationId: number;
@@ -29,14 +30,13 @@ export function EmployeeList({
 }: EmployeeListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [branch, setBranch] = useState<any | null>(null);
   interface User {
     id: number;
     name: string;
     status: string;
     email: string;
     created_at: string;
-
-    // phone_number: string;
   }
   const [employees, setEmployees] = useState<User[]>([]);
   const itemsPerPage = 5;
@@ -58,6 +58,24 @@ export function EmployeeList({
       fetchEmployees();
     }
   }, [organizationId, branchId]);
+
+  useEffect(() => {
+    const organizationId = getOrganizationId();
+    const fetchOrganization = async () => {
+      try {
+        const response = await getBranchById(
+          Number(organizationId),
+          Number(branchId)
+        );
+        console.log("Organization response:", response);
+        setBranch(response);
+      } catch (error) {
+        console.error("Error fetching organization:", error);
+      }
+    };
+
+    fetchOrganization();
+  });
 
   const filteredEmployees = employees.filter((employee) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())

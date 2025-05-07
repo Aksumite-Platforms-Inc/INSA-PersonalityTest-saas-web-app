@@ -31,7 +31,11 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { deleteBranch, getAllBranches } from "@/services/branch.service"; // Import the service
+import {
+  deleteBranch,
+  getAllBranches,
+  getBranchMembers,
+} from "@/services/branch.service"; // Import the service
 import { getOrganizationById } from "@/services/organization.service"; // Import the service
 import { getAllOrgMembers } from "@/services/user.service";
 import { set } from "react-hook-form";
@@ -77,23 +81,23 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
     fetchOrganization();
   }, [organizationId]);
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const members = await getAllOrgMembers(organizationId);
-        setTotalEmployees(members.length); // Assuming members is an array of employees
-      } catch (error) {
-        setError((error as Error).message || "Failed to fetch employees.");
-        toast({
-          title: "Error!",
-          description: String(error),
-          variant: "destructive",
-        });
-      }
-    };
+  // useEffect(() => {
+  //   const fetchEmployees = async () => {
+  //     try {
+  //       const members = await getBranchMembers(organizationId);
+  //       setTotalEmployees(members.length); // Assuming members is an array of employees
+  //     } catch (error) {
+  //       setError((error as Error).message || "Failed to fetch employees.");
+  //       toast({
+  //         title: "Error!",
+  //         description: String(error),
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
 
-    fetchEmployees();
-  }, [organizationId]);
+  //   fetchEmployees();
+  // }, [organizationId]);
 
   const filteredBranches = branches.filter((branch) => branch && branch.name); // Ensure branch is not null or undefined
 
@@ -156,7 +160,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
               <TableHead>Organization</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>PhoneNumber</TableHead>
-              <TableHead>TotalEmployees</TableHead>
+              {/* <TableHead>TotalEmployees</TableHead> */}
               <TableHead>Created</TableHead>
               <TableHead className="w-[80px]"></TableHead>
             </TableRow>
@@ -175,12 +179,12 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
               filteredBranches.map((branch) => (
                 <TableRow key={branch.id}>
                   <TableCell className="font-medium">{branch.name}</TableCell>
-                  <TableCell>{organization.name}</TableCell>
+                  <TableCell>{organization?.name || "N/A"}</TableCell>
                   <TableCell>{branch.address}</TableCell>
                   <TableCell>{branch.phone}</TableCell>
-                  <TableCell>{totalEmployees}</TableCell>
+                  {/* <TableCell>{totalEmployees}</TableCell> */}
                   <TableCell>
-                    {new Date(branch.createdAt).toLocaleDateString()}
+                    {new Date(branch.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
