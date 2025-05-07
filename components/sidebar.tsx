@@ -11,6 +11,7 @@ import {
   Users,
   Folder,
   ClipboardList,
+  BarChart,
   Settings,
   Home,
 } from "lucide-react";
@@ -57,6 +58,14 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/organizations")}
                 open={open}
               />
+
+              <SidebarItem
+                href="/dashboard/superadmin/results/pdfs"
+                icon={BarChart3}
+                label={t("sidebar.results")}
+                active={pathname.includes("/results")}
+                open={open}
+              />
             </>
           )}
 
@@ -101,13 +110,6 @@ export function Sidebar({ open }: SidebarProps) {
                 active={pathname.includes("/test")}
                 open={open}
               />
-              {/* <SidebarItem
-                href="/dashboard/employee/results"
-                icon={BarChart3}
-                label={t("sidebar.results")}
-                active={pathname.includes("/results")}
-                open={open}
-              /> */}
             </>
           )}
 
