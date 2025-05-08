@@ -1,15 +1,18 @@
 import apiClient from "./apiClient";
 import { getAccessToken } from "@/utils/tokenUtils";
-import { ApiResponse } from "@/types/api-response.type";
+import { handleApiError } from "@/utils/error.utils";
+
 import {
-  PersonalityTestScores,
+  ApiResponse,
   OEJTSRequest,
   EnneagramRequest,
   RIASECRequest,
   BigFiveRequest,
-  EnneagramAnswer,
+  MBTIResult,
+  BigFiveResult,
+  ScoreEntry,
+  PersonalityTestScores,
 } from "@/types/personality.type";
-import { handleApiError } from "@/utils/error.utils"; // Assuming you have a utility for error handling
 
 // ============================
 // Check if a test is taken
@@ -33,7 +36,7 @@ export const checkTestTaken = async (
 };
 
 // ============================
-// Get test results
+// Get all test results (aggregated)
 // ============================
 export const getResults = async (
   userId: string,
@@ -53,10 +56,10 @@ export const getResults = async (
 // ============================
 export const submitRIASECAnswers = async (
   answers: RIASECRequest["answers"],
-): Promise<ApiResponse<PersonalityTestScores>> => {
+): Promise<ApiResponse<ScoreEntry[]>> => {
   try {
-    const response = await apiClient.post<ApiResponse<PersonalityTestScores>>(
-      "/personalityTest/riasec/calculateScores",
+    const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
+      "/organization/personalityTest/riasec/calculateScores",
       { answers },
     );
     return response.data;
@@ -70,9 +73,9 @@ export const submitRIASECAnswers = async (
 // ============================
 export const submitBig5TestAnswers = async (
   payload: BigFiveRequest,
-): Promise<ApiResponse<PersonalityTestScores>> => {
+): Promise<ApiResponse<BigFiveResult>> => {
   try {
-    const response = await apiClient.post<ApiResponse<PersonalityTestScores>>(
+    const response = await apiClient.post<ApiResponse<BigFiveResult>>(
       "/organization/personalityTest/bigfive/calculateScores",
       payload,
     );
@@ -88,14 +91,14 @@ export const submitBig5TestAnswers = async (
 export const submitMBTIAnswers = async (
   aAnswers: OEJTSRequest["a_answers"],
   bAnswers: OEJTSRequest["b_answers"],
-): Promise<ApiResponse<PersonalityTestScores>> => {
+): Promise<ApiResponse<MBTIResult>> => {
   const payload: OEJTSRequest = {
     a_answers: aAnswers,
     b_answers: bAnswers,
   };
 
   try {
-    const response = await apiClient.post<ApiResponse<PersonalityTestScores>>(
+    const response = await apiClient.post<ApiResponse<MBTIResult>>(
       "/organization/personalityTest/oejts/calculateScores",
       payload,
     );
@@ -110,10 +113,10 @@ export const submitMBTIAnswers = async (
 // ============================
 export const submitEnneagramAnswers = async (
   payload: EnneagramRequest,
-): Promise<ApiResponse<PersonalityTestScores>> => {
+): Promise<ApiResponse<ScoreEntry[]>> => {
   try {
-    const response = await apiClient.post<ApiResponse<PersonalityTestScores>>(
-      "/personalityTest/ennegram/calculateScores",
+    const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
+      "/organization/personalityTest/ennegram/calculateScores",
       payload,
     );
     return response.data;

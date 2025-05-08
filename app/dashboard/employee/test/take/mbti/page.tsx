@@ -11,92 +11,54 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { mbtiTest } from "@/data/tests/mbti";
 import { submitMBTIAnswers } from "@/services/test.service";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-interface MBTIPages {
-  page1: { id: number; left: string; right: string }[];
-  page2: { id: number; trait: string; text: string }[];
-}
-
-const mbtiTestTyped: { pages: MBTIPages } = mbtiTest;
+import { useState } from "react";
 
 export default function MBTITestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [aAnswers, setAAnswers] = useState<Record<number, number>>({});
   const [bAnswers, setBAnswers] = useState<Record<number, number>>({});
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedA = localStorage.getItem("aAnswers");
-      const storedB = localStorage.getItem("bAnswers");
-
-      if (storedA) setAAnswers(JSON.parse(storedA));
-      if (storedB) setBAnswers(JSON.parse(storedB));
-    }
-  }, []);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
+  const questions = currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
 
-  const questions =
-    currentGroup === 0 ? mbtiTestTyped.pages.page1 : mbtiTestTyped.pages.page2;
+  const handleAnswer = (questionId: number, value: number) => {
+    if (currentGroup === 0) {
+      setAAnswers((prev) => ({ ...prev, [questionId]: value }));
+    } else {
+      setBAnswers((prev) => ({ ...prev, [questionId]: value }));
+    }
+  };
 
   const handleNextGroup = async () => {
     if (currentGroup === 0) {
       setCurrentGroup(1);
-    } else {
-      setIsSubmitting(true);
-      setError(null);
+      return;
+    }
 
-      try {
-        // Call the service function to calculate scores
-        const response = await submitMBTIAnswers(aAnswers, bAnswers);
+    setIsSubmitting(true);
+    setError(null);
 
-        if (response.success) {
-          const data = response.data;
-          console.log("Submission successful", data);
-          localStorage.removeItem("aAnswers");
-          localStorage.removeItem("bAnswers");
-          router.push("/dashboard/employee/test/result");
-        } else {
-          throw new Error(response.error || "Failed to submit MBTI test");
-        }
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setIsSubmitting(false);
+    try {
+      const response = await submitMBTIAnswers(aAnswers, bAnswers);
+      if (response.success) {
+        const encoded = encodeURIComponent(JSON.stringify(response.data));
+        router.push(`/dashboard/employee/test/result/mbti?data=${encoded}`);
+      } else {
+        throw new Error(response.message || "Submission failed.");
       }
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handlePreviousGroup = () => {
-    if (currentGroup > 0) setCurrentGroup(currentGroup - 1);
-  };
-
-  const handleAnswer = (questionId: number, value: number) => {
-    if (currentGroup === 0) {
-      const updated = { ...aAnswers, [questionId]: value };
-      setAAnswers(updated);
-      localStorage.setItem("aAnswers", JSON.stringify(updated));
-    } else {
-      const updated = { ...bAnswers, [questionId]: value };
-      setBAnswers(updated);
-      localStorage.setItem("bAnswers", JSON.stringify(updated));
-    }
-  };
+  const isAnswered = (id: number) =>
+    currentGroup === 0 ? aAnswers[id] !== undefined : bAnswers[id] !== undefined;
 
   return (
     <div className="container mx-auto py-6">
@@ -114,79 +76,60 @@ export default function MBTITestPage() {
           </div>
         </CardHeader>
 
-        {isSubmitting && (
-          <p className="text-blue-600 text-sm text-center mb-2">
-            Submitting your answers...
-          </p>
-        )}
-        {error && (
-          <p className="text-red-600 text-sm text-center mb-2">{error}</p>
-        )}
+        {error && <p className="text-red-600 text-center mb-2">{error}</p>}
 
         <CardContent>
-          <div className="text-center mb-4">
+          <div className="text-center mb-6">
             <p className="text-lg font-medium">Page {currentGroup + 1} of 2</p>
-            <div className="flex items-center justify-between">
-              <Progress
-                value={((currentGroup + 1) / 2) * 100}
-                className="h-2 rounded-lg bg-gray-500 flex-1"
-              />
-              <span className="ml-2 text-sm text-gray-500">
-                {Math.round(((currentGroup + 1) / 2) * 100)}% Complete
-              </span>
-            </div>
+            <Progress value={(currentGroup + 1) * 50} className="h-2 mt-2" />
           </div>
 
-          {questions.map((question) => (
+          {questions.map((q) => (
             <div
-              key={question.id}
-              className="mb-6 py-4 border rounded-lg shadow-sm"
+              key={q.id}
+              className={`mb-6 p-4 border rounded-lg shadow-sm ${
+                isAnswered(q.id) ? "border-blue-400" : ""
+              }`}
             >
               {currentGroup === 0 ? (
-                // Page 1 Layout
-                <div className="grid grid-cols-7 items-center w-full text-sm sm:text-lg">
-                  <span className="col-span-2 text-right font-medium">
-                    {"left" in question && question.left}
-                  </span>
-                  <div className="col-span-3 flex items-center justify-center sm:space-x-2">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <label key={value} className="flex flex-col items-center">
-                        <input
-                          type="radio"
-                          name={`question-${question.id}`}
-                          value={value}
-                          checked={aAnswers[question.id] === value}
-                          onChange={() => handleAnswer(question.id, value)}
-                          className="form-radio h-4 w-4 text-blue-600 scale-75 sm:scale-100"
-                        />
-                      </label>
+                <div className="grid grid-cols-7 items-center">
+                  {"left" in q && (
+                    <span className="col-span-2 text-right font-medium">{q.left}</span>
+                  )}
+                  <div className="col-span-3 flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((val) => (
+                      <button
+                        key={val}
+                        onClick={() => handleAnswer(q.id, val)}
+                        className={`w-6 h-6 rounded-full border ${
+                          aAnswers[q.id] === val ? "bg-blue-500" : "bg-gray-200"
+                        } hover:bg-blue-100 focus:outline-none focus:ring`}
+                      />
                     ))}
                   </div>
-                  <span className="col-span-2 font-medium pl-2">
-                    {"right" in question ? question.right : ""}
-                  </span>
+                  {"right" in q && (
+                    <span className="col-span-2 font-medium">{q.right}</span>
+                  )}
                 </div>
               ) : (
-                // Page 2 Layout
-                <div className="sm:text-lg text-sm flex flex-col md:flex-row items-center justify-around w-full space-y-2 sm:space-y-0 md:space-x-4 px-2">
-                  <span className="font-medium sm:w-1/2">
-                    {"text" in question ? question.text : ""}
-                  </span>
-                  <div className="flex items-center space-x-2 sm:space-x-4">
-                    <span className="text-sm font-medium">Disagree</span>
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <label key={value} className="flex flex-col items-center">
-                        <input
-                          type="radio"
-                          name={`question-${question.id}`}
-                          value={value}
-                          checked={bAnswers[question.id] === value}
-                          onChange={() => handleAnswer(question.id, value)}
-                          className="form-radio h-3.5 w-3.5 text-blue-600"
+                <div className="flex flex-col items-center gap-3">
+                  {"text" in q && (
+                    <p className="font-medium text-center max-w-lg">{q.text}</p>
+                  )}
+                  <div className="flex items-center justify-between w-full max-w-md mt-2">
+                    <span className="text-sm">Disagree</span>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => handleAnswer(q.id, val)}
+                          className={`w-6 h-6 rounded-full border ${
+                            bAnswers[q.id] === val ? "bg-blue-500" : "bg-gray-200"
+                          } hover:bg-blue-100 focus:outline-none focus:ring`}
                         />
-                      </label>
-                    ))}
-                    <span className="text-sm font-medium">Agree</span>
+                      ))}
+                    </div>
+                    <span className="text-sm">Agree</span>
                   </div>
                 </div>
               )}
@@ -195,15 +138,24 @@ export default function MBTITestPage() {
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button
-            onClick={handlePreviousGroup}
-            disabled={currentGroup === 0}
-            variant="outline"
-          >
+          <Button onClick={() => setCurrentGroup(0)} disabled={currentGroup === 0}>
             Previous
           </Button>
-          <Button onClick={handleNextGroup}>
-            {currentGroup === 0 ? "Next" : "Submit"}
+          <Button
+            onClick={handleNextGroup}
+            disabled={isSubmitting}
+            className="flex items-center"
+          >
+            {currentGroup === 0 ? (
+              "Next"
+            ) : isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                Submitting...
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </CardFooter>
       </Card>

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { getOrganizations } from "@/services/org.service";
-import { uploadFile } from "@/services/file.service";
+// import { getOrganizations } from "@/services/organization.service";
+// import { uploadFile } from "@/services/file.service";
 import toast from "react-hot-toast";
 
 const AnalysisUploadPage = () => {
@@ -13,16 +13,15 @@ const AnalysisUploadPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchOrgs = async () => {
-      const { data, success, error } = await getOrganizations();
-      if (success) {
-        setOrgs(data ?? []);
-      } else {
-        toast.error(`Failed to load organizations: ${error}`);
-      }
-    };
-
-    fetchOrgs();
+    // const fetchOrgs = async () => {
+    //   const { data, success, error } = await getOrganizations();
+    //   if (success) {
+    //     setOrgs(data ?? []);
+    //   } else {
+    //     toast.error(`Failed to load organizations: ${error}`);
+    //   }
+    // };
+    // fetchOrgs();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,17 +49,17 @@ const AnalysisUploadPage = () => {
     }
 
     setLoading(true);
-    const { success, error } = await uploadFile(file, selectedOrgId);
+    // const { success, error } = await uploadFile(file, selectedOrgId);
     setLoading(false);
 
-    if (success) {
-      toast.success("PDF uploaded and sent successfully!");
-      setFile(null);
-      setSelectedOrgId(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } else {
-      toast.error(`Upload failed: ${error}`);
-    }
+    // if (success) {
+    //   toast.success("PDF uploaded and sent successfully!");
+    //   setFile(null);
+    //   setSelectedOrgId(null);
+    //   if (fileInputRef.current) fileInputRef.current.value = "";
+    // } else {
+    //   toast.error(`Upload failed: ${error}`);
+    // }
   };
 
   return (

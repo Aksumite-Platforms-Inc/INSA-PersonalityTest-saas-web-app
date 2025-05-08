@@ -12,153 +12,156 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { submitEnneagramAnswers } from "@/services/test.service";
+import toast from "react-hot-toast";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const questionsPerGroup = 9;
   const questions = enneagramTest.questions;
+  const totalPages = Math.ceil(questions.length / questionsPerGroup);
 
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
-    (currentGroup + 1) * questionsPerGroup,
+    (currentGroup + 1) * questionsPerGroup
   );
 
   const handleAnswer = (questionId: number, value: string) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
+    setAnswers((prev) => ({
+      ...prev,
       [questionId]: value,
     }));
   };
 
-  const handleNextGroup = () => {
-    if ((currentGroup + 1) * questionsPerGroup < questions.length) {
-      setCurrentGroup(currentGroup + 1);
+  const handleNext = () => {
+    if (currentQuestions.some((q) => !answers[q.id])) {
+      toast.error("Please answer all questions before continuing.");
+      return;
     }
+    setCurrentGroup(currentGroup + 1);
   };
 
-  const handlePreviousGroup = () => {
-    if (currentGroup > 0) {
-      setCurrentGroup(currentGroup - 1);
-    }
+  const handlePrevious = () => {
+    if (currentGroup > 0) setCurrentGroup(currentGroup - 1);
   };
 
   const handleSubmit = async () => {
-    if (Object.keys(answers).length !== questions.length) {
-      setError("Please answer all questions before submitting.");
+    const unanswered = questions.filter((q) => !answers[q.id]);
+    if (unanswered.length) {
+      toast.error("Please answer all questions before submitting.");
       return;
     }
 
     const payload = {
       answers: questions.map((q) => ({
-        type: q.type, // Ensure `type` field exists in your data
+        type: q.type,
         answer: Number(answers[q.id]),
       })),
     };
 
-    setLoading(true);
-    setError(null);
-
     try {
-      await submitEnneagramAnswers(payload);
+      setLoading(true);
+      const response = await submitEnneagramAnswers(payload);
+      if (response.success) {
+        toast.success("Submission successful!");
+        const encoded = encodeURIComponent(JSON.stringify(response.data));
+        router.push(`/dashboard/employee/test/result/enneagram?data=${encoded}`);
+      } else {
+        toast.error("Submission failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      router.push("/dashboard/employee/test/result");
-    } catch (err) {
-      setLoading(false);
-      setError("An error occurred during submission. Please try again.");
     }
   };
 
+  const progress = Math.round(
+    (Object.keys(answers).length / questions.length) * 100
+  );
+
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 relative">
       <Card>
         <CardHeader>
-          <CardTitle>{enneagramTest.title}</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>{enneagramTest.title}</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/dashboard/employee/test/select")}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </CardHeader>
+
         <CardContent>
-          <div className="text-center mb-4">
+          <div className="text-center mb-6">
             <p className="text-lg font-medium">
-              Page {currentGroup + 1} of{" "}
-              {Math.ceil(questions.length / questionsPerGroup)}
+              Page {currentGroup + 1} of {totalPages}
             </p>
             <Progress
-              value={
-                ((currentGroup + 1) /
-                  Math.ceil(questions.length / questionsPerGroup)) *
-                100
-              }
-              className="h-3 rounded-lg bg-gray-500"
+              value={progress}
+              className="h-2 rounded-lg"
             />
           </div>
-          <p className="text-muted-foreground mb-4">
+
+          <p className="text-muted-foreground mb-6 text-center">
             {enneagramTest.description}
           </p>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+
           {currentQuestions.map((question) => (
             <div
               key={question.id}
-              className="mb-4 p-4 border rounded-lg shadow-sm"
+              className="mb-6 p-4 border rounded-lg shadow-sm space-y-3"
             >
-              <p className="font-medium mb-2">{question.text}</p>
-              <div className="flex flex-col space-y-2">
-                {question.options?.map((option) => (
-                  <label
+              <p className="font-medium text-center">{question.text}</p>
+              <div className="flex flex-wrap justify-center gap-4">
+                {question.options.map((option) => (
+                  <Button
                     key={option.value}
-                    className="flex items-center space-x-2"
+                    variant={
+                      answers[question.id] === option.value
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() => handleAnswer(question.id, option.value)}
+                    className="min-w-[100px]"
                   >
-                    <input
-                      type="radio"
-                      name={`question-${question.id}`}
-                      value={option.value}
-                      className="mr-2 w-6 h-6"
-                      onChange={() => handleAnswer(question.id, option.value)}
-                    />
                     {option.label}
-                  </label>
-                )) || (
-                  <p className="text-sm text-muted-foreground">
-                    No options available
-                  </p>
-                )}
+                  </Button>
+                ))}
               </div>
             </div>
           ))}
         </CardContent>
+
         <CardFooter className="flex justify-between">
-          <Button onClick={handlePreviousGroup} disabled={currentGroup === 0}>
+          <Button onClick={handlePrevious} disabled={currentGroup === 0}>
             Previous
           </Button>
 
-          {(currentGroup + 1) * questionsPerGroup < questions.length ? (
-            <Button
-              onClick={handleNextGroup}
-              disabled={currentQuestions.some((q) => !answers[q.id])}
-            >
-              Next
-            </Button>
+          {currentGroup < totalPages - 1 ? (
+            <Button onClick={handleNext}>Next</Button>
           ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={currentQuestions.some((q) => !answers[q.id]) || loading}
-            >
-              {loading ? "Submitting..." : "Submit"}
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
           )}
         </CardFooter>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4"
-          onClick={() => router.push("/dashboard/employee/test/select")}
-        >
-          <X className="h-5 w-5" />
-        </Button>
       </Card>
     </div>
   );
