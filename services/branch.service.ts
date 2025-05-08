@@ -141,13 +141,9 @@ export const updateBranch = async (
 
 /**
  * Fetches details of a specific branch
- * @param orgId - Organization ID
  * @param branchId - Branch ID
  */
-export const getBranchById = async (
-  orgId: number,
-  branchId: number
-): Promise<Branch> => {
+export const getBranchById = async (branchId: number): Promise<Branch> => {
   const token = getAccessToken();
   if (!token) {
     console.error("Authorization token is missing. Please log in again.");
@@ -155,7 +151,7 @@ export const getBranchById = async (
   }
 
   const response = await apiClient.get<ApiResponse<Branch>>(
-    `/organization/${orgId}/branches/${branchId}`
+    `/organization/branches/${branchId}`
   );
 
   if (!response.data.success) {

@@ -63,11 +63,7 @@ export function EmployeeList({
     const organizationId = getOrganizationId();
     const fetchOrganization = async () => {
       try {
-        const response = await getBranchById(
-          Number(organizationId),
-          Number(branchId)
-        );
-        console.log("Organization response:", response);
+        const response = await getBranchById(Number(branchId));
         setBranch(response);
       } catch (error) {
         console.error("Error fetching organization:", error);

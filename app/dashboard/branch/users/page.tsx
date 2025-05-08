@@ -55,18 +55,13 @@ export default function UsersPage() {
     setBranchId(Number(branchId));
     setOrgId(organizationId);
     console.log("Org ID:", organizationId);
-    console.log("Branch ID:", branch);
+    console.log("Branch ID:", branchId);
 
     if (!organizationId) {
       console.error("Token data is missing or invalid.");
       return;
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const branchId = getBranchId();
-    console.log("Branch ID for the logged-in branch admin:", branchId);
-  }, []);
 
   function t(arg0: string): import("react").ReactNode {
     throw new Error("Function not implemented.");
@@ -97,18 +92,6 @@ export default function UsersPage() {
             <PlusCircle className="mr-2 h-4 w-4" />
             {translate("users.addEmployee")}
           </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={translate("users.search")}
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
       </div>
 
