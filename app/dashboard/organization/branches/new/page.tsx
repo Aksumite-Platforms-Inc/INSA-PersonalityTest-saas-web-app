@@ -1,174 +1,188 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { PageTitle } from "@/components/page-title"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { useTranslation } from "@/hooks/use-translation"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { PageTitle } from "@/components/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { createBranch, assignBranchAdmin } from "@/services/branch.service";
+import { getOrganizationId } from "@/utils/tokenUtils";
 
 export default function NewBranchPage() {
-  const { t } = useTranslation()
-  const router = useRouter()
-  const { toast } = useToast()
+  const router = useRouter();
+  const { toast } = useToast();
+  const organizationId = getOrganizationId(); // Get the organization ID from the token
+  const [name, setBranchName] = useState("");
+  // const [branchLocation, setBranchLocation] = useState("");
+  const [address, setBranchAddress] = useState("");
+  const [phone_number, setBranchPhone] = useState("");
+  const [email, setBranchEmail] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [branchName, setBranchName] = useState("")
-  const [branchLocation, setBranchLocation] = useState("")
-  const [branchAddress, setBranchAddress] = useState("")
-  const [branchPhone, setBranchPhone] = useState("")
-  const [branchEmail, setBranchEmail] = useState("")
-  const [adminEmail, setAdminEmail] = useState("")
-  const [adminName, setAdminName] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!branchName || !branchLocation || !adminEmail) {
+    if (!name || !address || !phone_number || !email) {
       toast({
-        title: t("branches.missingFields"),
-        description: t("branches.provideMandatoryFields"),
+        title: "Error",
+        description: "Please fill in all required fields.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const data = {
+        name,
+        email,
+        phone_number,
+        address,
+      };
+
+      console.log("Payload being sent:", data);
+
+      // Call the API to create the branch
+      const branch = await createBranch(Number(organizationId), data);
+
       toast({
-        title: t("branches.branchCreated"),
-        description: t("branches.branchAdminInvited"),
-      })
-      router.push("/dashboard/organization/branches")
-    }, 1500)
-  }
+        title: "Branch created",
+        description: `${branch.name} has been created successfully.`,
+      });
+
+      // // Call the API to assign the administrator
+      // await assignBranchAdmin(1, branch.id, adminEmail); // Replace `1` with the actual organization ID
+
+      // toast({
+      //   title: "Administrator assigned",
+      //   description: `Admin ${adminName} has been assigned successfully.`,
+      // });
+
+      router.push("/dashboard/organization/branches");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageTitle title={t("branches.newBranch")} description={t("branches.newBranchDescription")} />
+    <div className="space-y-6">
+      <PageTitle
+        title="Add New Branch"
+        description="Create a new branch in the organization"
+      />
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>{t("branches.branchDetails")}</CardTitle>
-              <CardDescription>{t("branches.branchDetailsDescription")}</CardDescription>
+              <CardTitle>Branch Details</CardTitle>
+              <CardDescription>
+                Basic information about the branch
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="branch-name">{t("branches.branchName")} *</Label>
+                <Label htmlFor="branch-name">Branch Name *</Label>
                 <Input
                   id="branch-name"
-                  value={branchName}
+                  value={name}
                   onChange={(e) => setBranchName(e.target.value)}
-                  placeholder={t("branches.branchNamePlaceholder")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="branch-location">{t("branches.location")} *</Label>
-                <Input
-                  id="branch-location"
-                  value={branchLocation}
-                  onChange={(e) => setBranchLocation(e.target.value)}
-                  placeholder={t("branches.locationPlaceholder")}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="branch-address">{t("branches.address")}</Label>
+                <Label htmlFor="branch-address">Address *</Label>
                 <Textarea
                   id="branch-address"
-                  value={branchAddress}
+                  value={address}
                   onChange={(e) => setBranchAddress(e.target.value)}
-                  placeholder={t("branches.addressPlaceholder")}
-                  rows={3}
                 />
               </div>
-
-              <div className="grid gap-4 grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="branch-phone">{t("branches.phone")}</Label>
-                  <Input
-                    id="branch-phone"
-                    value={branchPhone}
-                    onChange={(e) => setBranchPhone(e.target.value)}
-                    placeholder={t("branches.phonePlaceholder")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="branch-email">{t("branches.email")}</Label>
-                  <Input
-                    id="branch-email"
-                    type="email"
-                    value={branchEmail}
-                    onChange={(e) => setBranchEmail(e.target.value)}
-                    placeholder={t("branches.emailPlaceholder")}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="branch-phone">Phone *</Label>
+                <Input
+                  id="branch-phone"
+                  value={phone_number}
+                  onChange={(e) => setBranchPhone(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="branch-email">Email *</Label>
+                <Input
+                  id="branch-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setBranchEmail(e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>{t("branches.branchAdmin")}</CardTitle>
-              <CardDescription>{t("branches.branchAdminDescription")}</CardDescription>
+              <CardTitle>Administrator Account</CardTitle>
+              <CardDescription>
+                Assign an admin account for this branch
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="admin-email">{t("branches.adminEmail")} *</Label>
+                <Label htmlFor="admin-name">Admin Name</Label>
+                <Input
+                  id="admin-name"
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-email">Admin Email *</Label>
                 <Input
                   id="admin-email"
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder={t("branches.adminEmailPlaceholder")}
                   required
-                />
-                <p className="text-sm text-muted-foreground">{t("branches.adminEmailHelp")}</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="admin-name">{t("branches.adminName")}</Label>
-                <Input
-                  id="admin-name"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  placeholder={t("branches.adminNamePlaceholder")}
                 />
               </div>
             </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Branch"}
+              </Button>
+            </CardFooter>
           </Card>
         </div>
-
-        <div className="mt-6 flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.push("/dashboard/organization/branches")}>
-            {t("common.cancel")}
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t("common.creating") : t("common.create")}
-          </Button>
-        </div>
       </form>
-    </motion.div>
-  )
+    </div>
+  );
 }

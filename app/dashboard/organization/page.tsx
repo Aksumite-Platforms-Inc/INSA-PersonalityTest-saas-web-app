@@ -6,6 +6,7 @@ import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart";
 import { RecentEmployeeActivity } from "@/components/organization/recent-employee-activity";
+import { DocumentNotifications } from "@/components/organization/document-notifications";
 
 export default function OrganizationDashboard() {
   const [stats, setStats] = useState({
@@ -100,14 +101,19 @@ export default function OrganizationDashboard() {
       </Card>
 
       {/* Recent Employee Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Employee Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RecentEmployeeActivity />
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="col-span-full">
+          <DocumentNotifications />
+        </div>
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Recent Employee Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RecentEmployeeActivity />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

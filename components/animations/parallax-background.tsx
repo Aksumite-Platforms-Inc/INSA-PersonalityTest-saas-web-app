@@ -1,54 +1,30 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useRef } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { cn } from "@/lib/utils"
-
-// Register ScrollTrigger plugin
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 interface ParallaxBackgroundProps {
-  children: React.ReactNode
-  className?: string
-  speed?: number
+  children: React.ReactNode;
+  className?: string;
 }
 
-export function ParallaxBackground({ children, className, speed = 0.2 }: ParallaxBackgroundProps) {
-  const backgroundRef = useRef<HTMLDivElement>(null)
+export function ParallaxBackground({
+  children,
+  className,
+}: ParallaxBackgroundProps) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
 
-  useEffect(() => {
-    const element = backgroundRef.current
-    if (!element || typeof window === "undefined") return
-
-    // Create parallax effect
-    gsap.to(element, {
-      yPercent: speed * 100,
-      ease: "none",
-      scrollTrigger: {
-        trigger: element.parentElement,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      },
-    })
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars.trigger === element.parentElement) {
-          trigger.kill()
-        }
-      })
-    }
-  }, [speed])
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <div ref={backgroundRef} className={cn(className)}>
-      {children}
+    <div ref={ref} className={className}>
+      <motion.div style={{ y }}>{children}</motion.div>
     </div>
-  )
+  );
 }

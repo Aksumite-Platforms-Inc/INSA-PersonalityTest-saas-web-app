@@ -1,24 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { cn } from "@/lib/utils"
-
-// Register ScrollTrigger plugin only on the client side
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
+import { useEffect, useState, useRef } from "react";
+import { useInView } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface CounterProps {
-  end: number
-  start?: number
-  duration?: number
-  prefix?: string
-  suffix?: string
-  decimals?: number
-  className?: string
-  triggerOnce?: boolean
+  end: number;
+  start?: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  className?: string;
+  triggerOnce?: boolean;
 }
 
 export function Counter({
@@ -31,57 +25,38 @@ export function Counter({
   className,
   triggerOnce = true,
 }: CounterProps) {
-  const counterRef = useRef<HTMLSpanElement>(null)
-  const [value, setValue] = useState(start)
-  const hasAnimated = useRef(false)
-  const tweenRef = useRef<gsap.core.Tween | null>(null)
+  const [value, setValue] = useState(start);
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(counterRef, { once: triggerOnce, amount: 0.5 });
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    const counter = counterRef.current
-    if (!counter || typeof window === "undefined") return
+    if (!isInView || (hasAnimated.current && triggerOnce)) return;
 
-    // Create a proxy object for GSAP to animate
-    const obj = { value: start }
+    hasAnimated.current = true;
 
-    const updateCounter = () => {
-      if (hasAnimated.current && triggerOnce) return
+    let startTime: number;
+    let animationFrame: number;
 
-      hasAnimated.current = true
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
 
-      // Kill any existing animation
-      if (tweenRef.current) {
-        tweenRef.current.kill()
+      setValue(start + Math.floor(progress * (end - start)));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(step);
       }
+    };
 
-      // Create new tween
-      tweenRef.current = gsap.to(obj, {
-        value: end,
-        duration,
-        ease: "power2.out",
-        onUpdate: () => {
-          setValue(obj.value)
-        },
-      })
-    }
-
-    // Create ScrollTrigger
-    const trigger = ScrollTrigger.create({
-      trigger: counter,
-      start: "top 80%",
-      onEnter: updateCounter,
-      once: triggerOnce,
-    })
+    animationFrame = requestAnimationFrame(step);
 
     return () => {
-      // Clean up
-      if (tweenRef.current) {
-        tweenRef.current.kill()
-      }
-      trigger.kill()
-    }
-  }, [end, start, duration, triggerOnce])
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [isInView, end, start, duration, triggerOnce]);
 
-  const formattedValue = value.toFixed(decimals)
+  const formattedValue = value.toFixed(decimals);
 
   return (
     <span ref={counterRef} className={cn(className)}>
@@ -89,5 +64,5 @@ export function Counter({
       {formattedValue}
       {suffix}
     </span>
-  )
+  );
 }

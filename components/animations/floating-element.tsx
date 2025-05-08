@@ -1,53 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useRef } from "react"
-import gsap from "gsap"
-import { cn } from "@/lib/utils"
+import { motion } from "framer-motion";
 
 interface FloatingElementProps {
-  children: React.ReactNode
-  className?: string
-  duration?: number
-  distance?: number
-  delay?: number
+  children: React.ReactNode;
+  duration?: number;
+  distance?: number;
+  delay?: number;
 }
 
-export function FloatingElement({ children, className, duration = 3, distance = 15, delay = 0 }: FloatingElementProps) {
-  const elementRef = useRef<HTMLDivElement>(null)
-  const timelineRef = useRef<gsap.core.Timeline | null>(null)
-
-  useEffect(() => {
-    const element = elementRef.current
-    if (!element || typeof window === "undefined") return
-
-    // Create floating animation
-    const tl = gsap.timeline({
-      repeat: -1,
-      yoyo: true,
-      defaults: { ease: "sine.inOut" },
-    })
-
-    tl.to(element, {
-      y: `-=${distance}`,
-      duration,
-      delay,
-    })
-
-    // Store timeline for cleanup
-    timelineRef.current = tl
-
-    return () => {
-      if (timelineRef.current) {
-        timelineRef.current.kill()
-      }
-    }
-  }, [distance, duration, delay])
-
+export function FloatingElement({
+  children,
+  duration = 3,
+  distance = 15,
+  delay = 0,
+}: FloatingElementProps) {
   return (
-    <div ref={elementRef} className={cn(className)}>
+    <motion.div
+      animate={{
+        y: [0, -distance, 0],
+      }}
+      transition={{
+        duration,
+        repeat: Number.POSITIVE_INFINITY,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay,
+      }}
+    >
       {children}
-    </div>
-  )
+    </motion.div>
+  );
 }

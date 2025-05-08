@@ -8,6 +8,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getOrganizationId } from "@/utils/tokenUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface BranchData {
   id: number;
@@ -19,24 +21,25 @@ interface BranchData {
 export default function BranchEditPage() {
   const router = useRouter();
   const { branchId } = useParams();
-
-  const [branch, setBranch] = useState<BranchData | null>(null);
+  const organizationId = getOrganizationId();
+  const [branch, setBranch] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!branchId) return;
+    console.log("branchId:", branchId);
 
     const fetchBranch = async () => {
       setLoading(true);
       try {
-        const res = await getBranchById(Number(branchId));
-        if (res.success && res.data) {
-          setBranch(res.data);
-        } else {
-          setError(res.error || "Failed to load branch details.");
-        }
+        const res = await getBranchById(
+          Number(branchId),
+          Number(organizationId)
+        );
+        setBranch(res);
       } catch (err) {
         setError("An error occurred while fetching branch details.");
       } finally {
@@ -55,25 +58,30 @@ export default function BranchEditPage() {
 
   const handleSave = async () => {
     if (!branch) return;
-
+    console.log;
     setIsSaving(true);
     try {
-      // Fill in missing properties with default values
-      const branchToUpdate: BranchData = {
-        id: branch.id,
-        name: branch.name,
-        manager: branch.manager,
-        status: branch.status ?? "inactive",
-      };
+      const { id, name, email, phone_number, address } = branch;
+      await updateBranch(Number(organizationId), Number(branchId), {
+        id,
+        name,
+        email,
+        phone_number,
+        address,
+      });
 
-      const res = await updateBranch(branch.id, branchToUpdate);
-      if (res.success) {
-        router.back();
-      } else {
-        setError(res.error || "Failed to save changes.");
-      }
+      toast({
+        title: "Organization Updated",
+        description: `Successfully updated ${name}`,
+      });
+
+      router.push("/dashboard/organization/branches");
     } catch (err) {
-      setError("Failed to save changes.");
+      toast({
+        title: "Update Failed",
+        description: "Something went wrong while updating.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -101,18 +109,32 @@ export default function BranchEditPage() {
           />
         </div>
         <div>
-          <label className="block font-medium">Manager</label>
+          <label className="block font-medium">Branch Email</label>
           <Input
-            name="manager"
-            value={branch?.manager ?? ""}
+            name="email"
+            type="email"
+            value={branch?.email ?? ""}
+            placeholder="email@example.com"
             onChange={handleChange}
           />
         </div>
         <div>
-          <label className="block font-medium">Status</label>
+          <label className="block font-medium">Phone Number</label>
           <Input
-            name="status"
-            value={branch?.status ?? ""}
+            name="phone_number"
+            type="tel"
+            placeholder="+1234567890"
+            value={branch?.phone_number ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label className="block font-medium">Address</label>
+          <Input
+            name="address"
+            type="text"
+            placeholder="123 Main St, City, Country"
+            value={branch?.address ?? ""}
             onChange={handleChange}
           />
         </div>

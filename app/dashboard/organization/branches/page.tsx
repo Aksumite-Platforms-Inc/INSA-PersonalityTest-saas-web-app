@@ -4,9 +4,31 @@ import { BranchesTable } from "@/components/organization/branches-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getOrganizationId } from "@/utils/tokenUtils";
+import { useState, useEffect } from "react";
 
 export default function BranchesPage() {
   const router = useRouter();
+  const [orgId, setOrgId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const organizationId = getOrganizationId(); // Assuming this function retrieves the token data
+    if (!organizationId) {
+      console.error("Token data is missing or invalid.");
+      return;
+    }
+
+    if (!organizationId) {
+      console.error("Organization ID is missing from the token.");
+      return;
+    }
+
+    setOrgId(organizationId);
+  }, []);
+
+  if (!orgId) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -23,7 +45,7 @@ export default function BranchesPage() {
         </Button>
       </div>
 
-      <BranchesTable />
+      <BranchesTable organizationId={orgId} />
     </div>
   );
 }

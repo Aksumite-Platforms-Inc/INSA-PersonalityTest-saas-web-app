@@ -7,8 +7,12 @@ import { ApiResponse } from "@/types/api-response.type";
 export interface Branch {
   id: number;
   name: string;
+  email: string;
+  phone_number: string;
+  address: string;
   org_id: number;
   created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -35,11 +39,16 @@ export const getAllBranches = async (orgId: number): Promise<Branch[]> => {
 /**
  * Creates a new branch under the given organization
  * @param orgId - ID of the organization
- * @param name - Name of the new branch
+ * @param data - Data of the new branch
  */
 export const createBranch = async (
   orgId: number,
-  name: string
+  data: {
+    name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+  }
 ): Promise<Branch> => {
   const token = getAccessToken();
   if (!token) {
@@ -49,7 +58,7 @@ export const createBranch = async (
 
   const response = await apiClient.post<ApiResponse<Branch>>(
     `/organization/${orgId}/branches`,
-    { name }
+    data
   );
 
   if (!response.data.success) {
@@ -60,13 +69,57 @@ export const createBranch = async (
 };
 
 /**
- * Fetches details of a specific branch
+ * Get all branch members for a specific branch
  * @param orgId - Organization ID
  * @param branchId - Branch ID
  */
-export const getBranchById = async (
+// export const listOrganizations = async (): Promise<Organization[]> => {
+//   const response = await apiClient.get<Organization[]>("/sys/organization");
+
+//   // Just return directly if it's already an array
+//   if (!Array.isArray(response.data)) {
+//     console.error("Unexpected response format:", response.data);
+//     throw new Error("Failed to fetch organizations.");
+//   }
+
+//   return response.data;
+// };
+
+export const getBranchMembers = async (
   orgId: number,
   branchId: number
+): Promise<Branch[]> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.get<ApiResponse<Branch[]>>(
+    `/organization/${orgId}/branchs/${branchId}/members`
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to fetch members.");
+  }
+
+  return response.data.data;
+};
+
+/**
+ * Updates the details of a specific branch
+ * @param orgId - Organization ID
+ * @param branchId - Branch ID
+ * @param data - Updated branch data
+ */
+export const updateBranch = async (
+  orgId: number,
+  branchId: number,
+  data: {
+    id: number;
+    name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+    // created_at: string;
+  }
 ): Promise<Branch> => {
   const token = getAccessToken();
   if (!token) {
@@ -74,8 +127,31 @@ export const getBranchById = async (
     throw new Error("Authorization token is missing.");
   }
 
+  const response = await apiClient.put<ApiResponse<Branch>>(
+    `/organization/${orgId}/branches/${branchId}`,
+    data
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to update branch.");
+  }
+
+  return response.data.data;
+};
+
+/**
+ * Fetches details of a specific branch
+ * @param branchId - Branch ID
+ */
+export const getBranchById = async (branchId: number): Promise<Branch> => {
+  const token = getAccessToken();
+  if (!token) {
+    console.error("Authorization token is missing. Please log in again.");
+    throw new Error("Authorization token is missing.");
+  }
+
   const response = await apiClient.get<ApiResponse<Branch>>(
-    `/organization/${orgId}/branches/${branchId}`
+    `/organization/branches/${branchId}`
   );
 
   if (!response.data.success) {

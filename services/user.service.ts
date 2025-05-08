@@ -19,6 +19,27 @@ export interface User {
 }
 
 /**
+ * Fetches the current user's information
+ * @returns User object containing user details
+ */
+export const fetchUserInfo = async (
+  org_id: number,
+  user_id: number
+): Promise<User> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.get<ApiResponse<User>>(
+    `/organization/${org_id}/members/${user_id}`
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to fetch user info.");
+  }
+
+  return response.data.data;
+};
+/**
  * Fetches all members of an organization
  * @param orgId - ID of the organization
  */
@@ -81,4 +102,55 @@ export const deleteOrgMember = async (
   }
 
   return { success: true, message: response.data.message };
+};
+
+export const updateUser = async (
+  userId: number,
+  org_id: number,
+  data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    position?: string;
+    department?: string;
+    status?: string;
+  }
+): Promise<User> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.put<ApiResponse<User>>(
+    `/organization/members/${userId}/update`,
+    data
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to update user.");
+  }
+
+  return response.data.data;
+};
+
+export const bulkAddUsers = async (
+  data: {
+    name: string;
+    email: string;
+    phone_number: string;
+    position: string;
+    department: string;
+  }[]
+): Promise<User[]> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.post<ApiResponse<User[]>>(
+    `/organization/addbulkmembers`,
+    { users: data } // Adjusted to match the expected API structure
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to bulk add users.");
+  }
+
+  return response.data.data;
 };

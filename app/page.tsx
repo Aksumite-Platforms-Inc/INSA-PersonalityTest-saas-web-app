@@ -1,9 +1,6 @@
 "use client";
 
-import type React from "react";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent} from "@/components/ui/card";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,211 +12,81 @@ import {
   CheckCircle,
   Shield,
   Users,
+  FileText,
+  ClipboardCheck,
+  Award,
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ExamProcessAnimation } from "@/components/animations/exam-process-animation";
+import { motion } from "framer-motion";
 import { AnimatedText } from "@/components/animations/animated-text";
 import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
+import { StatsSection } from "@/components/stats-section";
 
-export default function LoginPage() {
+export default function LandingPage() {
   // Refs for animation targets
   const headerRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
   const benefitsRef = useRef<HTMLElement>(null);
   const testimonialsRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
 
-  // Initialize animations
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 },
+    },
+  };
 
-    // Header animation
-    if (headerRef.current) {
-      gsap.from(headerRef.current, {
-        y: -100,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-      });
-    }
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
 
-    // Hero section animations
-    if (heroRef.current) {
-      const heroTl = gsap.timeline();
-      const h1Element = heroRef.current.querySelector("h1");
-      const pElement = heroRef.current.querySelector("p");
-      const aElements = heroRef.current.querySelectorAll("a");
-      const relativeElement = heroRef.current.querySelector(".relative");
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
 
-      if (h1Element) {
-        heroTl.from(h1Element, {
-          y: 50,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
+  const benefitVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.5 },
+    },
+  };
 
-      if (pElement) {
-        heroTl.from(
-          pElement,
-          {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-          },
-          "-=0.4"
-        );
-      }
-
-      if (aElements.length) {
-        heroTl.from(
-          aElements,
-          {
-            y: 20,
-            opacity: 0,
-            stagger: 0.2,
-            duration: 0.6,
-            ease: "power3.out",
-          },
-          "-=0.4"
-        );
-      }
-
-      if (relativeElement) {
-        heroTl.from(
-          relativeElement,
-          {
-            scale: 0.8,
-            opacity: 0,
-            duration: 1,
-            ease: "elastic.out(1, 0.5)",
-          },
-          "-=0.6"
-        );
-      }
-    }
-
-    // Features section animations
-    if (featuresRef.current) {
-      const h2Element = featuresRef.current.querySelector("h2");
-      const cardElements = featuresRef.current.querySelectorAll(".card");
-
-      if (h2Element) {
-        gsap.from(h2Element, {
-          scrollTrigger: {
-            trigger: featuresRef.current,
-            start: "top 80%",
-          },
-          y: 50,
-          opacity: 0,
-          duration: 0.8,
-        });
-      }
-
-      if (cardElements.length) {
-        gsap.from(cardElements, {
-          scrollTrigger: {
-            trigger: featuresRef.current,
-            start: "top 70%",
-          },
-          y: 50,
-          opacity: 0,
-          stagger: 0.2,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-    }
-
-    // Benefits section animations
-    if (benefitsRef.current) {
-      const h2Element = benefitsRef.current.querySelector("h2");
-      const benefitItems =
-        benefitsRef.current.querySelectorAll(".benefit-item");
-
-      if (h2Element) {
-        gsap.from(h2Element, {
-          scrollTrigger: {
-            trigger: benefitsRef.current,
-            start: "top 80%",
-          },
-          y: 50,
-          opacity: 0,
-          duration: 0.8,
-        });
-      }
-
-      if (benefitItems.length) {
-        gsap.from(benefitItems, {
-          scrollTrigger: {
-            trigger: benefitsRef.current,
-            start: "top 70%",
-          },
-          x: (index) => (index % 2 === 0 ? -50 : 50),
-          opacity: 0,
-          stagger: 0.15,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-    }
-
-    // Testimonials section animations
-    if (testimonialsRef.current) {
-      const testimonialCards =
-        testimonialsRef.current.querySelectorAll(".testimonial-card");
-
-      if (testimonialCards.length) {
-        gsap.from(testimonialCards, {
-          scrollTrigger: {
-            trigger: testimonialsRef.current,
-            start: "top 70%",
-          },
-          y: 80,
-          opacity: 0,
-          stagger: 0.2,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-    }
-
-    // CTA section animations
-    if (ctaRef.current) {
-      const ctaChildren = ctaRef.current.children;
-
-      if (ctaChildren.length) {
-        gsap.from(ctaChildren, {
-          scrollTrigger: {
-            trigger: ctaRef.current,
-            start: "top 80%",
-          },
-          y: 30,
-          opacity: 0,
-          stagger: 0.2,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-    }
-
-    ScrollTrigger.refresh();
-    // Cleanup function
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
+  const benefitVariantsRight = {
+    hidden: { opacity: 0, x: 30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.5 },
+    },
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navigation */}
-      <header
+      <motion.header
         ref={headerRef}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8 }}
         className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="container flex h-16 items-center justify-between">
@@ -246,6 +113,12 @@ export default function LoginPage() {
             >
               Testimonials
             </Link>
+            <Link
+              href="#pricing"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
+              Pricing
+            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link
@@ -259,7 +132,7 @@ export default function LoginPage() {
             </Button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Hero Section */}
       <section
@@ -291,21 +164,32 @@ export default function LoginPage() {
 
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="flex flex-col justify-center space-y-4"
+            >
+              <motion.div variants={fadeIn} className="space-y-2">
                 <AnimatedText
                   text="Unlock Your Organization's Potential"
                   tag="h1"
                   className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none"
                   animation="slideUp"
                 />
-                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                <motion.p
+                  variants={fadeIn}
+                  className="max-w-[600px] text-muted-foreground md:text-xl"
+                >
                   Discover the power of personality insights with INSA's
                   comprehensive testing platform. Enhance team dynamics, improve
                   hiring decisions, and boost organizational performance.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                </motion.p>
+              </motion.div>
+              <motion.div
+                variants={fadeIn}
+                className="flex flex-col gap-2 min-[400px]:flex-row"
+              >
                 <Button size="lg" asChild>
                   <Link href="/contact">
                     Request Demo <ArrowRight className="ml-2 h-4 w-4" />
@@ -314,16 +198,21 @@ export default function LoginPage() {
                 <Button size="lg" variant="outline" asChild>
                   <Link href="/login">Login to Platform</Link>
                 </Button>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
+              </motion.div>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8, type: "spring" }}
+              className="flex items-center justify-center"
+            >
               <div className="relative h-[350px] w-[350px] md:h-[450px] md:w-[450px]">
                 <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-3xl"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Brain className="h-32 w-32 text-primary" />
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -335,7 +224,13 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32"
       >
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+          >
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 Features
@@ -351,53 +246,67 @@ export default function LoginPage() {
                 personality assessments designed for the modern workplace.
               </p>
             </div>
-          </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="card">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <Brain className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-bold">Multiple Test Types</h3>
-                <p className="text-sm text-muted-foreground">
-                  MBTI-style, Big Five, RIASEC, and Enneagram assessments
-                  available.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="card">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <BarChart2 className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-bold">Advanced Analytics</h3>
-                <p className="text-sm text-muted-foreground">
-                  Detailed reports with actionable insights for individuals and
-                  teams.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="card">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <Users className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-bold">Multi-level Access</h3>
-                <p className="text-sm text-muted-foreground">
-                  Tailored dashboards for organizations, branches, and
-                  employees.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="card">
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <Shield className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-bold">Secure & Private</h3>
-                <p className="text-sm text-muted-foreground">
-                  Enterprise-grade security with role-based access controls.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+            className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-4"
+          >
+            <motion.div variants={cardVariants}>
+              <Card className="card">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                  <Brain className="h-12 w-12 mb-4 text-primary" />
+                  <h3 className="text-xl font-bold">Multiple Test Types</h3>
+                  <p className="text-sm text-muted-foreground">
+                    MBTI-style, Big Five, DISC, and Enneagram assessments
+                    available.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants}>
+              <Card className="card">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                  <BarChart2 className="h-12 w-12 mb-4 text-primary" />
+                  <h3 className="text-xl font-bold">Advanced Analytics</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Detailed reports with actionable insights for individuals
+                    and teams.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants}>
+              <Card className="card">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                  <Users className="h-12 w-12 mb-4 text-primary" />
+                  <h3 className="text-xl font-bold">Multi-level Access</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Tailored dashboards for organizations, branches, and
+                    employees.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants}>
+              <Card className="card">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                  <Shield className="h-12 w-12 mb-4 text-primary" />
+                  <h3 className="text-xl font-bold">Secure & Private</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Enterprise-grade security with role-based access controls.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      {/* <StatsSection /> */}
+      <StatsSection />
 
       {/* Benefits Section */}
       <section
@@ -435,7 +344,13 @@ export default function LoginPage() {
         </ParallaxBackground>
 
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+          >
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
                 Benefits
@@ -451,57 +366,81 @@ export default function LoginPage() {
                 sizes.
               </p>
             </div>
-          </div>
-          <div className="grid gap-6 py-12 lg:grid-cols-3">
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+            className="grid gap-6 py-12 lg:grid-cols-3"
+          >
+            <motion.div
+              variants={benefitVariants}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Improved Team Dynamics</h3>
               <p className="text-muted-foreground">
                 Understand how different personality types interact and optimize
                 team composition for better collaboration and productivity.
               </p>
-            </div>
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+            </motion.div>
+            <motion.div
+              variants={benefitVariantsRight}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Enhanced Hiring Decisions</h3>
               <p className="text-muted-foreground">
                 Make more informed recruitment choices by matching candidates'
                 personality profiles with role requirements and team dynamics.
               </p>
-            </div>
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+            </motion.div>
+            <motion.div
+              variants={benefitVariants}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Personalized Development</h3>
               <p className="text-muted-foreground">
                 Tailor training and development programs based on individual
                 strengths, weaknesses, and learning styles.
               </p>
-            </div>
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+            </motion.div>
+            <motion.div
+              variants={benefitVariantsRight}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Conflict Resolution</h3>
               <p className="text-muted-foreground">
                 Address interpersonal conflicts by understanding the underlying
                 personality differences and communication styles.
               </p>
-            </div>
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+            </motion.div>
+            <motion.div
+              variants={benefitVariants}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Leadership Development</h3>
               <p className="text-muted-foreground">
                 Identify and nurture leadership potential based on personality
                 traits and behavioral tendencies.
               </p>
-            </div>
-            <div className="flex flex-col items-start space-y-4 benefit-item">
+            </motion.div>
+            <motion.div
+              variants={benefitVariantsRight}
+              className="flex flex-col items-start space-y-4 benefit-item"
+            >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Data-Driven Culture</h3>
               <p className="text-muted-foreground">
                 Foster a culture of continuous improvement with regular
                 assessments and actionable insights.
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -512,7 +451,13 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32"
       >
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+          >
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 Testimonials
@@ -528,63 +473,229 @@ export default function LoginPage() {
                 INSA Personality Testing.
               </p>
             </div>
-          </div>
-          <div className="grid gap-6 py-12 lg:grid-cols-3">
-            <Card className="testimonial-card overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
-                  <div>
-                    <h3 className="font-bold">Ministry of Education</h3>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+            className="grid gap-6 py-12 lg:grid-cols-3"
+          >
+            <motion.div variants={cardVariants} className="testimonial-card">
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
+                    <div>
+                      <h3 className="font-bold">Ministry of Education</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Government Organization
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">
+                    "INSA's personality testing platform has transformed how we
+                    approach team building and leadership development across our
+                    organization. The insights gained have been invaluable."
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} className="testimonial-card">
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
+                    <div>
+                      <h3 className="font-bold">Commercial Bank of Ethiopia</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Financial Institution
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">
+                    "The platform's multi-level access system perfectly suits
+                    our organizational structure. Branch managers can oversee
+                    their teams while our HR department maintains a
+                    comprehensive view."
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} className="testimonial-card">
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
+                    <div>
+                      <h3 className="font-bold">Ethiopian Airlines</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Aviation Industry
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">
+                    "We've seen a 30% improvement in team cohesion since
+                    implementing INSA's personality assessments. The detailed
+                    reports and actionable recommendations are exceptional."
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section
+        ref={pricingRef}
+        id="pricing"
+        className="w-full py-12 md:py-24 lg:py-32 bg-muted"
+      >
+        <div className="container px-4 md:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+          >
+            <div className="space-y-2">
+              <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
+                Pricing
+              </div>
+              <AnimatedText
+                text="Simple, Transparent Pricing"
+                tag="h2"
+                className="text-3xl font-bold tracking-tighter sm:text-5xl"
+                animation="scale"
+              />
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Choose the plan that's right for your organization.
+              </p>
+            </div>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+            className="grid gap-6 py-12 lg:grid-cols-3"
+          >
+            <motion.div variants={cardVariants} className="pricing-card">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-2 text-center">
+                    <h3 className="text-2xl font-bold">Starter</h3>
+                    <p className="text-4xl font-bold">$499</p>
+                    <p className="text-sm text-muted-foreground">per month</p>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Up to 50 employees</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>2 test types</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Basic reporting</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Email support</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full">Get Started</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} className="pricing-card">
+              <Card className="border-primary">
+                <CardContent className="p-6">
+                  <div className="space-y-2 text-center">
+                    <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">
+                      Popular
+                    </div>
+                    <h3 className="text-2xl font-bold">Business</h3>
+                    <p className="text-4xl font-bold">$999</p>
+                    <p className="text-sm text-muted-foreground">per month</p>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Up to 200 employees</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>All test types</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Advanced reporting</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Priority support</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Team dynamics analysis</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full">Get Started</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} className="pricing-card">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-2 text-center">
+                    <h3 className="text-2xl font-bold">Enterprise</h3>
+                    <p className="text-4xl font-bold">Custom</p>
                     <p className="text-sm text-muted-foreground">
-                      Government Organization
+                      contact for pricing
                     </p>
                   </div>
-                </div>
-                <p className="mt-4 text-muted-foreground">
-                  "INSA's personality testing platform has transformed how we
-                  approach team building and leadership development across our
-                  organization. The insights gained have been invaluable."
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="testimonial-card overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
-                  <div>
-                    <h3 className="font-bold">Commercial Bank of Ethiopia</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Financial Institution
-                    </p>
+                  <div className="mt-6 space-y-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Unlimited employees</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>All test types</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Custom reporting</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>Dedicated account manager</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>API access</span>
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
+                        <span>On-premise deployment option</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full">Contact Sales</Button>
                   </div>
-                </div>
-                <p className="mt-4 text-muted-foreground">
-                  "The platform's multi-level access system perfectly suits our
-                  organizational structure. Branch managers can oversee their
-                  teams while our HR department maintains a comprehensive view."
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="testimonial-card overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
-                  <div>
-                    <h3 className="font-bold">Ethiopian Airlines</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Aviation Industry
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-4 text-muted-foreground">
-                  "We've seen a 30% improvement in team cohesion since
-                  implementing INSA's personality assessments. The detailed
-                  reports and actionable recommendations are exceptional."
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -594,7 +705,13 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground"
       >
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center"
+          >
             <div className="space-y-2">
               <AnimatedText
                 text="Ready to Get Started?"
@@ -614,14 +731,20 @@ export default function LoginPage() {
                 </Link>
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Exam Process Animation Section */}
+      {/* Process Animation Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeIn}
+            className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
+          >
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 How It Works
@@ -637,11 +760,129 @@ export default function LoginPage() {
                 insights.
               </p>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Interactive animation for larger screens */}
+          {/* Process steps with Framer Motion */}
           <div className="hidden md:block">
-            <ExamProcessAnimation />
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerContainer}
+              className="relative py-12"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-center md:items-start max-w-5xl mx-auto">
+                {/* Step 1: Receive Invitation */}
+                <motion.div
+                  variants={cardVariants}
+                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
+                >
+                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
+                    <FileText className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold mb-2">
+                      Receive Invitation
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Employees receive a personalized email invitation to take
+                      the assessment.
+                    </p>
+                  </div>
+
+                  {/* Connector line */}
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    viewport={{ once: true }}
+                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
+                  ></motion.div>
+                </motion.div>
+
+                {/* Step 2: Take the Test */}
+                <motion.div
+                  variants={cardVariants}
+                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
+                >
+                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
+                    <ClipboardCheck className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold mb-2">Take Assessment</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Complete the personality assessment through our intuitive
+                      interface.
+                    </p>
+                  </div>
+
+                  {/* Connector line */}
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                    viewport={{ once: true }}
+                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
+                  ></motion.div>
+                </motion.div>
+
+                {/* Step 3: Processing Results */}
+                <motion.div
+                  variants={cardVariants}
+                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
+                >
+                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
+                    <BarChart2 className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold mb-2">
+                      Processing Results
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Our algorithms analyze responses to generate accurate
+                      personality profiles.
+                    </p>
+                  </div>
+
+                  {/* Connector line */}
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    transition={{ duration: 0.5, delay: 0.9 }}
+                    viewport={{ once: true }}
+                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
+                  ></motion.div>
+                </motion.div>
+
+                {/* Step 4: Receive Results */}
+                <motion.div
+                  variants={cardVariants}
+                  className="relative flex flex-col items-center w-full md:w-1/4"
+                >
+                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
+                    <Award className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold mb-2">Receive Insights</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Access comprehensive reports with personalized insights
+                      and strengths.
+                    </p>
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileInView={{ scale: 1.2, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 1.2 }}
+                      viewport={{ once: true }}
+                      className="mt-4 flex justify-center space-x-2"
+                    >
+                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
+                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
+                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>

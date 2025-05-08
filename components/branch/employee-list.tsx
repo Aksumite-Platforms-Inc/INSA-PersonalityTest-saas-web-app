@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllBranchMembers } from "@/services/user.service";
 import {
   Table,
   TableBody,
@@ -13,101 +14,67 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { getBranchById } from "@/services/branch.service";
+import { getOrganizationId } from "@/utils/tokenUtils";
 
-// Demo data
-const employees = [
-  {
-    id: 1,
-    name: "Abebe Kebede",
-    department: "Finance",
-    position: "Accountant",
-    testStatus: "completed",
-    lastActivity: "2023-03-15",
-  },
-  {
-    id: 2,
-    name: "Tigist Haile",
-    department: "HR",
-    position: "HR Specialist",
-    testStatus: "in-progress",
-    lastActivity: "2023-03-14",
-  },
-  {
-    id: 3,
-    name: "Dawit Tadesse",
-    department: "IT",
-    position: "Systems Administrator",
-    testStatus: "completed",
-    lastActivity: "2023-03-12",
-  },
-  {
-    id: 4,
-    name: "Hiwot Girma",
-    department: "Operations",
-    position: "Operations Manager",
-    testStatus: "not-started",
-    lastActivity: null,
-  },
-  {
-    id: 5,
-    name: "Solomon Tesfaye",
-    department: "Marketing",
-    position: "Marketing Specialist",
-    testStatus: "completed",
-    lastActivity: "2023-03-10",
-  },
-  {
-    id: 6,
-    name: "Meron Alemu",
-    department: "Finance",
-    position: "Financial Analyst",
-    testStatus: "completed",
-    lastActivity: "2023-03-09",
-  },
-  {
-    id: 7,
-    name: "Yonas Bekele",
-    department: "Management",
-    position: "Project Manager",
-    testStatus: "completed",
-    lastActivity: "2023-03-08",
-  },
-  {
-    id: 8,
-    name: "Sara Tesfaye",
-    department: "Research",
-    position: "Research Specialist",
-    testStatus: "in-progress",
-    lastActivity: "2023-03-15",
-  },
-  {
-    id: 9,
-    name: "Dawit Haile",
-    department: "Operations",
-    position: "Operations Lead",
-    testStatus: "completed",
-    lastActivity: "2023-03-07",
-  },
-  {
-    id: 10,
-    name: "Hanna Girma",
-    department: "IT",
-    position: "Technical Specialist",
-    testStatus: "completed",
-    lastActivity: "2023-03-06",
-  },
-];
+interface EmployeeListProps {
+  organizationId: number;
+  branchId: number;
+  onViewDetails?: (employeeId: number) => void;
+}
 
-export function EmployeeList() {
+export function EmployeeList({
+  organizationId,
+  branchId,
+  onViewDetails,
+}: EmployeeListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [branch, setBranch] = useState<any | null>(null);
+  interface User {
+    id: number;
+    name: string;
+    status: string;
+    email: string;
+    created_at: string;
+  }
+  const [employees, setEmployees] = useState<User[]>([]);
   const itemsPerPage = 5;
 
-  const filteredEmployees = employees.filter(
-    (employee) =>
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const fetchedEmployees = await getAllBranchMembers(
+          organizationId,
+          branchId
+        );
+        setEmployees(fetchedEmployees);
+      } catch (error) {
+        console.error("Error fetching branch employees:", error);
+      }
+    };
+
+    if (organizationId && branchId) {
+      fetchEmployees();
+    }
+  }, [organizationId, branchId]);
+
+  useEffect(() => {
+    const organizationId = getOrganizationId();
+    const fetchOrganization = async () => {
+      try {
+        const response = await getBranchById(Number(branchId));
+        setBranch(response);
+      } catch (error) {
+        console.error("Error fetching organization:", error);
+      }
+    };
+
+    fetchOrganization();
+  });
+
+  const filteredEmployees = employees.filter((employee) =>
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
@@ -171,10 +138,9 @@ export function EmployeeList() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Test Status</TableHead>
-              <TableHead>Last Activity</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Registered On</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,15 +157,12 @@ export function EmployeeList() {
               paginatedEmployees.map((employee) => (
                 <TableRow key={employee.id}>
                   <TableCell className="font-medium">{employee.name}</TableCell>
-                  <TableCell>{employee.department}</TableCell>
-                  <TableCell>{employee.position}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>{employee.status}</TableCell>
                   <TableCell>
-                    {renderStatusBadge(employee.testStatus)}
-                  </TableCell>
-                  <TableCell>
-                    {employee.lastActivity
-                      ? new Date(employee.lastActivity).toLocaleDateString()
-                      : "N/A"}
+                    {employee.created_at
+                      ? new Date(employee.created_at).toLocaleDateString()
+                      : "N/A"}{" "}
                   </TableCell>
                 </TableRow>
               ))

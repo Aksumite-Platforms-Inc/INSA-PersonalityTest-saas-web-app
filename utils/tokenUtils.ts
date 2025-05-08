@@ -35,3 +35,19 @@ export const isTokenExpired = (): boolean => {
 export const getUserRole = (): string => {
   return decodeToken()?.role || "unknown";
 };
+
+export const getOrganizationId = (): number | null => {
+  return decodeToken()?.org_id || null;
+};
+
+export const getBranchId = (): number | null => {
+  return decodeToken()?.branch_id || null;
+};
+
+export const getUserId = (): number | null => {
+  return decodeToken()?.user_id || null;
+};
+
+export const getUserEmail = (): string | null => {
+  return decodeToken()?.email || null;
+};
