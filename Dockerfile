@@ -1,24 +1,25 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+# ...existing code...
+# Stage 1: Build app with Bun
+FROM oven/bun:1 AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-
-# Install dependencies
-RUN npm install -g pnpm && pnpm install
-
-# Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN pnpm build
+RUN bun install
+RUN bun run build
+RUN bunx next export
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Stage 2: Serve with NGINX
+FROM nginx:alpine
 
-# Start the application
-CMD ["pnpm", "start"]
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d
+
+# Copy static export output
+COPY --from=builder /app/out /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+# ...existing code...

@@ -1,0 +1,21 @@
+services:
+  frontend:
+    image: enochcodes/insa-frontend-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - insa_net
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.role == app
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "3000:80" # NGINX exposes port 80, maps to 3000 for external/local use (HAProxy targets this)
+
+networks:
+  insa_net:
+    external: true
