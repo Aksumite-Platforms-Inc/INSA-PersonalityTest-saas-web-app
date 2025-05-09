@@ -13,18 +13,28 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { LogOut, User, Settings } from "lucide-react";
+import { decodeToken } from "@/utils/tokenUtils";
+// import { fetchUserInfo } from "@/services/user.service";
+// import { useEffect, useState } from "react";
 
 export function UserMenu() {
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Mock user data - in a real app, this would come from authentication context
+  // Get real user data from token
+  const tokenUser = decodeToken();
   const user = {
-    name: "Demo User",
-    email: "user@example.com",
-    role: "Employee",
-    initials: "DU",
+    name: tokenUser?.name || "User",
+    email: tokenUser?.email || "",
+    role: tokenUser?.role || "",
+    initials: tokenUser?.name
+      ? tokenUser.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+      : "U",
   };
 
   const handleLogout = () => {
