@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
 interface User {
   id: string;
   name: string;
-  role: "super_admin" | "org_admin" | "branch_manager" | "org_member";
+  role: "super_admin" | "org_admin" | "branch_admin" | "org_member";
   permissions: string[];
 }
 
@@ -72,8 +72,8 @@ export const URL_ROLE_MAP: Record<string, UserRole> = {
 
 const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
   super_admin: ["super_admin", "org_admin", "branch_admin", "org_member"],
-  org_admin: ["org_admin", "branch_admin", "org_member"],
-  branch_admin: ["branch_admin", "org_member"],
+  org_admin: ["org_admin"],
+  branch_admin: ["branch_admin"],
   org_member: ["org_member"],
 };
 
@@ -103,7 +103,7 @@ export const useRBACAuth = () => {
       case "org_admin":
         role = "org_admin";
         break;
-      case "branch_manager":
+      case "branch_admin":
         role = "branch_admin";
         break;
       case "org_member":

@@ -14,8 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { LogOut, User, Settings } from "lucide-react";
 import { decodeToken } from "@/utils/tokenUtils";
-// import { fetchUserInfo } from "@/services/user.service";
-// import { useEffect, useState } from "react";
 
 export function UserMenu() {
   const router = useRouter();
@@ -46,6 +44,7 @@ export function UserMenu() {
 
   const handleLogout = () => {
     // In a real app, this would call an API to log out
+
     toast({
       title: t("logout.success"),
       description: t("logout.redirecting"),
@@ -82,10 +81,10 @@ export function UserMenu() {
           <User className="mr-2 h-4 w-4" />
           <span>{t("userMenu.profile")}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
+        {/* <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Settings className="mr-2 h-4 w-4" />
           <span>{t("userMenu.settings")}</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
