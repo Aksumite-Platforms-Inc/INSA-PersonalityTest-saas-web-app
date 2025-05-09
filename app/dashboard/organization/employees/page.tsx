@@ -6,12 +6,20 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { getBranchId, getOrganizationId } from "@/utils/tokenUtils";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getBranchById } from "@/services/branch.service";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
 export default function BranchesPage() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <BranchesPageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
+
+function BranchesPageContent({ searchParams }: { searchParams: URLSearchParams }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [orgId, setOrgId] = useState<number | null>(null);
   const [branchId, setBranchId] = useState<number | null>(null);
   const [branch, setBranch] = useState<any | null>(null);
@@ -34,10 +42,9 @@ export default function BranchesPage() {
     const fetchOrganization = async () => {
       try {
         const response = await getBranchById(
-          Number(organizationId),
+          // Number(organizationId),
           Number(branchId)
         );
-        // console.log("Organization response:", response);
         setBranch(response);
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -45,7 +52,7 @@ export default function BranchesPage() {
     };
 
     fetchOrganization();
-  });
+  }, [branchId]);
 
   return (
     <div className="space-y-6">
@@ -54,18 +61,12 @@ export default function BranchesPage() {
           title={`Branch (${branch?.name || ""}) Employees Management`}
           description="Manage employees in your branch"
         />
-        {
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Employee
-          </Button>
-        }
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Employee
+        </Button>
       </div>
-
-      <EmployeeList
-        organizationId={Number(orgId)}
-        branchId={Number(branchId)}
-      />
+      <EmployeeList organizationId={Number(orgId)} branchId={Number(branchId)} />
     </div>
   );
 }

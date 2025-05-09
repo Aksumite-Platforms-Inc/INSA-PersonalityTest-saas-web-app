@@ -1,10 +1,11 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
 const enneagramTypeNames: Record<string, string> = {
   A: "Type 1: The Reformer",
@@ -18,8 +19,15 @@ const enneagramTypeNames: Record<string, string> = {
   I: "Type 9: The Peacemaker",
 };
 
-export default function EnneagramResultPage() {
-  const searchParams = useSearchParams();
+export default function EnneagramResultPageWrapper() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <EnneagramResultPage searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
+
+function EnneagramResultPage({ searchParams }: { searchParams: URLSearchParams }) {
   const router = useRouter();
   const dataParam = searchParams.get("data");
   const [resultData, setResultData] = useState<{ type: string; type_name: string; score: number }[]>([]);
@@ -106,9 +114,7 @@ export default function EnneagramResultPage() {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={() => router.push("/dashboard/employee/test/select")}>
-              Back to Tests
-            </Button>
+            <Button onClick={() => router.push("/dashboard/employee/test/select")}>Back to Tests</Button>
           </div>
         </CardContent>
       </Card>

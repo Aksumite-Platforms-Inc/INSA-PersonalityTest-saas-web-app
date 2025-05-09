@@ -1,11 +1,12 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
 const traitInfo = {
   openness: {
@@ -35,8 +36,15 @@ const traitInfo = {
   },
 };
 
-export default function BigFiveResultPage() {
-  const searchParams = useSearchParams();
+export default function BigFiveResultPageWrapper() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <BigFiveResultPageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
+
+function BigFiveResultPageContent({ searchParams }: { searchParams: URLSearchParams }) {
   const router = useRouter();
   const dataParam = searchParams.get("data");
   const [resultData, setResultData] = useState<any>(null);

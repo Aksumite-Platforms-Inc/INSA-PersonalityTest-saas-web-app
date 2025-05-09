@@ -1,25 +1,18 @@
-# ...existing code...
-# Stage 1: Build app with Bun
-FROM oven/bun:1 AS builder
-
+# Stage 1: Build with Bun
+FROM oven/bun:1.1.10 AS builder
 WORKDIR /app
-
 COPY . .
-
 RUN bun install
 RUN bun run build
-RUN bunx next export
 
-# Stage 2: Serve with NGINX
-FROM nginx:alpine
+# Stage 2: Serve with Node.js
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/.next .next
+COPY --from=builder /app/public public
+COPY --from=builder /app/package.json package.json
+COPY --from=builder /app/node_modules node_modules
 
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
-
-# Copy static export output
-COPY --from=builder /app/out /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-# ...existing code...
+ENV PORT=3000
+EXPOSE 3000
+CMD ["bun", "run", "start"]

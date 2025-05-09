@@ -1,11 +1,12 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { MBTIResult } from "@/types/personality.type";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
 const dimensions = [
   { code: "IE", label1: "Introversion (I)", label2: "Extroversion (E)" },
@@ -14,8 +15,15 @@ const dimensions = [
   { code: "JP", label1: "Judging (J)", label2: "Perceiving (P)" },
 ];
 
-export default function MbtiResultPage() {
-  const searchParams = useSearchParams();
+export default function MbtiResultPageWrapper() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <MbtiResultPageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
+
+function MbtiResultPageContent({ searchParams }: { searchParams: URLSearchParams }) {
   const router = useRouter();
   const [result, setResult] = useState<MBTIResult | null>(null);
 
@@ -39,13 +47,11 @@ export default function MbtiResultPage() {
         <CardHeader>
           <CardTitle className="text-2xl">MBTI Test Result</CardTitle>
         </CardHeader>
-
         <CardContent className="space-y-6">
           <div className="text-center">
             <p className="text-muted-foreground text-sm mb-2">Your Personality Type:</p>
             <h2 className="text-4xl font-bold text-primary">{result.personality}</h2>
           </div>
-
           <div className="grid sm:grid-cols-2 gap-4">
             {dimensions.map(({ code, label1, label2 }) => {
               const value = result[code as keyof MBTIResult] as number;
@@ -58,8 +64,7 @@ export default function MbtiResultPage() {
                   </div>
                   <Progress
                     value={percentage}
-                    className="h-3 rounded-full"
-                    style={{ backgroundColor: "#e5e7eb" }}
+                    className="h-3 rounded-full bg-gray-200"
                   />
                   <div className="text-center text-xs text-muted-foreground mt-1">
                     Preference Score: <strong>{value}</strong> (Range: -2 to 2)
@@ -68,7 +73,6 @@ export default function MbtiResultPage() {
               );
             })}
           </div>
-
           <div className="bg-gray-50 p-4 rounded-lg shadow-inner">
             <h3 className="text-lg font-semibold mb-2">Your Personality Summary</h3>
             {Array.isArray(result.description) ? (
@@ -81,11 +85,8 @@ export default function MbtiResultPage() {
               <p className="text-muted-foreground">{result.description}</p>
             )}
           </div>
-
           <div className="flex justify-end">
-            <Button onClick={() => router.push("/dashboard/employee/test/select")}>
-              Back to Tests
-            </Button>
+            <Button onClick={() => router.push("/dashboard/employee/test/select")}>Back to Tests</Button>
           </div>
         </CardContent>
       </Card>

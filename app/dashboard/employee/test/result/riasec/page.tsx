@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -22,6 +21,7 @@ import {
   YAxis,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
 const typeNames: Record<string, string> = {
   R: "Realistic",
@@ -43,8 +43,15 @@ const descriptions: Record<string, string> = {
   C: "Conventional types are detail-oriented and excel in structured environments with clear rules.",
 };
 
-export default function RiaSecResultPage() {
-  const searchParams = useSearchParams();
+export default function RiaSecResultPageWrapper() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <RiaSecResultPageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
+
+function RiaSecResultPageContent({ searchParams }: { searchParams: URLSearchParams }) {
   const router = useRouter();
   const dataParam = searchParams.get("data");
   const [resultData, setResultData] = useState<{ type: string; score: number }[]>([]);
@@ -137,9 +144,7 @@ export default function RiaSecResultPage() {
 
           {/* CTA */}
           <div className="flex justify-end mt-6">
-            <Button onClick={() => router.push("/dashboard/employee/test/select")}>
-              Back to Tests
-            </Button>
+            <Button onClick={() => router.push("/dashboard/employee/test/select")}>Back to Tests</Button>
           </div>
         </CardContent>
       </Card>
