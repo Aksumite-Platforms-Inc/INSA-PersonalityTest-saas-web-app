@@ -1,57 +1,31 @@
+// components/RouteGuard.tsx
+
 "use client";
 
-import type React from "react";
-
+import { useAuth } from "@/app/contexts/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useAuth, type UserRole } from "../app/contexts/auth-context";
-import { useToast } from "@/hooks/use-toast";
 
-interface RouteGuardProps {
+export function RouteGuard({
+  children,
+  allowedRoles,
+}: {
   children: React.ReactNode;
-  allowedRoles: UserRole[];
-}
-
-export function RouteGuard({ children, allowedRoles }: RouteGuardProps) {
-  const { user, status } = useAuth();
+  allowedRoles: string[];
+}) {
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const toast = useToast();
 
   useEffect(() => {
-    // Wait until authentication status is determined
-    if (status === "loading") return;
-
-    // If user is not authenticated, redirect to login
-    if (status === "unauthenticated") {
-      toast.warning({
-        title: "Authentication required",
-        description: "Please log in to access this page",
-      });
-      router.push("/login");
-      return;
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+      } else if (!allowedRoles.includes(user.role)) {
+        router.push("/unauthorized");
+      }
     }
+  }, [loading, user, router, allowedRoles]);
 
-    // If user is authenticated but not authorized for this route
-    if (user && !allowedRoles.includes(user.role)) {
-      toast.error({
-        title: "Access denied",
-        description: "You don't have permission to access this page",
-      });
-      router.push(`/dashboard/${user.role}`);
-    }
-  }, [user, status, allowedRoles, router, pathname, toast]);
-
-  // Show nothing while checking authentication
-  if (status === "loading" || status === "unauthenticated") {
-    return null;
-  }
-
-  // If user doesn't have permission, don't render children
-  if (!user || !allowedRoles.includes(user.role)) {
-    return null;
-  }
-
-  // User is authenticated and authorized
+  if (loading || !user) return <div>Loading...</div>;
   return <>{children}</>;
 }

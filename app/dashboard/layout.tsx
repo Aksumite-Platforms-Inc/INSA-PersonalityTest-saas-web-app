@@ -1,10 +1,10 @@
 import type React from "react";
-import { RouteGuard } from "../../components/route-guard";
+import { AppShell } from "@/components/app-shell";
 
-export default function SuperadminLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <RouteGuard allowedRoles={["super_admin"]}>{children}</RouteGuard>;
+  return <AppShell>{children}</AppShell>;
 }
