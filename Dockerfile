@@ -1,17 +1,18 @@
 # Stage 1: Build the Next.js application
 FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json for better layer caching
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies)
 RUN npm ci
 
-# Copy the rest of the code
+# Copy the rest of the application code
 COPY . .
 
-# Enable standalone mode and build
+# Build the Next.js application with standalone output
 RUN npm run build
 
 # Stage 2: Production image
@@ -22,19 +23,22 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
-ENV HOST 0.0.0.0
+# Copy package.json and package-lock.json for production install
+COPY package.json package-lock.json* ./
 
-# Copy only necessary files from builder
-COPY --from=builder /app/package.json ./
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Copy Next.js standalone output and static assets
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Copy node_modules bundled inside standalone (should already have it)
+# Ensure .next/standalone has its node_modules (in some setups, it’s self-contained)
 COPY --from=builder /app/node_modules ./node_modules
 
-# Expose port
+# Expose port 3000
 EXPOSE 3000
 
-# Run using standalone server
+# Start the application
 CMD ["node", "server.js"]
