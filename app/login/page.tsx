@@ -109,16 +109,16 @@ export default function LoginPage() {
       // Map legacy roles to new UserRole for redirect
       let redirectPath = "";
       switch (role) {
-        case "superadmin":
+        case "super_admin":
           redirectPath = "superadmin";
           break;
         case "org_admin":
           redirectPath = "organization";
           break;
-        case "branch_manager":
+        case "branch_admin":
           redirectPath = "branch";
           break;
-        case "employee":
+        case "org_member":
           redirectPath = "employee/test";
           break;
         default:

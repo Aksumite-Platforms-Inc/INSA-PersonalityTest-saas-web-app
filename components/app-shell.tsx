@@ -35,8 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </motion.main>
-      </div>
-      <Toaster />
+      </div>{" "}
     </div>
   );
 }

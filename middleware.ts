@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     "/superadmin",
     "/organization",
     "/branch",
+    "/employee",
   ];
 
   if (publicPaths.some((p) => path.startsWith(p))) {
