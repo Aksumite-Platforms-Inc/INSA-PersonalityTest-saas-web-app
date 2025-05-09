@@ -37,7 +37,6 @@ import {
 import { motion } from "framer-motion";
 import { getBranchId, getOrganizationId } from "@/utils/tokenUtils";
 import { EmployeeList } from "@/components/branch/employee-list";
-import { getBranchById } from "@/services/branch.service";
 
 export default function UsersPage() {
   const { t: translate } = useTranslation();

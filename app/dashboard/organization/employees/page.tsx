@@ -19,33 +19,30 @@ export default function BranchesPage() {
   useEffect(() => {
     const organizationId = getOrganizationId();
     const branchIdFromParams = searchParams.get("branchId");
-
-    setBranchId(branchIdFromParams ? Number(branchIdFromParams) : null);
     setOrgId(organizationId);
-
-    if (!organizationId) {
-      console.error("Token data is missing or invalid.");
-      return;
-    }
+    setBranchId(Number(branchIdFromParams));
   }, [searchParams]);
 
   useEffect(() => {
-    const organizationId = getOrganizationId();
+    if (!branchId || isNaN(Number(branchId))) {
+      setBranch(null);
+      return;
+    }
     const fetchOrganization = async () => {
       try {
-        const response = await getBranchById(
-          Number(organizationId),
-          Number(branchId)
-        );
-        // console.log("Organization response:", response);
+        const response = await getBranchById(Number(branchId));
         setBranch(response);
-      } catch (error) {
-        console.error("Error fetching organization:", error);
+      } catch (error: any) {
+        if (error?.response?.status === 404) {
+          setBranch(null);
+          // Optionally, show a toast or log: "Branch not found"
+        } else {
+          console.error("Error fetching organization:", error);
+        }
       }
     };
-
     fetchOrganization();
-  });
+  }, [branchId]);
 
   return (
     <div className="space-y-6">
