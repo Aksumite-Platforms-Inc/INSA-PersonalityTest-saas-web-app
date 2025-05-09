@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import type React from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,72 +13,22 @@ import {
   CheckCircle,
   Shield,
   Users,
-  FileText,
-  ClipboardCheck,
-  Award,
 } from "lucide-react";
 import { motion } from "framer-motion";
+
+import { ExamProcessAnimation } from "@/components/animations/exam-process-animation";
 import { AnimatedText } from "@/components/animations/animated-text";
 import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
-import { StatsSection } from "@/components/stats-section";
 
-export default function LandingPage() {
+export default function LoginPage() {
   // Refs for animation targets
   const headerRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
   const benefitsRef = useRef<HTMLElement>(null);
   const testimonialsRef = useRef<HTMLElement>(null);
-  const pricingRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
-
-  // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6 },
-    },
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
-  const benefitVariants = {
-    hidden: { opacity: 0, x: -30 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
-  const benefitVariantsRight = {
-    hidden: { opacity: 0, x: 30 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.5 },
-    },
-  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -129,9 +80,12 @@ export default function LandingPage() {
       </motion.header>
 
       {/* Hero Section */}
-      <section
+      <motion.section
         ref={heroRef}
         className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted relative"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
       >
         {/* Add decorative floating elements */}
         <div className="absolute top-20 left-[10%] hidden lg:block">
@@ -158,13 +112,8 @@ export default function LandingPage() {
 
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="flex flex-col justify-center space-y-4"
-            >
-              <motion.div variants={fadeIn} className="space-y-2">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2">
                 <AnimatedText
                   text="Unlock Your Organization's Potential"
                   tag="h1"
@@ -172,17 +121,25 @@ export default function LandingPage() {
                   animation="slideUp"
                 />
                 <motion.p
-                  variants={fadeIn}
                   className="max-w-[600px] text-muted-foreground md:text-xl"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                   Discover the power of personality insights with INSA's
                   comprehensive testing platform. Enhance team dynamics, improve
                   hiring decisions, and boost organizational performance.
                 </motion.p>
-              </motion.div>
+              </div>
               <motion.div
-                variants={fadeIn}
                 className="flex flex-col gap-2 min-[400px]:flex-row"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.6,
+                  ease: "easeOut",
+                  staggerChildren: 0.2,
+                }}
               >
                 <Button size="lg" asChild>
                   <Link href="/contact">
@@ -193,38 +150,31 @@ export default function LandingPage() {
                   <Link href="/login">Login to Platform</Link>
                 </Button>
               </motion.div>
-            </motion.div>
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, type: "spring" }}
-              className="flex items-center justify-center"
-            >
+            </div>
+            <div className="flex items-center justify-center">
               <div className="relative h-[350px] w-[350px] md:h-[450px] md:w-[450px]">
                 <div className="absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-3xl"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Brain className="h-32 w-32 text-primary" />
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features Section */}
-      <section
+      <motion.section
         ref={featuresRef}
         id="features"
         className="w-full py-12 md:py-24 lg:py-32"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center"
-          >
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 Features
@@ -235,78 +185,74 @@ export default function LandingPage() {
                 className="text-3xl font-bold tracking-tighter sm:text-5xl"
                 animation="fadeIn"
               />
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <motion.p
+                className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.8 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 Our platform offers a suite of scientifically validated
                 personality assessments designed for the modern workplace.
-              </p>
+              </motion.p>
             </div>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainer}
-            className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-4"
-          >
-            <motion.div variants={cardVariants}>
-              <Card className="card">
-                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                  <Brain className="h-12 w-12 mb-4 text-primary" />
-                  <h3 className="text-xl font-bold">Multiple Test Types</h3>
-                  <p className="text-sm text-muted-foreground">
-                    MBTI-style, Big Five, DISC, and Enneagram assessments
-                    available.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={cardVariants}>
-              <Card className="card">
-                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                  <BarChart2 className="h-12 w-12 mb-4 text-primary" />
-                  <h3 className="text-xl font-bold">Advanced Analytics</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Detailed reports with actionable insights for individuals
-                    and teams.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={cardVariants}>
-              <Card className="card">
-                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                  <Users className="h-12 w-12 mb-4 text-primary" />
-                  <h3 className="text-xl font-bold">Multi-level Access</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Tailored dashboards for organizations, branches, and
-                    employees.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={cardVariants}>
-              <Card className="card">
-                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                  <Shield className="h-12 w-12 mb-4 text-primary" />
-                  <h3 className="text-xl font-bold">Secure & Private</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enterprise-grade security with role-based access controls.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
+          </div>
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="card">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <Brain className="h-12 w-12 mb-4 text-primary" />
+                <h3 className="text-xl font-bold">Multiple Test Types</h3>
+                <p className="text-sm text-muted-foreground">
+                  MBTI-style, Big Five, RIASEC, and Enneagram assessments
+                  available.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="card">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <BarChart2 className="h-12 w-12 mb-4 text-primary" />
+                <h3 className="text-xl font-bold">Advanced Analytics</h3>
+                <p className="text-sm text-muted-foreground">
+                  Detailed reports with actionable insights for individuals and
+                  teams.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="card">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <Users className="h-12 w-12 mb-4 text-primary" />
+                <h3 className="text-xl font-bold">Multi-level Access</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tailored dashboards for organizations, branches, and
+                  employees.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="card">
+              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <Shield className="h-12 w-12 mb-4 text-primary" />
+                <h3 className="text-xl font-bold">Secure & Private</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enterprise-grade security with role-based access controls.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Stats Section */}
-      <StatsSection />
+      {/* <StatsSection /> */}
 
       {/* Benefits Section */}
-      <section
+      <motion.section
         ref={benefitsRef}
         id="benefits"
         className="w-full py-12 md:py-24 lg:py-32 bg-muted relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <ParallaxBackground className="absolute inset-0 -z-10">
           <div className="absolute inset-0 opacity-10">
@@ -338,13 +284,7 @@ export default function LandingPage() {
         </ParallaxBackground>
 
         <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center"
-          >
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
                 Benefits
@@ -355,22 +295,29 @@ export default function LandingPage() {
                 className="text-3xl font-bold tracking-tighter sm:text-5xl"
                 animation="slideUp"
               />
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <motion.p
+                className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.8 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 Our platform delivers tangible benefits for organizations of all
                 sizes.
-              </p>
+              </motion.p>
             </div>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainer}
-            className="grid gap-6 py-12 lg:grid-cols-3"
-          >
+          </div>
+          <div className="grid gap-6 py-12 lg:grid-cols-3">
             <motion.div
-              variants={benefitVariants}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Improved Team Dynamics</h3>
@@ -380,8 +327,15 @@ export default function LandingPage() {
               </p>
             </motion.div>
             <motion.div
-              variants={benefitVariantsRight}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Enhanced Hiring Decisions</h3>
@@ -391,8 +345,15 @@ export default function LandingPage() {
               </p>
             </motion.div>
             <motion.div
-              variants={benefitVariants}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Personalized Development</h3>
@@ -402,8 +363,15 @@ export default function LandingPage() {
               </p>
             </motion.div>
             <motion.div
-              variants={benefitVariantsRight}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Conflict Resolution</h3>
@@ -413,8 +381,15 @@ export default function LandingPage() {
               </p>
             </motion.div>
             <motion.div
-              variants={benefitVariants}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Leadership Development</h3>
@@ -424,8 +399,15 @@ export default function LandingPage() {
               </p>
             </motion.div>
             <motion.div
-              variants={benefitVariantsRight}
               className="flex flex-col items-start space-y-4 benefit-item"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.15,
+              }}
             >
               <CheckCircle className="h-10 w-10 text-primary" />
               <h3 className="text-xl font-bold">Data-Driven Culture</h3>
@@ -434,24 +416,22 @@ export default function LandingPage() {
                 assessments and actionable insights.
               </p>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Testimonials Section */}
-      <section
+      <motion.section
         ref={testimonialsRef}
         id="testimonials"
         className="w-full py-12 md:py-24 lg:py-32"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center"
-          >
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 Testimonials
@@ -462,21 +442,31 @@ export default function LandingPage() {
                 className="text-3xl font-bold tracking-tighter sm:text-5xl"
                 animation="slideRight"
               />
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <motion.p
+                className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.8 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 See what our clients have to say about their experience with
                 INSA Personality Testing.
-              </p>
+              </motion.p>
             </div>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainer}
-            className="grid gap-6 py-12 lg:grid-cols-3"
-          >
-            <motion.div variants={cardVariants} className="testimonial-card">
-              <Card className="overflow-hidden">
+          </div>
+          <div className="grid gap-6 py-12 lg:grid-cols-3">
+            <motion.div
+              className="testimonial-card overflow-hidden"
+              initial={{ opacity: 0, y: 80 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.2,
+              }}
+            >
+              <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
@@ -495,8 +485,18 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             </motion.div>
-            <motion.div variants={cardVariants} className="testimonial-card">
-              <Card className="overflow-hidden">
+            <motion.div
+              className="testimonial-card overflow-hidden"
+              initial={{ opacity: 0, y: 80 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.2,
+              }}
+            >
+              <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
@@ -516,8 +516,18 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             </motion.div>
-            <motion.div variants={cardVariants} className="testimonial-card">
-              <Card className="overflow-hidden">
+            <motion.div
+              className="testimonial-card overflow-hidden"
+              initial={{ opacity: 0, y: 80 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.7 }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut",
+                staggerChildren: 0.2,
+              }}
+            >
+              <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
@@ -536,176 +546,21 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
-      </section>
-
-      {/* Pricing Section */}
-      {/* <section
-        ref={pricingRef}
-        id="pricing"
-        className="w-full py-12 md:py-24 lg:py-32 "
-      >
-        <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center"
-          >
-            <div className="space-y-2">
-              <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
-                Pricing
-              </div>
-              <AnimatedText
-                text="Simple, Transparent Pricing"
-                tag="h2"
-                className="text-3xl font-bold tracking-tighter sm:text-5xl"
-                animation="scale"
-              />
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Choose the plan that's right for your organization.
-              </p>
-            </div>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainer}
-            className="grid gap-6 py-12 lg:grid-cols-3"
-          >
-            <motion.div variants={cardVariants} className="pricing-card">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="space-y-2 text-center">
-                    <h3 className="text-2xl font-bold">Starter</h3>
-                    <p className="text-4xl font-bold">$499</p>
-                    <p className="text-sm text-muted-foreground">per month</p>
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Up to 50 employees</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>2 test types</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Basic reporting</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Email support</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full">Get Started</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={cardVariants} className="pricing-card">
-              <Card className="border-primary">
-                <CardContent className="p-6">
-                  <div className="space-y-2 text-center">
-                    <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">
-                      Popular
-                    </div>
-                    <h3 className="text-2xl font-bold">Business</h3>
-                    <p className="text-4xl font-bold">$999</p>
-                    <p className="text-sm text-muted-foreground">per month</p>
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Up to 200 employees</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>All test types</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Advanced reporting</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Priority support</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Team dynamics analysis</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full">Get Started</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-            <motion.div variants={cardVariants} className="pricing-card">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="space-y-2 text-center">
-                    <h3 className="text-2xl font-bold">Enterprise</h3>
-                    <p className="text-4xl font-bold">Custom</p>
-                    <p className="text-sm text-muted-foreground">
-                      contact for pricing
-                    </p>
-                  </div>
-                  <div className="mt-6 space-y-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Unlimited employees</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>All test types</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Custom reporting</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>Dedicated account manager</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>API access</span>
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="mr-2 h-4 w-4 text-primary" />
-                        <span>On-premise deployment option</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full">Contact Sales</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section> */}
+      </motion.section>
 
       {/* CTA Section */}
-      <section
+      <motion.section
         ref={ctaRef}
         className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.2 }}
       >
         <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center"
-          >
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
               <AnimatedText
                 text="Ready to Get Started?"
@@ -713,32 +568,42 @@ export default function LandingPage() {
                 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
                 animation="fadeIn"
               />
-              <p className="mx-auto max-w-[700px] text-primary-foreground/80 md:text-xl">
+              <motion.p
+                className="mx-auto max-w-[700px] text-primary-foreground/80 md:text-xl"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.8 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 Transform your organization with data-driven personality
                 insights. Request a demo today.
-              </p>
+              </motion.p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <motion.div
+              className="flex flex-col gap-2 min-[400px]:flex-row"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.8 }}
+              transition={{
+                duration: 0.6,
+                ease: "easeOut",
+                staggerChildren: 0.2,
+              }}
+            >
               <Button size="lg" variant="secondary" asChild>
                 <Link href="/contact">
                   Request Demo <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Process Animation Section */}
+      {/* Exam Process Animation Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
         <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeIn}
-            className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
-          >
+          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
             <div className="space-y-2">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                 How It Works
@@ -754,129 +619,11 @@ export default function LandingPage() {
                 insights.
               </p>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Process steps with Framer Motion */}
+          {/* Interactive animation for larger screens */}
           <div className="hidden md:block">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerContainer}
-              className="relative py-12"
-            >
-              <div className="flex flex-col md:flex-row justify-between items-center md:items-start max-w-5xl mx-auto">
-                {/* Step 1: Receive Invitation */}
-                <motion.div
-                  variants={cardVariants}
-                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
-                >
-                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
-                    <FileText className="h-12 w-12 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold mb-2">
-                      Receive Invitation
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Employees receive a personalized email invitation to take
-                      the assessment.
-                    </p>
-                  </div>
-
-                  {/* Connector line */}
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    viewport={{ once: true }}
-                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
-                  ></motion.div>
-                </motion.div>
-
-                {/* Step 2: Take the Test */}
-                <motion.div
-                  variants={cardVariants}
-                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
-                >
-                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
-                    <ClipboardCheck className="h-12 w-12 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold mb-2">Take Assessment</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Complete the personality assessment through our intuitive
-                      interface.
-                    </p>
-                  </div>
-
-                  {/* Connector line */}
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    transition={{ duration: 0.5, delay: 0.6 }}
-                    viewport={{ once: true }}
-                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
-                  ></motion.div>
-                </motion.div>
-
-                {/* Step 3: Processing Results */}
-                <motion.div
-                  variants={cardVariants}
-                  className="relative flex flex-col items-center mb-12 md:mb-0 w-full md:w-1/4"
-                >
-                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
-                    <BarChart2 className="h-12 w-12 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold mb-2">
-                      Processing Results
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Our algorithms analyze responses to generate accurate
-                      personality profiles.
-                    </p>
-                  </div>
-
-                  {/* Connector line */}
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    transition={{ duration: 0.5, delay: 0.9 }}
-                    viewport={{ once: true }}
-                    className="hidden md:block absolute top-12 left-[50%] h-1 bg-primary/50 w-full origin-left"
-                  ></motion.div>
-                </motion.div>
-
-                {/* Step 4: Receive Results */}
-                <motion.div
-                  variants={cardVariants}
-                  className="relative flex flex-col items-center w-full md:w-1/4"
-                >
-                  <div className="bg-primary/10 p-4 rounded-full mb-4 z-10">
-                    <Award className="h-12 w-12 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold mb-2">Receive Insights</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Access comprehensive reports with personalized insights
-                      and strengths.
-                    </p>
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileInView={{ scale: 1.2, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 1.2 }}
-                      viewport={{ once: true }}
-                      className="mt-4 flex justify-center space-x-2"
-                    >
-                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
-                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
-                      <span className="inline-block w-3 h-3 bg-primary rounded-full"></span>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
+            <ExamProcessAnimation />
           </div>
         </div>
       </section>
