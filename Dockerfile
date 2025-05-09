@@ -44,5 +44,5 @@ COPY --from=builder /app/node_modules ./node_modules
 # Expose port 3000
 EXPOSE 3000
 
-# Start the application (make sure the standalone server exists)
-CMD ["node", "server.js"]
+# Start the application using npm run start
+CMD ["npm", "start"]
