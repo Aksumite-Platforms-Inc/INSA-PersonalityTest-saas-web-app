@@ -24,10 +24,17 @@ export function UserMenu() {
 
   // Get real user data from token
   const tokenUser = decodeToken();
+  const roleMap: Record<string, string> = {
+    org_member: "Employee",
+    org_admin: "Organization Admin",
+    branch_admin: "Branch Admin",
+    super_admin: "System Admin",
+  };
+
   const user = {
     name: tokenUser?.name || "User",
     email: tokenUser?.email || "",
-    role: tokenUser?.role || "",
+    role: roleMap[tokenUser?.role || ""] || "Unknown Role",
     initials: tokenUser?.name
       ? tokenUser.name
           .split(" ")
