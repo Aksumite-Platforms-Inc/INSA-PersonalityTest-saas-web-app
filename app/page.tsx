@@ -113,12 +113,6 @@ export default function LandingPage() {
             >
               Testimonials
             </Link>
-            <Link
-              href="#pricing"
-              className="text-sm font-medium hover:underline underline-offset-4"
-            >
-              Pricing
-            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link
@@ -547,10 +541,10 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section
+      {/* <section
         ref={pricingRef}
         id="pricing"
-        className="w-full py-12 md:py-24 lg:py-32 bg-muted"
+        className="w-full py-12 md:py-24 lg:py-32 "
       >
         <div className="container px-4 md:px-6">
           <motion.div
@@ -697,7 +691,7 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section
