@@ -1,15 +1,17 @@
-// middleware.ts
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token");
+  const token = request.cookies.get("authToken")?.value;
+  const path = request.nextUrl.pathname;
 
   const publicPaths = ["/login", "/forgotpassword"];
-  const protectedPaths = ["/dashboard", "/superadmin", "/organization"];
-
-  const path = request.nextUrl.pathname;
+  const protectedPaths = [
+    "/dashboard",
+    "/superadmin",
+    "/organization",
+    "/branch",
+  ];
 
   if (publicPaths.some((p) => path.startsWith(p))) {
     return NextResponse.next();

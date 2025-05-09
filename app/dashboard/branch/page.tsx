@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRBACAuth } from "@/app/contexts/auth-context";
+import { useRouter } from "next/navigation";
 // import { getBranchStats } from "@/services/branchService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +10,25 @@ import { EmployeeProgressChart } from "@/components/branch/employee-progress-cha
 import { EmployeeList } from "@/components/branch/employee-list";
 
 export default function BranchDashboard() {
+  const { role } = useRBACAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (role && role !== "branch_admin") {
+      // If not branch_admin, redirect to their allowed dashboard
+      router.replace(
+        "/dashboard/" +
+          (role === "super_admin"
+            ? "superadmin"
+            : role === "org_admin"
+            ? "organization"
+            : role === "org_member"
+            ? "employee/test"
+            : "")
+      );
+    }
+  }, [role, router]);
+
   const [stats, setStats] = useState({
     totalEmployees: 0,
     testsCompleted: 0,

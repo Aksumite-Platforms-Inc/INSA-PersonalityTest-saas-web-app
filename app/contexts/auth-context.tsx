@@ -48,3 +48,77 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
+// RBAC additions
+export type UserRole =
+  | "super_admin"
+  | "org_admin"
+  | "branch_admin"
+  | "org_member";
+
+export const ROLE_URL_MAP: Record<UserRole, string> = {
+  super_admin: "superadmin",
+  org_admin: "organization",
+  branch_admin: "branch",
+  org_member: "employee",
+};
+
+export const URL_ROLE_MAP: Record<string, UserRole> = {
+  superadmin: "super_admin",
+  organization: "org_admin",
+  branch: "branch_admin",
+  employee: "org_member",
+};
+
+const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
+  super_admin: ["super_admin", "org_admin", "branch_admin", "org_member"],
+  org_admin: ["org_admin", "branch_admin", "org_member"],
+  branch_admin: ["branch_admin", "org_member"],
+  org_member: ["org_member"],
+};
+
+function isAuthorized(
+  userRole: UserRole | null,
+  allowedRoles: UserRole[]
+): boolean {
+  if (!userRole) return false;
+  return allowedRoles.some((role) => ROLE_HIERARCHY[userRole]?.includes(role));
+}
+
+function getRoleUrl(role: UserRole | null): string {
+  if (!role) return "";
+  return ROLE_URL_MAP[role] || "";
+}
+
+// Extend useAuth to provide RBAC helpers
+export const useRBACAuth = () => {
+  const { user, loading } = useAuth();
+  // Map legacy roles to new UserRole
+  let role: UserRole | null = null;
+  if (user) {
+    switch (user.role) {
+      case "superadmin":
+        role = "super_admin";
+        break;
+      case "org_admin":
+        role = "org_admin";
+        break;
+      case "branch_manager":
+        role = "branch_admin";
+        break;
+      case "employee":
+        role = "org_member";
+        break;
+      default:
+        role = null;
+    }
+  }
+  return {
+    user,
+    loading,
+    role,
+    isAuthorized: (allowedRoles: UserRole[]) =>
+      isAuthorized(role, allowedRoles),
+    getRoleUrl,
+  };
+};
