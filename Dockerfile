@@ -41,4 +41,4 @@ COPY --from=builder /app/public ./public
 EXPOSE 3000
 
 # Run the Next.js production server
-CMD ["npx", "next", "start", "-p", "3000"]
+CMD ["npm", "start"]
