@@ -34,11 +34,10 @@ import {
   RefreshCw,
   UserX,
   ClipboardList,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { getBranchId, getOrganizationId } from '@/utils/tokenUtils';
-import { EmployeeList } from '@/components/branch/employee-list';
-import { getBranchById } from '@/services/branch.service';
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { getBranchId, getOrganizationId } from "@/utils/tokenUtils";
+import { EmployeeList } from "@/components/branch/employee-list";
 
 export default function UsersPage() {
   const { t: translate } = useTranslation();

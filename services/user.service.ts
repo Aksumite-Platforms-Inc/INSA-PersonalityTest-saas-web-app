@@ -154,3 +154,38 @@ export const bulkAddUsers = async (
 
   return response.data.data;
 };
+
+export const activateAccount = async (
+  email: string,
+  code: string,
+  password: string
+) => {
+  try {
+    const response = await apiClient.post(
+      "/organization/members/activate",
+      { email, activation_code: code, new_password: password },
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error activating account:", error);
+    throw error;
+  }
+};
+export const resetPassword = async (
+  email: string,
+  code: string,
+  password: string
+) => {
+  try {
+    const response = await apiClient.post(
+      "/organization/members/validateresetpassword",
+      { email, reset_code: code, new_password: password },
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    throw error;
+  }
+};
