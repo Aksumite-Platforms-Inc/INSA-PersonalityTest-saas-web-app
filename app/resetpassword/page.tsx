@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { resetPassword } from "@/services/user.service";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
-const PasswordResetPage = () => {
-  const searchParams = useSearchParams();
+const PasswordResetPageContent = ({ searchParams }: { searchParams: URLSearchParams }) => {
   const router = useRouter();
-
   const email = searchParams.get("email");
   const code = searchParams.get("code");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +20,6 @@ const PasswordResetPage = () => {
       setError("Passwords do not match.");
       return;
     }
-
     try {
       await resetPassword(email as string, code as string, password);
       setSuccess(true);
@@ -33,7 +30,7 @@ const PasswordResetPage = () => {
 
   useEffect(() => {
     if (success) {
-      router.push("/"); // Redirect to home page or desired route
+      router.push("/");
     }
   }, [success, router]);
 
@@ -77,6 +74,14 @@ const PasswordResetPage = () => {
         </button>
       </form>
     </div>
+  );
+};
+
+const PasswordResetPage = () => {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <PasswordResetPageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
   );
 };
 
