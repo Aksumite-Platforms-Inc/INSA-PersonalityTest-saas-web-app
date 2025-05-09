@@ -22,6 +22,8 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
+ENV HOST 0.0.0.0
+
 # Copy only necessary files from builder
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.next/standalone ./
