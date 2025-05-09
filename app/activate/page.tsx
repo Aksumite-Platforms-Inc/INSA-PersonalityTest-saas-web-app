@@ -3,16 +3,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { activateAccount, resetPassword } from "@/services/user.service";
+import { useRouter } from "next/navigation";
+import { activateAccount } from "@/services/user.service";
+import SearchParamsWrapper from '@/components/SearchParamsWrapper';
 
-const ActivatePage = () => {
-  const searchParams = useSearchParams();
+const ActivatePageContent = ({ searchParams }: { searchParams: URLSearchParams }) => {
   const router = useRouter();
-
   const email = searchParams.get("email");
   const code = searchParams.get("code");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +22,6 @@ const ActivatePage = () => {
       setError("Passwords do not match.");
       return;
     }
-
     try {
       await activateAccount(email as string, code as string, password);
       setSuccess(true);
@@ -35,7 +32,7 @@ const ActivatePage = () => {
 
   useEffect(() => {
     if (success) {
-      router.push("/"); // Redirect to home page or desired route
+      router.push("/");
     }
   }, [success, router]);
 
@@ -82,4 +79,10 @@ const ActivatePage = () => {
   );
 };
 
-export default ActivatePage;
+export default function ActivatePage() {
+  return (
+    <SearchParamsWrapper>
+      {(searchParams) => <ActivatePageContent searchParams={searchParams} />}
+    </SearchParamsWrapper>
+  );
+}
