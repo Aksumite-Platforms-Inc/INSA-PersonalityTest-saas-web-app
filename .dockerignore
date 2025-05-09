@@ -1,9 +1,9 @@
+Dockerfile
+.dockerignore
 node_modules
-out
-.git
+npm-debug.log
+README.md
 .next
+.git
 docker-compose.yml
 docker-compose.prod.yml
-Dockerfile
-bun.lockb
-*.log
