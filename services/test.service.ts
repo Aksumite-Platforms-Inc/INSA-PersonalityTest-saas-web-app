@@ -4,6 +4,15 @@ import { handleApiError } from "@/utils/error.utils";
 import { savePayloadToGist } from "./gistApi";
 import path from "path";
 
+// Conditionally import `fs` and `path` for server-side usage
+let fs: typeof import("fs") | null = null;
+let path: typeof import("path") | null = null;
+
+if (typeof window === "undefined") {
+  fs = require("fs");
+  path = require("path");
+}
+
 import {
   ApiResponse,
   OEJTSRequest,
@@ -30,8 +39,21 @@ const savePayloadToFile = async (
     console.log("Gist URL:", gistUrl); // Additional log for verification
   } catch (error) {
     console.error("❌ Error saving payload to Gist:", error);
-  }
-};
+
+// Helper to save payload to local folder (server-side only)
+// const savePayloadToFile = (fileName: string, payload: any) => {
+//   if (!fs || !path) return; // Skip if not in a Node.js environment
+
+//   try {
+//     const dirPath = path.join(process.cwd(), "saved-payloads");
+//     fs.mkdirSync(dirPath, { recursive: true });
+//     const filePath = path.join(dirPath, fileName);
+//     fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+//     console.log(`✅ Saved payload to ${filePath}`);
+//   } catch (error) {
+//     console.error("❌ Error saving payload to file system:", error);
+//   }
+// };
 
 // ============================
 // Check if a test is taken
@@ -44,7 +66,7 @@ export const checkTestTaken = async (
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<boolean>>(
-    `/organization/checktest/members/${memberId}/tests/${testId}`
+    "/organization/checktest/members/${memberId}/tests/${testId}"
   );
 
   if (!response.data.success) {
@@ -62,7 +84,7 @@ export const getResults = async (
 ): Promise<ApiResponse<PersonalityTestScores>> => {
   try {
     const response = await apiClient.get<ApiResponse<PersonalityTestScores>>(
-      `/organization/personalityTest/getResults?user_id=${userId}`
+      "/organization/personalityTest/getResults?user_id=${userId}"
     );
     return response.data;
   } catch (error: any) {
@@ -90,6 +112,7 @@ export const submitRIASECAnswers = async (
       userId.toString(),
       "RIASEC"
     );
+//     savePayloadToFile("riasec-answers.json", { answers });
     return handleApiError(error);
   }
 };
@@ -114,6 +137,7 @@ export const submitBig5TestAnswers = async (
       userId.toString(),
       "Big Five"
     );
+//     savePayloadToFile("bigfive-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -144,6 +168,7 @@ export const submitMBTIAnswers = async (
       userId.toString(),
       "MBTI"
     );
+//     savePayloadToFile("mbti-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -168,6 +193,8 @@ export const submitEnneagramAnswers = async (
       userId.toString(),
       "Enneagram"
     );
+
+//     savePayloadToFile("enneagram-answers.json", payload);
     return handleApiError(error);
   }
 };

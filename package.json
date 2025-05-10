@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack --port 5174",
     "build": "next build",
-    "start": "next start -p 3000 -H 0.0.0.0",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -51,11 +51,8 @@
     "embla-carousel-react": "8.5.1",
     "framer-motion": "^12.9.7",
     "fs": "^0.0.1-security",
-    "googleapis": "^148.0.0",
     "gsap": "^3.12.7",
     "input-otp": "1.4.1",
-    "insa-personalitytest-saas-web-app": "file:",
-    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.454.0",
     "next": "^15.3.2",
@@ -70,6 +67,7 @@
     "react-resizable-panels": "^2.1.7",
     "react-simple-maps": "^3.0.0",
     "recharts": "^2.12.7",
+    "sharp": "^0.34.1",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
@@ -80,7 +78,6 @@
   "devDependencies": {
     "@types/axios": "^0.9.36",
     "@types/jest": "^29.5.14",
-    "@types/js-cookie": "^3.0.6",
     "@types/jwt-decode": "^2.2.1",
     "@types/next": "^8.0.7",
     "@types/node": "^22.7.9",

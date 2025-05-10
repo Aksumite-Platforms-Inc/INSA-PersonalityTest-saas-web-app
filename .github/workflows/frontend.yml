@@ -11,8 +11,8 @@ env:
 
 jobs:
   build-and-push:
-    name: 🛠️ Build & Push Frontend Docker Image
-    runs-on: ubuntu-latest
+    name: 🛠 Build & Push Frontend Docker Image
+    runs-on: [self-hosted, insa-build-runner]  # use your own build runner
 
     steps:
       - name: 📥 Checkout code
@@ -20,6 +20,8 @@ jobs:
 
       - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: network=host
 
       - name: 🔐 Login to Docker Hub
         uses: docker/login-action@v2
@@ -27,7 +29,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: 🏗️ Build and Push Frontend Image
+      - name: 🧹 Clean up old Docker resources (optional but recommended)
+        run: |
+          docker system prune -af || true
+          docker builder prune -af || true
+
+      - name: 🏗 Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -42,8 +49,7 @@ jobs:
 
     steps:
       - name: 📦 Pull latest frontend image
-        run: |
-          docker pull ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        run: docker pull ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: 🔄 Deploy Docker Stack
         working-directory: /home/ubuntu/insa-deploy
