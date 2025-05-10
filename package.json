@@ -50,6 +50,7 @@
     "cmdk": "1.0.4",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "^12.9.7",
+    "fs": "^0.0.1-security",
     "gsap": "^3.12.7",
     "input-otp": "1.4.1",
     "insa-personalitytest-saas-web-app": "file:",

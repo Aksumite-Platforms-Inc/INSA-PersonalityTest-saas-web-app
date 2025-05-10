@@ -16,14 +16,16 @@ import {
   PersonalityTestScores,
 } from "@/types/personality.type";
 
-// Helper function to save payload to the file system
+// Simple helper to save payload to local folder
 const savePayloadToFile = (fileName: string, payload: any) => {
   try {
-    const filePath = path.join(process.cwd(), "public", "saved-payloads", fileName);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    const dirPath = path.join(process.cwd(), "saved-payloads");
+    fs.mkdirSync(dirPath, { recursive: true });
+    const filePath = path.join(dirPath, fileName);
     fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+    console.log(`✅ Saved payload to ${filePath}`);
   } catch (error) {
-    console.error("Error saving payload to file system:", error);
+    console.error("❌ Error saving payload to file system:", error);
   }
 };
 
@@ -32,13 +34,13 @@ const savePayloadToFile = (fileName: string, payload: any) => {
 // ============================
 export const checkTestTaken = async (
   memberId: number,
-  testId: number,
+  testId: number
 ): Promise<boolean> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<boolean>>(
-    `/organization/checktest/members/${memberId}/tests/${testId}`,
+    "/organization/checktest/members/${memberId}/tests/${testId}"
   );
 
   if (!response.data.success) {
@@ -52,11 +54,11 @@ export const checkTestTaken = async (
 // Get all test results (aggregated)
 // ============================
 export const getResults = async (
-  userId: string,
+  userId: string
 ): Promise<ApiResponse<PersonalityTestScores>> => {
   try {
     const response = await apiClient.get<ApiResponse<PersonalityTestScores>>(
-      `/organization/personalityTest/getResults?user_id=${userId}`,
+      "/organization/personalityTest/getResults?user_id=${userId}"
     );
     return response.data;
   } catch (error: any) {
@@ -68,12 +70,12 @@ export const getResults = async (
 // Submit RIASEC Test Answers
 // ============================
 export const submitRIASECAnswers = async (
-  answers: RIASECRequest["answers"],
+  answers: RIASECRequest["answers"]
 ): Promise<ApiResponse<ScoreEntry[]>> => {
   try {
     const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
       "/organization/personalityTest/riasec/calculateScores",
-      { answers },
+      { answers }
     );
     return response.data;
   } catch (error: any) {
@@ -86,12 +88,12 @@ export const submitRIASECAnswers = async (
 // Submit Big Five Test Answers
 // ============================
 export const submitBig5TestAnswers = async (
-  payload: BigFiveRequest,
+  payload: BigFiveRequest
 ): Promise<ApiResponse<BigFiveResult>> => {
   try {
     const response = await apiClient.post<ApiResponse<BigFiveResult>>(
       "/organization/personalityTest/bigfive/calculateScores",
-      payload,
+      payload
     );
     return response.data;
   } catch (error: any) {
@@ -105,7 +107,7 @@ export const submitBig5TestAnswers = async (
 // ============================
 export const submitMBTIAnswers = async (
   aAnswers: OEJTSRequest["a_answers"],
-  bAnswers: OEJTSRequest["b_answers"],
+  bAnswers: OEJTSRequest["b_answers"]
 ): Promise<ApiResponse<MBTIResult>> => {
   const payload: OEJTSRequest = {
     a_answers: aAnswers,
@@ -115,7 +117,7 @@ export const submitMBTIAnswers = async (
   try {
     const response = await apiClient.post<ApiResponse<MBTIResult>>(
       "/organization/personalityTest/oejts/calculateScores",
-      payload,
+      payload
     );
     return response.data;
   } catch (error: any) {
@@ -128,12 +130,12 @@ export const submitMBTIAnswers = async (
 // Submit Enneagram Answers
 // ============================
 export const submitEnneagramAnswers = async (
-  payload: EnneagramRequest,
+  payload: EnneagramRequest
 ): Promise<ApiResponse<ScoreEntry[]>> => {
   try {
     const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
       "/organization/personalityTest/ennegram/calculateScores",
-      payload,
+      payload
     );
     return response.data;
   } catch (error: any) {
