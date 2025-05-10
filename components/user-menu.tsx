@@ -13,7 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { LogOut, User, Settings } from "lucide-react";
-import { decodeToken } from "@/utils/tokenUtils";
+import { decodeToken, logout } from "@/utils/tokenUtils";
 
 export function UserMenu() {
   const router = useRouter();
@@ -44,6 +44,11 @@ export function UserMenu() {
 
   const handleLogout = () => {
     // In a real app, this would call an API to log out
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
+
+    document.cookie = "authToken=; path=/; max-age=0";
+    document.cookie = "authToken=; path=/; domain=yourdomain.com; max-age=0";
 
     toast({
       title: t("logout.success"),

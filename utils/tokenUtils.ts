@@ -51,3 +51,10 @@ export const getUserId = (): number | null => {
 export const getUserEmail = (): string | null => {
   return decodeToken()?.email || null;
 };
+
+export const logout = (): void => {
+  // if (typeof window !== "undefined") {
+  localStorage.removeItem("authToken");
+  document.cookie = "authToken=; path=/; max-age=0"; // Clear cookie
+  // }
+};
