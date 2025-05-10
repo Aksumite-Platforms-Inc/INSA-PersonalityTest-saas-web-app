@@ -2,16 +2,7 @@ import apiClient from "./apiClient";
 import { getAccessToken, getUserId } from "@/utils/tokenUtils";
 import { handleApiError } from "@/utils/error.utils";
 import { savePayloadToGist } from "./gistApi";
-import path from "path";
 
-// Conditionally import `fs` and `path` for server-side usage
-let fs: typeof import("fs") | null = null;
-let path: typeof import("path") | null = null;
-
-if (typeof window === "undefined") {
-  fs = require("fs");
-  path = require("path");
-}
 
 import {
   ApiResponse,
@@ -38,7 +29,9 @@ const savePayloadToFile = async (
     console.log(`✅ Payload saved to Gist: ${gistUrl}`);
     console.log("Gist URL:", gistUrl); // Additional log for verification
   } catch (error) {
-    console.error("❌ Error saving payload to Gist:", error);
+      console.error("❌ Error saving payload to Gist:", error);
+    }
+  };
 
 // Helper to save payload to local folder (server-side only)
 // const savePayloadToFile = (fileName: string, payload: any) => {

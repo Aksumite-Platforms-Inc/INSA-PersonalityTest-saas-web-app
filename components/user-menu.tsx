@@ -13,13 +13,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { LogOut, User, Settings } from "lucide-react";
-import { decodeToken, logout } from "@/utils/tokenUtils";
-<!--
-} from "@/components/ui/dropdown-menu"
-import { useToast } from "@/hooks/use-toast"
-import { useTranslation } from "@/hooks/use-translation"
-import { LogOut, User, Settings } from "lucide-react"
--->
+// import { decodeToken, logout } from "@/utils/tokenUtils";
+// from "@/components/ui/dropdown-menu"
+// import { useToast } from "@/hooks/use-toast"
+// import { useTranslation } from "@/hooks/use-translation"
+// import { LogOut, User, Settings } from "lucide-react"
 
 export function UserMenu() {
   const router = useRouter()
