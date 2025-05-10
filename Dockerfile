@@ -2,7 +2,7 @@
 
 FROM node:18-alpine AS base
 
-ENV NODE_OPTIONS=--max-old-space-size=2048
+ENV NODE_OPTIONS=--max-old-space-size=4096
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -21,7 +21,7 @@ RUN \
 
 
 # Rebuild the source code only when needed
-FROM base AS builder
+FROM node:18 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
