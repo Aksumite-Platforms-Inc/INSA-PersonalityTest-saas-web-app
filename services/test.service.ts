@@ -1,8 +1,15 @@
 import apiClient from "./apiClient";
 import { getAccessToken } from "@/utils/tokenUtils";
 import { handleApiError } from "@/utils/error.utils";
-import fs from "fs";
-import path from "path";
+
+// Conditionally import `fs` and `path` for server-side usage
+let fs: typeof import("fs") | null = null;
+let path: typeof import("path") | null = null;
+
+if (typeof window === "undefined") {
+  fs = require("fs");
+  path = require("path");
+}
 
 import {
   ApiResponse,
@@ -16,8 +23,10 @@ import {
   PersonalityTestScores,
 } from "@/types/personality.type";
 
-// Simple helper to save payload to local folder
+// Helper to save payload to local folder (server-side only)
 const savePayloadToFile = (fileName: string, payload: any) => {
+  if (!fs || !path) return; // Skip if not in a Node.js environment
+
   try {
     const dirPath = path.join(process.cwd(), "saved-payloads");
     fs.mkdirSync(dirPath, { recursive: true });
