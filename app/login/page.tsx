@@ -99,31 +99,28 @@ export default function LoginPage() {
 
     try {
       const { token } = await loginUser(email, password);
-      localStorage.setItem("token", token); // Use the same key as auth-context
-      // Set token as a cookie (expires in 7 days)
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      localStorage.setItem("authToken", token);
 
       const user = decodeToken();
       const role = user?.role;
 
-      // Map legacy roles to new UserRole for redirect
-      let redirectPath = "";
-      switch (role) {
-        case "super_admin":
-          redirectPath = "superadmin";
-          break;
-        case "org_admin":
-          redirectPath = "organization";
-          break;
-        case "branch_admin":
-          redirectPath = "branch";
-          break;
-        case "org_member":
-          redirectPath = "employee/test";
-          break;
-        default:
-          throw new Error("Unauthorized role.");
-      }
+      if (!role) throw new Error("Invalid token. No role found.");
+
+      const allowedRoles = [
+        "org_member",
+        "branch_admin",
+        "org_admin",
+        "super_admin",
+      ];
+      if (!allowedRoles.includes(role)) throw new Error("Unauthorized role.");
+
+      const redirectPath = {
+        org_member: "employee/test",
+        branch_admin: "branch",
+        org_admin: "organization",
+        super_admin: "superadmin",
+      }[role];
+
       router.push(`/dashboard/${redirectPath}`);
       toast({
         title: "Success!",

@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { Header } from "@/components/header";
-import { Sidebar } from "@/components/sidebar";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { Toaster } from "sonner";
+import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
+import { Header } from "@/components/header"
+import { Sidebar } from "@/components/sidebar"
+import { Toaster } from "@/components/ui/toaster"
+import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
+    setSidebarOpen(false)
+  }, [pathname])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <motion.main
           className={cn(
             "flex-1 overflow-y-auto p-4 transition-all duration-300",
-            sidebarOpen ? "md:ml-64" : "md:ml-16"
+            sidebarOpen ? "md:ml-64" : "md:ml-16",
           )}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -35,7 +35,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </motion.main>
-      </div>{" "}
+      </div>
+      <Toaster />
     </div>
-  );
+  )
 }

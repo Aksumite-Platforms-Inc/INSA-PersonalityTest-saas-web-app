@@ -7,30 +7,9 @@ import { TestsCompletedChart } from "@/components/dashboard/tests-completed-char
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { listOrganizations } from "@/services/organization.service";
 import { useEffect, useState } from "react";
-import { useRBACAuth } from "@/app/contexts/auth-context";
-import { useRouter } from "next/navigation";
 // import { listTests } from "@/services/test.service";
 
 export default function SuperadminDashboard() {
-  const { role } = useRBACAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (role && role !== "super_admin") {
-      // If not super_admin, redirect to their allowed dashboard
-      router.replace(
-        "/dashboard/" +
-          (role === "org_admin"
-            ? "organization"
-            : role === "branch_admin"
-            ? "branch"
-            : role === "org_member"
-            ? "employee/test"
-            : "")
-      );
-    }
-  }, [role, router]);
-
   const [totalOrganizations, setTotalOrganizations] = useState(0);
   const [testsCompleted, setTestsCompleted] = useState(0);
 
