@@ -12,16 +12,11 @@ env:
 jobs:
   build-and-push:
     name: 🛠 Build & Push Frontend Docker Image
-    runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: "--max-old-space-size=16384"
-      DOCKER_BUILDKIT: 1
+    runs-on: [self-hosted, insa-build-runner]  # use your own build runner
 
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -34,14 +29,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: 🧹 Cleanup resources
+      - name: 🧹 Clean up old Docker resources (optional but recommended)
         run: |
-          docker system prune -af
-          sudo sysctl vm.swappiness=10
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          docker system prune -af || true
+          docker builder prune -af || true
 
       - name: 🏗 Build and Push Frontend Image
         uses: docker/build-push-action@v5
@@ -50,12 +41,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          build-args: |
-            NODE_OPTIONS=--max-old-space-size=16384
-            NODE_ENV=production
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
 
   deploy:
     name: 🚀 Deploy Frontend to Production
