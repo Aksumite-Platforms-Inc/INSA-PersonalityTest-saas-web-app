@@ -34,6 +34,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - name: Clean up old images
+        run: |
+          docker image prune -f
       - name: 🏗 Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
