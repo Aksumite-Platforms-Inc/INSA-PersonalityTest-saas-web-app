@@ -1,9 +1,9 @@
 # syntax=docker.io/docker/dockerfile:1
 
-# Use full Debian image with build essentials
-FROM node:18.20.2-bullseye AS base
+# Use official Node image with build tools
+FROM node:18.20.2-bullseye-slim AS base
 
-# Stage 1: Install dependencies
+# Stage 1: Install system dependencies
 FROM base AS deps
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -11,11 +11,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
+# Copy package files
 COPY package.json package-lock.json* ./
 
-# Clean install with cache cleanup
-RUN npm ci --prefer-offline --no-audit && \
-    npm cache clean --force
+# Install dependencies with clean cache
+RUN npm ci --no-audit --prefer-offline --no-optional \
+    && npm cache clean --force
 
 # Stage 2: Build application
 FROM base AS builder
@@ -23,26 +24,26 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Memory optimization config
+# Memory optimization configuration
 ENV NODE_OPTIONS="--max-old-space-size=16384"
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV GENERATE_SOURCEMAP=false
 
-# Custom Next.js config for memory optimization
+# Optimized Next.js config
 RUN echo "module.exports = { \
-  swcMinify: true, \
   output: 'standalone', \
   experimental: { \
     webpackBuildWorker: false, \
     cpus: 1, \
-    workerThreads: false, \
-    memoryBasedWorkersCount: 1, \
-    sharedPool: true \
+    workerThreads: false \
+  }, \
+  compiler: { \
+    styledComponents: true \
   } \
 }" > next.config.js
 
-# Build with resource limits
-RUN npm run build -- --debug
+# Build with memory limits
+RUN npm run build
 
 # Final production image
 FROM base AS runner

@@ -34,12 +34,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Clean up old images
-        run: docker image prune -f
-
-      - name: Set swap space
+      - name: 🧹 Cleanup resources
         run: |
-          sudo fallocate -l 4G /swapfile
+          docker system prune -af
+          sudo sysctl vm.swappiness=10
+          sudo fallocate -l 8G /swapfile
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
