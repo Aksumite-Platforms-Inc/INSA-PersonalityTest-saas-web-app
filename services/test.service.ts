@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
 import { getAccessToken } from "@/utils/tokenUtils";
 import { handleApiError } from "@/utils/error.utils";
+import fs from "fs";
+import path from "path";
 
 import {
   ApiResponse,
@@ -13,6 +15,17 @@ import {
   ScoreEntry,
   PersonalityTestScores,
 } from "@/types/personality.type";
+
+// Helper function to save payload to the file system
+const savePayloadToFile = (fileName: string, payload: any) => {
+  try {
+    const filePath = path.join(process.cwd(), "public", "saved-payloads", fileName);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error saving payload to file system:", error);
+  }
+};
 
 // ============================
 // Check if a test is taken
@@ -64,6 +77,7 @@ export const submitRIASECAnswers = async (
     );
     return response.data;
   } catch (error: any) {
+    savePayloadToFile("riasec-answers.json", { answers });
     return handleApiError(error);
   }
 };
@@ -81,6 +95,7 @@ export const submitBig5TestAnswers = async (
     );
     return response.data;
   } catch (error: any) {
+    savePayloadToFile("bigfive-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -104,6 +119,7 @@ export const submitMBTIAnswers = async (
     );
     return response.data;
   } catch (error: any) {
+    savePayloadToFile("mbti-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -121,6 +137,7 @@ export const submitEnneagramAnswers = async (
     );
     return response.data;
   } catch (error: any) {
+    savePayloadToFile("enneagram-answers.json", payload);
     return handleApiError(error);
   }
 };
