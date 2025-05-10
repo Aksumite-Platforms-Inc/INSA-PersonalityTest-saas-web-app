@@ -86,7 +86,7 @@ export default function LandingPage() {
         ref={headerRef}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.5 }}
         className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="container flex h-16 items-center justify-between">
@@ -132,6 +132,9 @@ export default function LandingPage() {
       <section
         ref={heroRef}
         className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
       >
         {/* Add decorative floating elements */}
         <div className="absolute top-20 left-[10%] hidden lg:block">

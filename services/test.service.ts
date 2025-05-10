@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
-import { getAccessToken } from "@/utils/tokenUtils";
+import { getAccessToken, getUserId } from "@/utils/tokenUtils";
 import { handleApiError } from "@/utils/error.utils";
+import { savePayloadToGist } from "./gistApi";
+import path from "path";
 
 // Conditionally import `fs` and `path` for server-side usage
 let fs: typeof import("fs") | null = null;
@@ -23,20 +25,35 @@ import {
   PersonalityTestScores,
 } from "@/types/personality.type";
 
-// Helper to save payload to local folder (server-side only)
-const savePayloadToFile = (fileName: string, payload: any) => {
-  if (!fs || !path) return; // Skip if not in a Node.js environment
-
+// Update the `savePayloadToFile` function to include user ID and test name in the payload
+const savePayloadToFile = async (
+  fileName: string,
+  payload: any,
+  userId: string,
+  testName: string
+) => {
   try {
-    const dirPath = path.join(process.cwd(), "saved-payloads");
-    fs.mkdirSync(dirPath, { recursive: true });
-    const filePath = path.join(dirPath, fileName);
-    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
-    console.log(`✅ Saved payload to ${filePath}`);
+    const content = JSON.stringify({ userId, testName, ...payload }, null, 2);
+    const gistUrl = await savePayloadToGist(fileName, content);
+    console.log(`✅ Payload saved to Gist: ${gistUrl}`);
+    console.log("Gist URL:", gistUrl); // Additional log for verification
   } catch (error) {
-    console.error("❌ Error saving payload to file system:", error);
-  }
-};
+    console.error("❌ Error saving payload to Gist:", error);
+
+// Helper to save payload to local folder (server-side only)
+// const savePayloadToFile = (fileName: string, payload: any) => {
+//   if (!fs || !path) return; // Skip if not in a Node.js environment
+
+//   try {
+//     const dirPath = path.join(process.cwd(), "saved-payloads");
+//     fs.mkdirSync(dirPath, { recursive: true });
+//     const filePath = path.join(dirPath, fileName);
+//     fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), "utf-8");
+//     console.log(`✅ Saved payload to ${filePath}`);
+//   } catch (error) {
+//     console.error("❌ Error saving payload to file system:", error);
+//   }
+// };
 
 // ============================
 // Check if a test is taken
@@ -75,12 +92,13 @@ export const getResults = async (
   }
 };
 
-// ============================
-// Submit RIASEC Test Answers
-// ============================
+// Update the `submitRIASECAnswers` function to use `getUserId` from `tokenUtils`
 export const submitRIASECAnswers = async (
   answers: RIASECRequest["answers"]
 ): Promise<ApiResponse<ScoreEntry[]>> => {
+  const userId = getUserId();
+  if (!userId) throw new Error("User ID is missing from the token.");
+
   try {
     const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
       "/organization/personalityTest/riasec/calculateScores",
@@ -88,17 +106,24 @@ export const submitRIASECAnswers = async (
     );
     return response.data;
   } catch (error: any) {
-    savePayloadToFile("riasec-answers.json", { answers });
+    await savePayloadToFile(
+      "riasec-answers.json",
+      { answers },
+      userId.toString(),
+      "RIASEC"
+    );
+//     savePayloadToFile("riasec-answers.json", { answers });
     return handleApiError(error);
   }
 };
 
-// ============================
-// Submit Big Five Test Answers
-// ============================
+// Update the `submitBig5TestAnswers` function to use `getUserId` from `tokenUtils`
 export const submitBig5TestAnswers = async (
   payload: BigFiveRequest
 ): Promise<ApiResponse<BigFiveResult>> => {
+  const userId = getUserId();
+  if (!userId) throw new Error("User ID is missing from the token.");
+
   try {
     const response = await apiClient.post<ApiResponse<BigFiveResult>>(
       "/organization/personalityTest/bigfive/calculateScores",
@@ -106,18 +131,25 @@ export const submitBig5TestAnswers = async (
     );
     return response.data;
   } catch (error: any) {
-    savePayloadToFile("bigfive-answers.json", payload);
+    await savePayloadToFile(
+      "bigfive-answers.json",
+      payload,
+      userId.toString(),
+      "Big Five"
+    );
+//     savePayloadToFile("bigfive-answers.json", payload);
     return handleApiError(error);
   }
 };
 
-// ============================
-// Submit OEJTS (MBTI) Answers
-// ============================
+// Update the `submitMBTIAnswers` function to use `getUserId` from `tokenUtils`
 export const submitMBTIAnswers = async (
   aAnswers: OEJTSRequest["a_answers"],
   bAnswers: OEJTSRequest["b_answers"]
 ): Promise<ApiResponse<MBTIResult>> => {
+  const userId = getUserId();
+  if (!userId) throw new Error("User ID is missing from the token.");
+
   const payload: OEJTSRequest = {
     a_answers: aAnswers,
     b_answers: bAnswers,
@@ -130,17 +162,24 @@ export const submitMBTIAnswers = async (
     );
     return response.data;
   } catch (error: any) {
-    savePayloadToFile("mbti-answers.json", payload);
+    await savePayloadToFile(
+      "mbti-answers.json",
+      payload,
+      userId.toString(),
+      "MBTI"
+    );
+//     savePayloadToFile("mbti-answers.json", payload);
     return handleApiError(error);
   }
 };
 
-// ============================
-// Submit Enneagram Answers
-// ============================
+// Update the `submitEnneagramAnswers` function to use `getUserId` from `tokenUtils`
 export const submitEnneagramAnswers = async (
   payload: EnneagramRequest
 ): Promise<ApiResponse<ScoreEntry[]>> => {
+  const userId = getUserId();
+  if (!userId) throw new Error("User ID is missing from the token.");
+
   try {
     const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
       "/organization/personalityTest/ennegram/calculateScores",
@@ -148,7 +187,14 @@ export const submitEnneagramAnswers = async (
     );
     return response.data;
   } catch (error: any) {
-    savePayloadToFile("enneagram-answers.json", payload);
+    await savePayloadToFile(
+      "enneagram-answers.json",
+      payload,
+      userId.toString(),
+      "Enneagram"
+    );
+
+//     savePayloadToFile("enneagram-answers.json", payload);
     return handleApiError(error);
   }
 };

@@ -67,8 +67,7 @@ export default function UploadEmployeesPage() {
 
       const extractedUsers = jsonData.map((row: any, index: number) => {
         const errors = [];
-        if (!row["First Name"] || !row["Last Name"])
-          errors.push("Missing name");
+        if (!row["Full Name"]) errors.push("Missing name");
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row["Email Address"]))
           errors.push("Invalid email");
         if (row["Phone Number"] && !/^\d{10,15}$/.test(row["Phone Number"]))
@@ -77,7 +76,7 @@ export default function UploadEmployeesPage() {
         return {
           row: index + 2,
           data: {
-            name: `${row["First Name"]} ${row["Last Name"]}`,
+            name: `${row["Full Name"]}`,
             email: row["Email Address"],
             phone_number: row["Phone Number"] || "",
             position: row["Position"],

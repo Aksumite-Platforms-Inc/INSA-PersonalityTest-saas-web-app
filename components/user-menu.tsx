@@ -9,10 +9,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
+import { LogOut, User, Settings } from "lucide-react";
+import { decodeToken, logout } from "@/utils/tokenUtils";
+<!--
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
 import { LogOut, User, Settings } from "lucide-react"
+-->
 
 export function UserMenu() {
   const router = useRouter()
@@ -29,6 +36,11 @@ export function UserMenu() {
 
   const handleLogout = () => {
     // In a real app, this would call an API to log out
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
+
+    document.cookie = "authToken=; path=/; max-age=0";
+    document.cookie = "authToken=; path=/; domain=yourdomain.com; max-age=0";
     toast({
       title: t("logout.success"),
       description: t("logout.redirecting"),
