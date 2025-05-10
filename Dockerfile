@@ -1,62 +1,66 @@
 # syntax=docker.io/docker/dockerfile:1
 
-# Use a larger base image instead of alpine
-FROM node:18-bullseye-slim AS base
+# Use full Debian image with build essentials
+FROM node:18.20.2-bullseye AS base
 
-# Install dependencies only when needed
+# Stage 1: Install dependencies
 FROM base AS deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     build-essential \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json package-lock.json* ./
 
-# Rebuild the source code only when needed
+# Clean install with cache cleanup
+RUN npm ci --prefer-offline --no-audit && \
+    npm cache clean --force
+
+# Stage 2: Build application
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set higher memory limit and disable parallel builds
-ENV NODE_OPTIONS=--max-old-space-size=8192
+# Memory optimization config
+ENV NODE_OPTIONS="--max-old-space-size=16384"
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV GENERATE_SOURCEMAP=false
 
-# Disable Next.js build workers
-RUN echo "module.exports = { experimental: { webpackBuildWorker: false, parallelServerCompiles: false, parallelServerBuildTraces: false } }" > next.config.js
+# Custom Next.js config for memory optimization
+RUN echo "module.exports = { \
+  swcMinify: true, \
+  output: 'standalone', \
+  experimental: { \
+    webpackBuildWorker: false, \
+    cpus: 1, \
+    workerThreads: false, \
+    memoryBasedWorkersCount: 1, \
+    sharedPool: true \
+  } \
+}" > next.config.js
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Build with resource limits
+RUN npm run build -- --debug
 
-# Production image
+# Final production image
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NODE_OPTIONS=--max-old-space-size=4096
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs -m nextjs && \
+    mkdir -p /app/.next && \
+    chown -R nextjs:nodejs /app
 
-COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 USER nextjs
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+
 CMD ["node", "server.js"]
