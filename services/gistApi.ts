@@ -1,5 +1,5 @@
 import axios from "axios";
-const GITHUB_TOKEN = process.env["GITHUB_GIST_TOKEN"]; // Ensure compatibility with OS environment variables
+const GITHUB_TOKEN = process.env.GITHUB_GIST_TOKEN; // Ensure compatibility with OS environment variables
 if (!GITHUB_TOKEN) {
   console.error("❌ GITHUB_GIST_TOKEN is not set in the environment variables.");
 }
