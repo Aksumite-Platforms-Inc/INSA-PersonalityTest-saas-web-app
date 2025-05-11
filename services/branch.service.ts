@@ -110,7 +110,6 @@ export const getBranchMembers = async (
  * @param data - Updated branch data
  */
 export const updateBranch = async (
-  orgId: number,
   branchId: number,
   data: {
     id: number;
@@ -128,7 +127,7 @@ export const updateBranch = async (
   }
 
   const response = await apiClient.put<ApiResponse<Branch>>(
-    `/organization/${orgId}/branches/${branchId}`,
+    `/organization/branches/${branchId}`,
     data
   );
 
