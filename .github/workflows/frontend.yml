@@ -56,6 +56,8 @@ jobs:
         run: |
           export $(cat .env.full | grep -v '^#' | xargs)
           docker stack deploy -c docker-compose.prod.yaml insa
+          docker service logs --tail 50 insa_insa_frontend
+          docker service logs insa_insa_frontend
 
       - name: ✅ Confirm Services
         run: docker service ls
