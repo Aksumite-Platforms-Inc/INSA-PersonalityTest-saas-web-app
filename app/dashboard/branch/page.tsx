@@ -1,34 +1,14 @@
+// dashboard/branch/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRBACAuth } from "@/app/contexts/auth-context";
-import { useRouter } from "next/navigation";
-// import { getBranchStats } from "@/services/branchService";
+import { RouteGuard } from "@/components/route-guard";
+import { useState } from "react";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeProgressChart } from "@/components/branch/employee-progress-chart";
 import { EmployeeList } from "@/components/branch/employee-list";
 
-export default function BranchDashboard() {
-  const { role } = useRBACAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (role && role !== "branch_admin") {
-      // If not branch_admin, redirect to their allowed dashboard
-      router.replace(
-        "/dashboard/" +
-          (role === "super_admin"
-            ? "superadmin"
-            : role === "org_admin"
-            ? "organization"
-            : role === "org_member"
-            ? "employee/test"
-            : "")
-      );
-    }
-  }, [role, router]);
-
+function BranchDashboardContent() {
   const [stats, setStats] = useState({
     totalEmployees: 0,
     testsCompleted: 0,
@@ -38,30 +18,16 @@ export default function BranchDashboard() {
     changeInCompletionRate: 0,
   });
 
-  // useEffect(() => {
-  //   const fetchStats = async () => {
-  //     const { data, success, error } = await getBranchStats();
-  //     if (success) {
-  //       setStats(data);
-  //     } else {
-  //       console.error("Failed to fetch branch stats:", error);
-  //     }
-  //   };
-
-  //   fetchStats();
-  // }, []);
-
   return (
     <div className="space-y-6">
       <PageTitle
         title="Branch Dashboard"
         description="Monitor employee test progress and performance"
       />
-
-      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Cards */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader>
             <CardTitle className="text-sm font-medium">
               Total Employees
             </CardTitle>
@@ -77,7 +43,7 @@ export default function BranchDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader>
             <CardTitle className="text-sm font-medium">
               Tests Completed
             </CardTitle>
@@ -93,7 +59,7 @@ export default function BranchDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader>
             <CardTitle className="text-sm font-medium">
               Completion Rate
             </CardTitle>
@@ -110,8 +76,6 @@ export default function BranchDashboard() {
         </Card>
       </div>
 
-      {/* Charts */}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-center">Employee Progress</CardTitle>
@@ -121,7 +85,6 @@ export default function BranchDashboard() {
         </CardContent>
       </Card>
 
-      {/* Employee List */}
       <Card>
         <CardHeader>
           <CardTitle>Employee Test Status</CardTitle>
@@ -131,5 +94,13 @@ export default function BranchDashboard() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function BranchDashboardPage() {
+  return (
+    <RouteGuard allowedRoles={["branch_admin"]}>
+      <BranchDashboardContent />
+    </RouteGuard>
   );
 }

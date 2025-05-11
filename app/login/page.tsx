@@ -95,55 +95,23 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
-      const { token } = await loginUser(email, password);
-      // Always use the same key as auth-context
-      localStorage.setItem("authToken", token);
-      // Set token as a cookie (optional, for backend if needed)
-      document.cookie = `authToken=${token}; path=/; max-age=${
-        60 * 60 * 24 * 7
-      }`;
+      const { role } = await loginUser(email, password);
 
-      // Decode role for redirect
-      const user = decodeToken();
-      const role = user?.role;
+      let redirect = "/dashboard";
+      if (role === "super_admin") redirect = "/dashboard/superadmin";
+      else if (role === "org_admin") redirect = "/dashboard/organization";
+      else if (role === "branch_admin") redirect = "/dashboard/branch";
+      else if (role === "org_member") redirect = "/dashboard/employee/test";
 
-      // Map legacy roles to new UserRole for redirect
-      let redirectPath = "";
-      switch (role) {
-        case "super_admin":
-          redirectPath = "superadmin";
-          break;
-        case "org_admin":
-          redirectPath = "organization";
-          break;
-        case "branch_admin":
-          redirectPath = "branch";
-          break;
-        case "org_member":
-          redirectPath = "employee/test";
-          break;
-        default:
-          throw new Error("Unauthorized role.");
-      }
-      // Use window.location to force reload and context re-init
-      window.location.href = `/dashboard/${redirectPath}`;
-      // Show toast after navigation (optional, or use a global toast)
-    } catch (error: any) {
-      setError(error.message || "Invalid credentials. Please try again.");
+      window.location.href = redirect;
+    } catch (err: any) {
       toast({
-        title: "Error!",
-        description: error.message || "Invalid credentials. Please try again.",
+        title: "Login Failed",
+        description: err.message || "Invalid credentials",
         variant: "destructive",
       });
-
-      gsap.fromTo(
-        formRef.current,
-        { x: -10 },
-        { x: 0, duration: 0.1, repeat: 5, yoyo: true }
-      );
       setIsLoading(false);
     }
   };

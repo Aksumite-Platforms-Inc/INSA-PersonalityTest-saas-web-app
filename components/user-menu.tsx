@@ -49,6 +49,10 @@ export function UserMenu() {
 
   const handleLogout = () => {
     // In a real app, this would call an API to log out
+    // and clear the token from local storage or cookies
+    // logout();
+    localStorage.removeItem("authToken");
+    document.cookie = "authToken=; path=/; max-age=0"; // Clear cookie
 
     toast({
       title: t("logout.success"),

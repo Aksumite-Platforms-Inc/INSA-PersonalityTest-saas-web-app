@@ -17,7 +17,6 @@ import { useTranslation } from "@/hooks/use-translation";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
-import { useRBACAuth } from "@/app/contexts/auth-context";
 
 // Demo test data
 const availableTests = [
@@ -64,23 +63,6 @@ export default function EmployeeTestSelectPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
-  const { role } = useRBACAuth();
-
-  useEffect(() => {
-    if (role && role !== "org_member") {
-      // If not org_member, redirect to their allowed dashboard
-      router.replace(
-        "/dashboard/" +
-          (role === "super_admin"
-            ? "superadmin"
-            : role === "org_admin"
-            ? "organization"
-            : role === "branch_admin"
-            ? "branch"
-            : "")
-      );
-    }
-  }, [role, router]);
 
   const handleStartTest = () => {
     if (!selectedTest) {
