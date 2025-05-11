@@ -2,16 +2,6 @@ import apiClient from "./apiClient";
 import { getAccessToken, getUserId } from "@/utils/tokenUtils";
 import { handleApiError } from "@/utils/error.utils";
 import { savePayloadToGist } from "./gistApi";
-import path from "path";
-
-// Conditionally import `fs` and `path` for server-side usage
-let fs: typeof import("fs") | null = null;
-let path: typeof import("path") | null = null;
-
-if (typeof window === "undefined") {
-  fs = require("fs");
-  path = require("path");
-}
 
 import {
   ApiResponse,
@@ -33,12 +23,27 @@ const savePayloadToFile = async (
   testName: string
 ) => {
   try {
+    // const content = JSON.stringify({ userId, testName, ...payload }, null, 2);
+    // const gistUrl = await savePayloadToGist(fileName, content);
+    // console.log(`✅ Payload saved to Gist: ${gistUrl}`);
+    // console.log("Gist URL:", gistUrl); // Additional log for verification
+
     const content = JSON.stringify({ userId, testName, ...payload }, null, 2);
-    const gistUrl = await savePayloadToGist(fileName, content);
-    console.log(`✅ Payload saved to Gist: ${gistUrl}`);
-    console.log("Gist URL:", gistUrl); // Additional log for verification
+
+    const response: Axios.AxiosXHR<ApiResponse> = await axios.post(
+      "/api/save-data",
+      content
+    );
+
+    console.log(response);
+
+    if (response.data.success) {
+      console.log(response.data);
+    }
   } catch (error) {
     console.error("❌ Error saving payload to Gist:", error);
+  }
+};
 
 // Helper to save payload to local folder (server-side only)
 // const savePayloadToFile = (fileName: string, payload: any) => {
@@ -112,7 +117,7 @@ export const submitRIASECAnswers = async (
       userId.toString(),
       "RIASEC"
     );
-//     savePayloadToFile("riasec-answers.json", { answers });
+    //     savePayloadToFile("riasec-answers.json", { answers });
     return handleApiError(error);
   }
 };
@@ -137,7 +142,7 @@ export const submitBig5TestAnswers = async (
       userId.toString(),
       "Big Five"
     );
-//     savePayloadToFile("bigfive-answers.json", payload);
+    //     savePayloadToFile("bigfive-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -168,7 +173,7 @@ export const submitMBTIAnswers = async (
       userId.toString(),
       "MBTI"
     );
-//     savePayloadToFile("mbti-answers.json", payload);
+    //     savePayloadToFile("mbti-answers.json", payload);
     return handleApiError(error);
   }
 };
@@ -194,7 +199,7 @@ export const submitEnneagramAnswers = async (
       "Enneagram"
     );
 
-//     savePayloadToFile("enneagram-answers.json", payload);
+    //     savePayloadToFile("enneagram-answers.json", payload);
     return handleApiError(error);
   }
 };
