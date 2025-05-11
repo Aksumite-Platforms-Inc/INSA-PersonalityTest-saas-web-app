@@ -3,7 +3,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { fetchUserInfo } from "@/services/user.service";
+import { decodeToken } from "@/utils/tokenUtils";
 
 interface User {
   id: string;
@@ -27,11 +28,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // use cookies if HttpOnly
+    const token = localStorage.getItem("authToken"); // use cookies if HttpOnly
     if (token) {
       try {
-        const decoded: User = jwtDecode(token);
-        setUser(decoded);
+        const decoded = decodeToken();
+        if (decoded && decoded.user_id && decoded.org_id) {
+          fetchUserInfo(decoded.org_id, decoded.user_id)
+            .then((userData) => {
+              // Map backend role to allowed UserRole
+              let mappedRole: User["role"] = "org_member";
+              switch (userData.role) {
+                case "super_admin":
+                case "org_admin":
+                case "branch_admin":
+                case "org_member":
+                  mappedRole = userData.role;
+                  break;
+                default:
+                  mappedRole = "org_member";
+              }
+              setUser({
+                ...userData,
+                id: String(userData.id),
+                role: mappedRole,
+                permissions: [],
+              });
+            })
+            .catch((err) => {
+              console.error("Failed to fetch user info:", err);
+              setUser(null);
+            })
+            .finally(() => setLoading(false));
+          return;
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         console.error("Invalid token:", err);
         setUser(null);

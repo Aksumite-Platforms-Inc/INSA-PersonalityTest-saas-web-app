@@ -99,10 +99,14 @@ export default function LoginPage() {
 
     try {
       const { token } = await loginUser(email, password);
-      localStorage.setItem("token", token); // Use the same key as auth-context
-      // Set token as a cookie (expires in 7 days)
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      // Always use the same key as auth-context
+      localStorage.setItem("authToken", token);
+      // Set token as a cookie (optional, for backend if needed)
+      document.cookie = `authToken=${token}; path=/; max-age=${
+        60 * 60 * 24 * 7
+      }`;
 
+      // Decode role for redirect
       const user = decodeToken();
       const role = user?.role;
 
@@ -124,11 +128,9 @@ export default function LoginPage() {
         default:
           throw new Error("Unauthorized role.");
       }
-      router.push(`/dashboard/${redirectPath}`);
-      toast({
-        title: "Success!",
-        description: "You have logged in successfully.",
-      });
+      // Use window.location to force reload and context re-init
+      window.location.href = `/dashboard/${redirectPath}`;
+      // Show toast after navigation (optional, or use a global toast)
     } catch (error: any) {
       setError(error.message || "Invalid credentials. Please try again.");
       toast({
