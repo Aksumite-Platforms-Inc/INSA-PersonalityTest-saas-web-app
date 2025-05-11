@@ -23,25 +23,20 @@ const savePayloadToFile = async (
   testName: string
 ) => {
   try {
-    // const content = JSON.stringify({ userId, testName, ...payload }, null, 2);
-    // const gistUrl = await savePayloadToGist(fileName, content);
-    // console.log(`✅ Payload saved to Gist: ${gistUrl}`);
-    // console.log("Gist URL:", gistUrl); // Additional log for verification
-
     const content = JSON.stringify({ userId, testName, ...payload }, null, 2);
 
-    const response: Axios.AxiosXHR<ApiResponse> = await axios.post(
-      "/api/save-data",
-      content
-    );
+    // Generate unique filename if needed (prevents duplicates)
+    const timestamp = Date.now();
+    const uniqueFileName = `${fileName}_${userId}_${timestamp}.json`; 
 
-    console.log(response);
-
-    if (response.data.success) {
-      console.log(response.data);
-    }
+    // Save to Gist (or your storage system)
+    const gistUrl = await savePayloadToGist(uniqueFileName, content);
+    
+    console.log(`✅ Payload saved to Gist: ${gistUrl}`);
+    return gistUrl;
   } catch (error) {
-    console.error("❌ Error saving payload to Gist:", error);
+    console.error("❌ Error saving payload:", error);
+    throw error; // Re-throw to handle upstream
   }
 };
 

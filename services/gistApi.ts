@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const GITHUB_TOKEN = process.env.GITHUB_GIST_TOKEN; // Replace with your GitHub token
+const GITHUB_TOKEN = process.env["GITHUB_GIST_TOKEN"] || ""; // Ensure compatibility with OS environment variables
 
 /**
  * Save payload to a GitHub Gist
