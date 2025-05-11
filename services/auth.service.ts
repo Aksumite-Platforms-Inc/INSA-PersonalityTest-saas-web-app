@@ -2,7 +2,7 @@ import apiClient from "./apiClient";
 import { ApiResponse } from "@/types/api-response.type";
 import { RefreshTokenResponse } from "@/types/auth-response.type";
 
-const TOKEN_KEY = "authToken"; // must match everywhere
+const TOKEN_KEY = "authToken";
 
 /**
  * Logs in a user and stores the access token.

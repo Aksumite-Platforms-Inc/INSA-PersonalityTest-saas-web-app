@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken"); // use cookies if HttpOnly
+    const token = localStorage.getItem("token"); // use cookies if HttpOnly
     if (token) {
       try {
         const decoded: User = jwtDecode(token);
