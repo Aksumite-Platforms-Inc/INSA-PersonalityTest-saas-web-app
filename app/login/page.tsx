@@ -99,11 +99,9 @@ export default function LoginPage() {
 
     try {
       const { token } = await loginUser(email, password);
-      localStorage.setItem("authToken", token); // Use the same key everywhere
+      localStorage.setItem("token", token); // Use the same key as auth-context
       // Set token as a cookie (expires in 7 days)
-      document.cookie = `authToken=${token}; path=/; max-age=${
-        60 * 60 * 24 * 7
-      }`;
+      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
       const user = decodeToken();
       const role = user?.role;

@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 export const getAccessToken = (): string | null => {
   return typeof window !== "undefined"
     ? localStorage.getItem("authToken")
-    : null; // already correct, just ensure all usage is 'authToken'
+    : null;
 };
 
 export interface DecodedToken {
