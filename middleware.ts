@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (protectedPaths.some((p) => path.startsWith(p)) && !token) {
-    // return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
