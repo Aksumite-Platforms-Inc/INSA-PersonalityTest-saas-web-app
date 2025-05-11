@@ -1,41 +1,49 @@
 // components/RouteGuard.tsx
-
 "use client";
 
-import {
-  useRBACAuth,
-  UserRole,
-  ROLE_URL_MAP,
-} from "@/app/contexts/auth-context";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/app/contexts/auth-context";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
 
-export function RouteGuard({
-  children,
-  allowedRoles,
-}: {
+interface RouteGuardProps {
+  allowedRoles: string[];
   children: React.ReactNode;
-  allowedRoles: UserRole[];
-}) {
-  const { user, loading, role, isAuthorized } = useRBACAuth();
+}
+
+const roleRedirectMap: Record<string, string> = {
+  super_admin: "/dashboard/superadmin",
+  org_admin: "/dashboard/organization",
+  branch_admin: "/dashboard/branch",
+  org_member: "/dashboard/employee/test",
+};
+
+export const RouteGuard = ({ allowedRoles, children }: RouteGuardProps) => {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push("/login");
-      } else if (!isAuthorized(allowedRoles)) {
-        // Redirect to the user's allowed dashboard root if not authorized for this route
-        if (role && ROLE_URL_MAP[role]) {
-          router.push(`/dashboard/${ROLE_URL_MAP[role]}`);
-        } else {
-          router.push("/unauthorized");
+        router.replace("/login");
+        return;
+      }
+
+      if (!allowedRoles.includes(user.role)) {
+        const redirectPath = roleRedirectMap[user.role] || "/dashboard";
+        if (pathname !== redirectPath) {
+          router.replace(redirectPath); // ⬅ Redirect to correct dashboard
         }
+        setAuthorized(false); // Prevent rendering
+      } else {
+        setAuthorized(true); // ✅ Only then render children
       }
     }
-  }, [loading, user, isAuthorized, allowedRoles, router, role, pathname]);
+  }, [user, loading, pathname, allowedRoles, router]);
 
-  if (loading || !user) return <div>Loading...</div>;
+  // Don't render anything while loading or redirecting
+  if (loading || !authorized) return null;
+
   return <>{children}</>;
-}
+};

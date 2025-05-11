@@ -1,105 +1,37 @@
+// services/auth.service.ts
 import apiClient from "./apiClient";
-import { ApiResponse } from "@/types/api-response.type";
-import { RefreshTokenResponse } from "@/types/auth-response.type";
-
-const TOKEN_KEY = "authToken";
+import type { ApiResponse } from "@/types/api-response.type";
 
 /**
- * Logs in a user and stores the access token.
- * @param email - User email
- * @param password - User password
- * @param isSystemAdmin - Determines the login endpoint
+ * Logs in a user and stores the access token from response.
  */
+export interface RawAuthResponse {
+  token: string;
+  user_id: number;
+  role: string;
+  org_id?: number;
+  branch_id?: number;
+}
+
 export const loginUser = async (
   email: string,
   password: string
-  //   isSystemAdmin: boolean
-  // ): Promise<{ token: string; message?: string }> => {
-  //   const endpoint = isSystemAdmin ? "/sys/login" : "/sso/login";
-): Promise<{ token: string; message?: string }> => {
-  const endpoint = "/sso/login";
-
-  const response = await apiClient.post<ApiResponse<{ token: string }>>(
-    endpoint,
+): Promise<RawAuthResponse> => {
+  const res = await apiClient.post<ApiResponse<RawAuthResponse>>(
+    "/sso/login",
     { email, password },
-    { withCredentials: true } // Ensures refresh token cookie is set
+    { withCredentials: true }
   );
 
-  if (!response.data.success || !response.data.data.token) {
-    throw new Error(response.data.message || "Login failed.");
-  }
-
-  const token = response.data.data.token;
-  localStorage.setItem(TOKEN_KEY, token);
-
-  return {
-    token,
-    message: response.data.message,
-  };
+  const data = res.data.data;
+  localStorage.setItem("authToken", data.token);
+  return data;
 };
 
 /**
- * Logs out the user by removing the access token.
- * Optionally, notify the backend to invalidate the session.
+ * Logs out a user by removing the token and cookie.
  */
 export const logoutUser = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
-  // Optionally, you can notify the server via:
-  // await apiClient.post('/sso/logout');
+  localStorage.removeItem("authToken");
+  document.cookie = "authToken=; path=/; max-age=0";
 };
-
-/**
- * Retrieves the current access token from localStorage.
- */
-export const getToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-};
-
-/**
- * Used by interceptors to refresh expired access tokens.
- */
-export const refreshAccessToken = async (): Promise<string> => {
-  const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>(
-    "/sso/refresh",
-    {},
-    { withCredentials: true } // send refresh token cookie
-  );
-
-  if (!response.data.success || !response.data.data.access_token) {
-    throw new Error(response.data.message || "Token refresh failed.");
-  }
-
-  const newToken = response.data.data.access_token;
-  localStorage.setItem(TOKEN_KEY, newToken);
-  return newToken;
-};
-
-export const performResetPassword = async (
-  email: string
-): Promise<{ message: string }> => {
-  const endpoint = "organization/members/resetpassword";
-
-  const response = await apiClient.post<ApiResponse<null>>(
-    endpoint,
-    { email },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!response.data.success) {
-    throw new Error(response.data.message || "Reset password failed.");
-  }
-
-  return {
-    message: response.data.message || "Password reset email sent successfully.",
-  };
-};
-
-/**
- * Re-exported as getAccessToken for consistent naming across the app.
- */
-export const getAccessToken = getToken;

@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRBACAuth } from "@/app/contexts/auth-context";
 import { useRouter } from "next/navigation";
-// import { getOrganizationStats } from "@/services/orgService";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart";
@@ -11,25 +9,7 @@ import { RecentEmployeeActivity } from "@/components/organization/recent-employe
 import { DocumentNotifications } from "@/components/organization/document-notifications";
 
 export default function OrganizationDashboard() {
-  const { role } = useRBACAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    if (role && role !== "org_admin") {
-      // If not org_admin, redirect to their allowed dashboard
-      router.replace(
-        "/dashboard/" +
-          (role === "super_admin"
-            ? "superadmin"
-            : role === "branch_admin"
-            ? "branch"
-            : role === "org_member"
-            ? "employee/test"
-            : "")
-      );
-    }
-  }, [role, router]);
-
   const [stats, setStats] = useState({
     totalBranches: 0,
     totalEmployees: 0,
@@ -38,19 +18,6 @@ export default function OrganizationDashboard() {
     changeInEmployees: 0,
     changeInCompletionRate: 0,
   });
-
-  // useEffect(() => {
-  //   const fetchStats = async () => {
-  //     const { data, success, error } = await getOrganizationStats();
-  //     if (success) {
-  //       setStats(data);
-  //     } else {
-  //       console.error("Failed to fetch organization stats:", error);
-  //     }
-  //   };
-
-  //   fetchStats();
-  // }, []);
 
   return (
     <div className="space-y-6">
