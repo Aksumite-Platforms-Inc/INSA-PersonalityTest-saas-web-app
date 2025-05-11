@@ -4,7 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
-import { Toaster } from "react-hot-toast";
+import { ToastProvider } from "../components/toast-provider";
+import { AuthProvider } from "../app/contexts/auth-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,10 +13,6 @@ export const metadata: Metadata = {
   title: "INSA Personality Testing Platform",
   description:
     "A cloud-native multi-tenant SaaS web application for psychology-based internal testing",
-  generator: "INSA-PersonalityTest",
-  icons: {
-    icon: "/favicon.png",
-  },
 };
 
 export default function RootLayout({
@@ -28,16 +25,18 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <LanguageProvider>{children}</LanguageProvider>
-          <Toaster position="top-right" />
+          <LanguageProvider>
+            <AuthProvider>
+              {children}
+              <ToastProvider />
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-
-import "./globals.css";
