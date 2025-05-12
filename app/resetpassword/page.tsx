@@ -1,11 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { resetPassword } from "@/services/user.service";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 
-const PasswordResetPageContent = ({ searchParams }: { searchParams: URLSearchParams }) => {
+const PasswordResetPageContent = ({
+  searchParams,
+}: {
+  searchParams: URLSearchParams;
+}) => {
   const router = useRouter();
   const email = searchParams.get("email");
   const code = searchParams.get("code");
@@ -13,6 +28,7 @@ const PasswordResetPageContent = ({ searchParams }: { searchParams: URLSearchPar
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,69 +36,116 @@ const PasswordResetPageContent = ({ searchParams }: { searchParams: URLSearchPar
       setError("Passwords do not match.");
       return;
     }
+    setIsLoading(true);
     try {
       await resetPassword(email as string, code as string, password);
       setSuccess(true);
     } catch {
       setError("Password reset failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (success) {
-      router.push("/");
+      const timer = setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return () => clearTimeout(timer);
     }
   }, [success, router]);
 
   if (!email || !code) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <p className="text-lg text-gray-700">Invalid password reset link.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Card className="border-none shadow-lg w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">
+              Invalid Reset Link
+            </CardTitle>
+            <CardDescription className="text-center">
+              The reset link is invalid or has expired.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+            <p className="text-gray-600">
+              Please request a new password reset link.
+            </p>
+          </CardContent>
+          <CardFooter className="justify-center">
+            <Button onClick={() => router.push("/forgotpassword")}>
+              Request New Link
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md space-y-4 w-96"
-      >
-        <h1 className="text-xl font-semibold">Reset Your Password</h1>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Reset Password
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md border-none shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            Reset Your Password
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your new password below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!success ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="password"
+                placeholder="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              {error && (
+                <div className="flex items-center text-sm text-red-500">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  {error}
+                </div>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </Button>
+            </form>
+          ) : (
+            <div className="text-center space-y-4">
+              <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
+              <p className="text-gray-700 font-medium">
+                Password reset successful.
+              </p>
+              <p className="text-gray-500 text-sm">Redirecting to login...</p>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="justify-center">
+          <Button variant="link" onClick={() => router.push("/login")}>
+            Back to Login
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
 
-const PasswordResetPage = () => {
-  return (
-    <SearchParamsWrapper>
-      {(searchParams) => <PasswordResetPageContent searchParams={searchParams} />}
-    </SearchParamsWrapper>
-  );
-};
+const PasswordResetPage = () => (
+  <SearchParamsWrapper>
+    {(searchParams) => <PasswordResetPageContent searchParams={searchParams} />}
+  </SearchParamsWrapper>
+);
 
 export default PasswordResetPage;

@@ -35,3 +35,30 @@ export const logoutUser = (): void => {
   localStorage.removeItem("authToken");
   document.cookie = "authToken=; path=/; max-age=0";
 };
+
+/**
+ * Resets the password for a user by sending a reset password email.
+ */
+export const performResetPassword = async (
+  email: string
+): Promise<{ message: string }> => {
+  const endpoint = "organization/members/resetpassword";
+
+  const response = await apiClient.post<ApiResponse<null>>(
+    endpoint,
+    { email },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Reset password failed.");
+  }
+
+  return {
+    message: response.data.message || "Password reset email sent successfully.",
+  };
+};
