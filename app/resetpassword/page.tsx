@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { resetPassword } from "@/services/user.service";
+import { performPasswordReset } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,7 +38,7 @@ const PasswordResetPageContent = ({
     }
     setIsLoading(true);
     try {
-      await resetPassword(email as string, code as string, password);
+      await performPasswordReset(email as string, code as string, password);
       setSuccess(true);
     } catch {
       setError("Password reset failed. Please try again.");

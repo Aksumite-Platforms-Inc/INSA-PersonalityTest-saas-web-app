@@ -62,3 +62,25 @@ export const performResetPassword = async (
     message: response.data.message || "Password reset email sent successfully.",
   };
 };
+
+/**
+ * Resets the password for a user using email, reset code, and new password.
+ */
+export const performPasswordReset = async (
+  email: string,
+  code: string,
+  password: string
+): Promise<{ message: string }> => {
+  const endpoint = "/organization/members/validateresetpassword";
+  const response = await apiClient.post<ApiResponse<null>>(
+    endpoint,
+    { email, reset_code: code, new_password: password },
+    { withCredentials: true }
+  );
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Password reset failed.");
+  }
+  return {
+    message: response.data.message || "Password reset successful.",
+  };
+};
