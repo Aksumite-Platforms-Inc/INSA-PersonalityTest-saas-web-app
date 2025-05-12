@@ -88,7 +88,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.header>
-
       {/* Hero Section */}
       <motion.section
         ref={heroRef}
@@ -172,15 +171,14 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
       {/* Features Section */}
       <motion.section
         ref={featuresRef}
         id="features"
         className="w-full py-12 md:py-24 lg:py-32"
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
@@ -250,30 +248,10 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-      {/* <motion.section
-        ref={experienceRef}
-        id="experience"
-        className="w-full py-12 md:py-24 lg:py-32 bg-muted relative overflow-hidden"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <motion.p
-          className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        > */}
       <TestProcessDemo />
       <ResultsProcessDemo />
-      {/* </motion.p>
-      </motion.section> */}
-
       {/* Stats Section */}
       {/* <StatsSection /> */}
-
       {/* Benefits Section */}
       <motion.section
         ref={benefitsRef}
@@ -281,7 +259,7 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32 bg-muted relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <ParallaxBackground className="absolute inset-0 -z-10">
@@ -449,7 +427,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
       {/* Testimonials Section */}
       <motion.section
         ref={testimonialsRef}
@@ -457,7 +434,7 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
@@ -579,14 +556,13 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
       {/* CTA Section */}
       <motion.section
         ref={ctaRef}
         className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.2 }}
       >
         <div className="container px-4 md:px-6">
@@ -629,8 +605,7 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
-      {/* Exam Process Animation Section */}
+      ;{/* Exam Process Animation Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
@@ -657,7 +632,6 @@ export default function LoginPage() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="w-full border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">

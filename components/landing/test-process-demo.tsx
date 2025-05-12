@@ -38,26 +38,34 @@ export default function TestProcessDemo() {
   });
 
   return (
-    <section ref={containerRef} className="py-20 bg-white">
+    <section ref={containerRef} className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Experience Our Testing Process
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            See how easy it is to take a personality test and get valuable
-            insights.
-          </p>
-        </div>
+        <motion.div
+          className="bg-background rounded-xl  overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Experience Our Testing Process
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              See how easy it is to take a personality test and get valuable
+              insights.
+            </p>
+          </div>
+        </motion.div>
 
         <div className="relative">
           {/* Progress bar */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 transform -translate-x-1/2 z-0">
+          {/* <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-muted transform -translate-x-1/2 z-0">
             <motion.div
               className="w-full bg-indigo-600 absolute top-0 left-0"
               style={{ height: progress }}
             />
-          </div>
+          </div> */}
 
           {/* Step 1 */}
           <motion.div
@@ -65,6 +73,7 @@ export default function TestProcessDemo() {
             className="relative z-10 flex flex-col md:flex-row items-center mb-24"
             initial={{ opacity: 0 }}
             animate={step1InView ? { opacity: 1 } : {}}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
           >
             <div className="md:w-1/2 mb-8 md:mb-0 md:pr-12">
@@ -85,8 +94,8 @@ export default function TestProcessDemo() {
                 ))}
               </div>
             </div>
-            <div className="md:w-1/2 bg-gray-50 p-6 rounded-xl shadow-md">
-              <div className="relative h-64 rounded-lg overflow-hidden border border-gray-200">
+            <div className="md:w-1/2 bg-muted p-6 rounded-xl shadow-md">
+              <div className="relative h-64  rounded-lg overflow-hidden border border-border">
                 <Image
                   src="/placeholder.svg?height=256&width=500"
                   alt="Test selection interface"
@@ -94,7 +103,7 @@ export default function TestProcessDemo() {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 p-4 rounded-lg shadow-sm">
+                  <div className="bg-background/90 p-4 rounded-lg shadow-sm">
                     <h4 className="font-semibold text-lg mb-2">
                       Test Selection
                     </h4>
@@ -162,8 +171,8 @@ export default function TestProcessDemo() {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/2 bg-gray-50 p-6 rounded-xl shadow-md">
-              <div className="relative h-64 rounded-lg overflow-hidden border border-gray-200">
+            <div className="md:w-1/2 bg-muted p-6 rounded-xl shadow-md">
+              <div className="relative h-64 rounded-lg overflow-hidden border border-border">
                 <Image
                   src="/placeholder.svg?height=256&width=500"
                   alt="Test question interface"
@@ -171,7 +180,7 @@ export default function TestProcessDemo() {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 p-4 rounded-lg shadow-sm w-full max-w-md">
+                  <div className="bg-background/90 p-4 rounded-lg shadow-sm w-full max-w-md">
                     <div className="mb-4">
                       <div className="h-2 bg-indigo-100 rounded-full">
                         <div className="h-2 bg-indigo-600 rounded-full w-1/3"></div>
@@ -253,8 +262,8 @@ export default function TestProcessDemo() {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/2 bg-gray-50 p-6 rounded-xl shadow-md">
-              <div className="relative h-64 rounded-lg overflow-hidden border border-gray-200">
+            <div className="md:w-1/2 bg-muted p-6 rounded-xl shadow-md">
+              <div className="relative h-64 rounded-lg overflow-hidden border border-border">
                 <Image
                   src="/placeholder.svg?height=256&width=500"
                   alt="Test results interface"
@@ -262,7 +271,7 @@ export default function TestProcessDemo() {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 p-4 rounded-lg shadow-sm w-full max-w-md">
+                  <div className="bg-background/90 p-4 rounded-lg shadow-sm w-full max-w-md">
                     <h4 className="font-semibold text-lg mb-4">
                       Your OEJTS Results
                     </h4>
@@ -333,8 +342,8 @@ export default function TestProcessDemo() {
                 </div>
               </div>
             </div>
-            <div className="md:w-1/2 bg-gray-50 p-6 rounded-xl shadow-md">
-              <div className="relative h-64 rounded-lg overflow-hidden border border-gray-200">
+            <div className="md:w-1/2 bg-muted p-6 rounded-xl shadow-md">
+              <div className="relative h-64 rounded-lg overflow-hidden border border-border">
                 <Image
                   src="/placeholder.svg?height=256&width=500"
                   alt="Insights application interface"
@@ -342,7 +351,7 @@ export default function TestProcessDemo() {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 p-4 rounded-lg shadow-sm w-full max-w-md">
+                  <div className="bg-background/90 p-4 rounded-lg shadow-sm w-full max-w-md">
                     <h4 className="font-semibold text-lg mb-4">
                       Recommended Actions
                     </h4>

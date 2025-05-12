@@ -17,7 +17,7 @@ export default function ResultsProcessDemo() {
   const [activeTab, setActiveTab] = useState("individual");
 
   return (
-    <section className="py-20 bg-indigo-50">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -28,7 +28,7 @@ export default function ResultsProcessDemo() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Powerful Results Analysis
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Explore how our platform presents personality test results and
             insights at individual and team levels.
           </p>
@@ -50,7 +50,7 @@ export default function ResultsProcessDemo() {
 
             <TabsContent value="individual" className="mt-0">
               <motion.div
-                className="bg-white rounded-xl shadow-xl overflow-hidden"
+                className="bg-background rounded-xl shadow-xl overflow-hidden"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -58,8 +58,8 @@ export default function ResultsProcessDemo() {
                 <div className="flex flex-col lg:flex-row">
                   <div className="lg:w-1/2 p-8">
                     <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
-                        <FileText className="h-6 w-6 text-indigo-600" />
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
+                        <FileText className="h-6 w-6 text-primary" />
                       </div>
                       <h3 className="text-2xl font-semibold">
                         Individual Profile
@@ -71,14 +71,14 @@ export default function ResultsProcessDemo() {
                         <h4 className="text-lg font-medium mb-2">
                           Personality Type
                         </h4>
-                        <div className="p-4 bg-indigo-50 rounded-lg">
+                        <div className="p-4 bg-primary/5 rounded-lg">
                           <div className="flex justify-between items-center mb-2">
                             <span className="font-medium">The Analyst</span>
-                            <span className="text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
+                            <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
                               INTJ
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             Strategic thinkers with a focus on innovation and
                             long-term planning. Highly analytical and
                             independent.
@@ -94,8 +94,8 @@ export default function ResultsProcessDemo() {
                               <span>Introversion</span>
                               <span>85%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-indigo-600 rounded-full w-[85%]"></div>
+                            <div className="h-2 bg-muted rounded-full">
+                              <div className="h-2 bg-primary rounded-full w-[85%]"></div>
                             </div>
                           </div>
                           <div>
@@ -103,8 +103,8 @@ export default function ResultsProcessDemo() {
                               <span>Intuition</span>
                               <span>90%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-indigo-600 rounded-full w-[90%]"></div>
+                            <div className="h-2 bg-muted rounded-full">
+                              <div className="h-2 bg-primary rounded-full w-[90%]"></div>
                             </div>
                           </div>
                           <div>
@@ -112,8 +112,8 @@ export default function ResultsProcessDemo() {
                               <span>Thinking</span>
                               <span>75%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-indigo-600 rounded-full w-[75%]"></div>
+                            <div className="h-2 bg-muted rounded-full">
+                              <div className="h-2 bg-primary rounded-full w-[75%]"></div>
                             </div>
                           </div>
                           <div>
@@ -121,8 +121,8 @@ export default function ResultsProcessDemo() {
                               <span>Judging</span>
                               <span>80%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-indigo-600 rounded-full w-[80%]"></div>
+                            <div className="h-2 bg-muted rounded-full">
+                              <div className="h-2 bg-primary rounded-full w-[80%]"></div>
                             </div>
                           </div>
                         </div>
@@ -149,17 +149,17 @@ export default function ResultsProcessDemo() {
                     </div>
                   </div>
 
-                  <div className="lg:w-1/2 bg-gray-50 p-8">
+                  <div className="lg:w-1/2 bg-muted p-8">
                     <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
-                        <BarChart3 className="h-6 w-6 text-purple-600" />
+                      <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center mr-4">
+                        <BarChart3 className="h-6 w-6 text-secondary" />
                       </div>
                       <h3 className="text-2xl font-semibold">
                         Detailed Analysis
                       </h3>
                     </div>
 
-                    <div className="relative h-96 rounded-lg overflow-hidden border border-gray-200 mb-6">
+                    <div className="relative h-96 rounded-lg overflow-hidden border border-border mb-6">
                       <Image
                         src="/placeholder.svg?height=384&width=500"
                         alt="Personality chart"
@@ -167,23 +167,23 @@ export default function ResultsProcessDemo() {
                         className="object-cover"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-white/90 p-4 rounded-lg shadow-sm">
+                        <div className="bg-background/90 p-4 rounded-lg shadow-sm">
                           <h4 className="font-semibold text-center mb-4">
                             Personality Radar Chart
                           </h4>
                           <div className="w-64 h-64 relative">
                             {/* Placeholder for radar chart */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-full h-full rounded-full border-2 border-indigo-200 opacity-30"></div>
-                              <div className="absolute w-3/4 h-3/4 rounded-full border-2 border-indigo-200 opacity-50"></div>
-                              <div className="absolute w-1/2 h-1/2 rounded-full border-2 border-indigo-200 opacity-70"></div>
-                              <div className="absolute w-1/4 h-1/4 rounded-full border-2 border-indigo-200 opacity-90"></div>
+                              <div className="w-full h-full rounded-full border-2 border-primary opacity-30"></div>
+                              <div className="absolute w-3/4 h-3/4 rounded-full border-2 border-primary opacity-50"></div>
+                              <div className="absolute w-1/2 h-1/2 rounded-full border-2 border-primary opacity-70"></div>
+                              <div className="absolute w-1/4 h-1/4 rounded-full border-2 border-primary opacity-90"></div>
 
                               {/* Chart points */}
-                              <div className="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-indigo-600 rounded-full"></div>
-                              <div className="absolute top-1/2 left-[15%] transform -translate-y-1/2 w-3 h-3 bg-indigo-600 rounded-full"></div>
-                              <div className="absolute bottom-[15%] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-indigo-600 rounded-full"></div>
-                              <div className="absolute top-1/2 right-[15%] transform -translate-y-1/2 w-3 h-3 bg-indigo-600 rounded-full"></div>
+                              <div className="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-primary rounded-full"></div>
+                              <div className="absolute top-1/2 left-[15%] transform -translate-y-1/2 w-3 h-3 bg-primary rounded-full"></div>
+                              <div className="absolute bottom-[15%] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-primary rounded-full"></div>
+                              <div className="absolute top-1/2 right-[15%] transform -translate-y-1/2 w-3 h-3 bg-primary rounded-full"></div>
 
                               {/* Lines connecting points */}
                               <div className="absolute inset-0">
@@ -208,8 +208,8 @@ export default function ResultsProcessDemo() {
                     <div className="space-y-4">
                       <h4 className="text-lg font-medium">Recommendations</h4>
                       <div className="space-y-2">
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-sm text-green-800">
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900">
+                          <p className="text-sm text-green-800 dark:text-green-200">
                             <span className="font-medium">
                               Work Environment:
                             </span>{" "}
@@ -217,15 +217,15 @@ export default function ResultsProcessDemo() {
                             focused work with minimal interruptions.
                           </p>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-sm text-blue-800">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900">
+                          <p className="text-sm text-blue-800 dark:text-blue-200">
                             <span className="font-medium">Communication:</span>{" "}
                             Be more explicit about your thoughts and ideas, as
                             others may not follow your intuitive leaps.
                           </p>
                         </div>
-                        <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                          <p className="text-sm text-purple-800">
+                        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-900">
+                          <p className="text-sm text-purple-800 dark:text-purple-200">
                             <span className="font-medium">Team Dynamics:</span>{" "}
                             Partner with more extroverted colleagues for
                             presentations and client interactions.
@@ -240,7 +240,7 @@ export default function ResultsProcessDemo() {
 
             <TabsContent value="team" className="mt-0">
               <motion.div
-                className="bg-white rounded-xl shadow-xl overflow-hidden"
+                className="bg-background rounded-xl shadow-xl overflow-hidden"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -248,8 +248,8 @@ export default function ResultsProcessDemo() {
                 <div className="flex flex-col lg:flex-row">
                   <div className="lg:w-1/2 p-8">
                     <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-                        <Users className="h-6 w-6 text-blue-600" />
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
+                        <Users className="h-6 w-6 text-primary" />
                       </div>
                       <h3 className="text-2xl font-semibold">
                         Team Composition
@@ -261,14 +261,14 @@ export default function ResultsProcessDemo() {
                         <h4 className="text-lg font-medium mb-2">
                           Team Profile
                         </h4>
-                        <div className="p-4 bg-blue-50 rounded-lg">
+                        <div className="p-4 bg-primary/5 rounded-lg">
                           <div className="flex justify-between items-center mb-2">
                             <span className="font-medium">Marketing Team</span>
-                            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
                               12 Members
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             A diverse team with a good balance of analytical and
                             creative personalities. Strong in innovation but may
                             need support in execution.
@@ -286,8 +286,8 @@ export default function ResultsProcessDemo() {
                               <span>Analytical Types</span>
                               <span>40%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-blue-600 rounded-full w-[40%]"></div>
+                            <div className="h-2 bg-muted rounded-full">
+                              <div className="h-2 bg-primary rounded-full w-[40%]"></div>
                             </div>
                           </div>
                           <div>
@@ -295,7 +295,7 @@ export default function ResultsProcessDemo() {
                               <span>Creative Types</span>
                               <span>35%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
+                            <div className="h-2 bg-muted rounded-full">
                               <div className="h-2 bg-purple-600 rounded-full w-[35%]"></div>
                             </div>
                           </div>
@@ -304,7 +304,7 @@ export default function ResultsProcessDemo() {
                               <span>Diplomatic Types</span>
                               <span>15%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
+                            <div className="h-2 bg-muted rounded-full">
                               <div className="h-2 bg-green-600 rounded-full w-[15%]"></div>
                             </div>
                           </div>
@@ -313,7 +313,7 @@ export default function ResultsProcessDemo() {
                               <span>Sentinel Types</span>
                               <span>10%</span>
                             </div>
-                            <div className="h-2 bg-gray-200 rounded-full">
+                            <div className="h-2 bg-muted rounded-full">
                               <div className="h-2 bg-yellow-600 rounded-full w-[10%]"></div>
                             </div>
                           </div>
@@ -341,15 +341,15 @@ export default function ResultsProcessDemo() {
                     </div>
                   </div>
 
-                  <div className="lg:w-1/2 bg-gray-50 p-8">
+                  <div className="lg:w-1/2 bg-muted p-8">
                     <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
-                        <BarChart3 className="h-6 w-6 text-green-600" />
+                      <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center mr-4">
+                        <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-300" />
                       </div>
                       <h3 className="text-2xl font-semibold">Team Dynamics</h3>
                     </div>
 
-                    <div className="relative h-96 rounded-lg overflow-hidden border border-gray-200 mb-6">
+                    <div className="relative h-96 rounded-lg overflow-hidden border border-border mb-6">
                       <Image
                         src="/placeholder.svg?height=384&width=500"
                         alt="Team dynamics chart"
@@ -357,14 +357,14 @@ export default function ResultsProcessDemo() {
                         className="object-cover"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-white/90 p-4 rounded-lg shadow-sm">
+                        <div className="bg-background/90 p-4 rounded-lg shadow-sm">
                           <h4 className="font-semibold text-center mb-4">
                             Team Interaction Map
                           </h4>
                           <div className="w-64 h-64 relative">
                             {/* Placeholder for team interaction visualization */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-20 h-20 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center">
+                              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
                                 <span className="text-xs font-medium">
                                   Core
                                 </span>
@@ -451,22 +451,22 @@ export default function ResultsProcessDemo() {
                         Team Recommendations
                       </h4>
                       <div className="space-y-2">
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-sm text-blue-800">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900">
+                          <p className="text-sm text-blue-800 dark:text-blue-200">
                             <span className="font-medium">Strengths:</span>{" "}
                             Strong in ideation and strategic thinking. Leverage
                             analytical members for planning phases.
                           </p>
                         </div>
-                        <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
-                          <p className="text-sm text-yellow-800">
+                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-900">
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200">
                             <span className="font-medium">Gaps:</span> Need more
                             detail-oriented members for implementation. Consider
                             pairing analytical and sentinel types.
                           </p>
                         </div>
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-sm text-green-800">
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900">
+                          <p className="text-sm text-green-800 dark:text-green-200">
                             <span className="font-medium">Communication:</span>{" "}
                             Implement structured feedback sessions to bridge
                             understanding between different personality types.
