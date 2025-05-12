@@ -136,7 +136,7 @@ export default function LoginPage() {
       </div>
 
       <div ref={logoRef} className="mb-8 flex items-center justify-center">
-        <Shield className="h-12 w-12 text-gray-400" />
+        <Shield className="h-12 w-12 text-secondary" />
       </div>
 
       <Card className="w-full max-w-md">
@@ -218,7 +218,7 @@ export default function LoginPage() {
             <Button
               ref={buttonRef}
               type="submit"
-              className="w-full bg-gray-700 text-primary-foreground hover:bg-secondary/90"
+              className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
               disabled={isLoading}
             >
               {isLoading ? "Logging in..." : "Login"}
