@@ -8,7 +8,7 @@ export function LargeLogo() {
       <Image
         src={logo}
         alt="INSA Logo"
-        width={100}
+        width={80}
         // height={90}
         className="object-contain"
       />

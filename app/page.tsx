@@ -20,6 +20,10 @@ import { ExamProcessAnimation } from "@/components/animations/exam-process-anima
 import { AnimatedText } from "@/components/animations/animated-text";
 import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
+import { Logo } from "@/components/logo";
+import TestProcessDemo from "@/components/landing/test-process-demo";
+import ResultsProcessDemo from "@/components/landing/result-process-demo";
+import { LargeLogo } from "@/components/largeLogo";
 
 export default function LoginPage() {
   // Refs for animation targets
@@ -27,6 +31,7 @@ export default function LoginPage() {
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
   const benefitsRef = useRef<HTMLElement>(null);
+  const experienceRef = useRef<HTMLElement>(null);
   const testimonialsRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
 
@@ -42,8 +47,7 @@ export default function LoginPage() {
       >
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">INSA Personality Testing</span>
+            <Logo />
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link
@@ -57,6 +61,12 @@ export default function LoginPage() {
               className="text-sm font-medium hover:underline underline-offset-4"
             >
               Benefits
+            </Link>
+            <Link
+              href="#experience"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
+              Experience
             </Link>
             <Link
               href="#testimonials"
@@ -78,7 +88,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.header>
-
       {/* Hero Section */}
       <motion.section
         ref={heroRef}
@@ -178,15 +187,14 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
       {/* Features Section */}
       <motion.section
         ref={featuresRef}
         id="features"
         className="w-full py-12 md:py-24 lg:py-32"
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
@@ -256,10 +264,10 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
+      <TestProcessDemo />
+      <ResultsProcessDemo />
       {/* Stats Section */}
       {/* <StatsSection /> */}
-
       {/* Benefits Section */}
       <motion.section
         ref={benefitsRef}
@@ -267,7 +275,7 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32 bg-muted relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <ParallaxBackground className="absolute inset-0 -z-10">
@@ -435,7 +443,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
       {/* Testimonials Section */}
       <motion.section
         ref={testimonialsRef}
@@ -443,7 +450,7 @@ export default function LoginPage() {
         className="w-full py-12 md:py-24 lg:py-32"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container px-4 md:px-6">
@@ -470,7 +477,7 @@ export default function LoginPage() {
               </motion.p>
             </div>
           </div>
-          <div className="grid gap-6 py-12 lg:grid-cols-3">
+          <div className="grid gap-6 py-12 lg:grid-cols-2">
             <motion.div
               className="testimonial-card overflow-hidden"
               initial={{ opacity: 0, y: 80 }}
@@ -487,9 +494,9 @@ export default function LoginPage() {
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
                     <div>
-                      <h3 className="font-bold">Ministry of Education</h3>
+                      <h3 className="font-bold">Dashen Bank</h3>
                       <p className="text-sm text-muted-foreground">
-                        Government Organization
+                        Financial Institution
                       </p>
                     </div>
                   </div>
@@ -517,9 +524,9 @@ export default function LoginPage() {
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
                     <div>
-                      <h3 className="font-bold">Commercial Bank of Ethiopia</h3>
+                      <h3 className="font-bold">Midroc Ethiopia</h3>
                       <p className="text-sm text-muted-foreground">
-                        Financial Institution
+                        Investment Group
                       </p>
                     </div>
                   </div>
@@ -532,7 +539,7 @@ export default function LoginPage() {
                 </CardContent>
               </Card>
             </motion.div>
-            <motion.div
+            {/* <motion.div
               className="testimonial-card overflow-hidden"
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -561,18 +568,17 @@ export default function LoginPage() {
                   </p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
           </div>
         </div>
       </motion.section>
-
       {/* CTA Section */}
       <motion.section
         ref={ctaRef}
         className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.8 }}
+        viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.2 }}
       >
         <div className="container px-4 md:px-6">
@@ -615,8 +621,7 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.section>
-
-      {/* Exam Process Animation Section */}
+      ;{/* Exam Process Animation Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
@@ -643,12 +648,11 @@ export default function LoginPage() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="w-full border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <div className="flex items-center gap-2">
-            <Brain className="h-6 w-6" />
+            <LargeLogo />
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} INSA Personality Testing. All rights
               reserved.
