@@ -27,11 +27,11 @@ const savePayloadToFile = async (
 
     // Generate unique filename if needed (prevents duplicates)
     const timestamp = Date.now();
-    const uniqueFileName = `${fileName}_${userId}_${timestamp}.json`; 
+    const uniqueFileName = `${fileName}_${userId}_${timestamp}.json`;
 
     // Save to Gist (or your storage system)
     const gistUrl = await savePayloadToGist(uniqueFileName, content);
-    
+
     console.log(`✅ Payload saved to Gist: ${gistUrl}`);
     return gistUrl;
   } catch (error) {
@@ -84,7 +84,7 @@ export const getResults = async (
 ): Promise<ApiResponse<PersonalityTestScores>> => {
   try {
     const response = await apiClient.get<ApiResponse<PersonalityTestScores>>(
-      "/organization/personalityTest/getResults?user_id=${userId}"
+      `/organization/personalityTest/getResults?user_id=${userId}`
     );
     return response.data;
   } catch (error: any) {

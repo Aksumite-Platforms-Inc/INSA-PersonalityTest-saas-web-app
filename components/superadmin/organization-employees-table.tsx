@@ -190,7 +190,17 @@ export function OrganizationEmployeesTable({
                           <Mail className="mr-2 h-4 w-4" />
                           <span>Send Email</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Navigate to the superadmin employee test results page
+                            // Use Next.js router for navigation
+                            const employeeId = employee.id;
+                            // You may need to import useRouter at the top if not already
+                            // This is a workaround since this is not a page component
+                            window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
+                          }}
+                        >
                           <FileText className="mr-2 h-4 w-4" />
                           <span>View Tests</span>
                         </DropdownMenuItem>
