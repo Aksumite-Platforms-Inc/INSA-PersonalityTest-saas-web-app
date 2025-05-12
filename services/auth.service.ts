@@ -84,3 +84,25 @@ export const performPasswordReset = async (
     message: response.data.message || "Password reset successful.",
   };
 };
+
+/**
+ * Activate members
+ */
+export const activateMember = async (
+  organizationId: string,
+  memberId: string,
+  password: string
+): Promise<{ message: string }> => {
+  const endpoint = `/organization/${organizationId}/members/${memberId}/activate`;
+  const response = await apiClient.post<ApiResponse<null>>(
+    endpoint,
+    { password },
+    { withCredentials: true }
+  );
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Activation failed.");
+  }
+  return {
+    message: response.data.message || "Activation successful.",
+  };
+};
