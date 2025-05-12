@@ -150,6 +150,22 @@ export default function LoginPage() {
                   <Link href="/login">Login to Platform</Link>
                 </Button>
               </motion.div>
+              <motion.div
+                className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+              >
+                <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+                  <motion.div
+                    className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2"
+                    animate={{ y: [0, 15, 0] }}
+                    transition={{
+                      repeat: Number.POSITIVE_INFINITY,
+                      duration: 2,
+                    }}
+                  />
+                </div>
+              </motion.div>
             </div>
             <div className="flex items-center justify-center">
               <div className="relative h-[350px] w-[350px] md:h-[450px] md:w-[450px]">
