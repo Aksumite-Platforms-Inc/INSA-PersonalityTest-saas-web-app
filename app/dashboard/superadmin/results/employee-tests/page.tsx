@@ -123,11 +123,13 @@ export default function SuperadminEmployeeTestsPage() {
   const availableTests = getAvailableTests(results);
 
   return (
-    <div className="flex h-screen w-screen bg-background">
+    <div className="flex h-screen w-full bg-background overflow-hidden">
       {/* Main content area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center border-b px-8 py-4 ">
-          <div className="flex-1 text-xl font-semibold">Test Results</div>
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center border-b px-8 py-4 min-w-0">
+          <div className="flex-1 text-xl font-semibold truncate">
+            Test Results
+          </div>
           <button
             className="text-sm text-blue-600 hover:underline border border-blue-100 rounded px-3 py-1 bg-blue-50"
             onClick={() => router.back()}
@@ -136,7 +138,7 @@ export default function SuperadminEmployeeTestsPage() {
             Back
           </button>
         </div>
-        <div className="flex-1 flex flex-col px-8 py-6">
+        <div className="flex-1 flex flex-col px-8 py-6 min-w-0 overflow-x-auto">
           {availableTests.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No test results available.
