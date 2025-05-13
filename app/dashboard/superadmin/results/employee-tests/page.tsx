@@ -73,16 +73,24 @@ export default function SuperadminEmployeeTestsPage() {
     if (data.mbti && data.mbti.personality) tests.push("mbti");
     if (
       data.big_five &&
-      data.big_five.Raw &&
-      Object.keys(data.big_five.Raw).length > 0
+      (data.big_five.Raw || data.big_five.raw) &&
+      Object.keys(data.big_five.Raw || data.big_five.raw).length > 0
     )
       tests.push("big5");
-    if (data.riasec && Array.isArray(data.riasec) && data.riasec.length > 0)
+    if (
+      (data.riasec_scores &&
+        Array.isArray(data.riasec_scores) &&
+        data.riasec_scores.length > 0) ||
+      (data.riasec && Array.isArray(data.riasec) && data.riasec.length > 0)
+    )
       tests.push("riasec");
     if (
-      data.enneagram &&
-      Array.isArray(data.enneagram) &&
-      data.enneagram.length > 0
+      (data.enneagram_scores &&
+        Array.isArray(data.enneagram_scores) &&
+        data.enneagram_scores.length > 0) ||
+      (data.enneagram &&
+        Array.isArray(data.enneagram) &&
+        data.enneagram.length > 0)
     )
       tests.push("enneagram");
     return tests;
@@ -115,21 +123,20 @@ export default function SuperadminEmployeeTestsPage() {
   const availableTests = getAvailableTests(results);
 
   return (
-    <div className="container mx-auto py-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Employee Test Results</CardTitle>
-            <button
-              className="text-sm text-blue-600 hover:underline border border-blue-100 rounded px-3 py-1 bg-blue-50"
-              onClick={() => router.back()}
-              type="button"
-            >
-              Back
-            </button>
-          </div>
-        </CardHeader>
-        <CardContent>
+    <div className="flex h-screen w-screen bg-background">
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center border-b px-8 py-4 ">
+          <div className="flex-1 text-xl font-semibold">Test Results</div>
+          <button
+            className="text-sm text-blue-600 hover:underline border border-blue-100 rounded px-3 py-1 bg-blue-50"
+            onClick={() => router.back()}
+            type="button"
+          >
+            Back
+          </button>
+        </div>
+        <div className="flex-1 flex flex-col px-8 py-6">
           {availableTests.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No test results available.
@@ -140,7 +147,7 @@ export default function SuperadminEmployeeTestsPage() {
               onValueChange={setSelectedTest}
               className="w-full"
             >
-              <TabsList className="mb-4">
+              <TabsList className="mb-6">
                 {availableTests.includes("mbti") && (
                   <TabsTrigger value="mbti">MBTI</TabsTrigger>
                 )}
@@ -154,24 +161,30 @@ export default function SuperadminEmployeeTestsPage() {
                   <TabsTrigger value="enneagram">Enneagram</TabsTrigger>
                 )}
               </TabsList>
-              <div className="mt-4">
+              <div className="flex-1 overflow-auto">
                 {selectedTest === "mbti" && results.mbti && (
                   <MBTIResultAdmin result={results.mbti} />
                 )}
                 {selectedTest === "big5" && results.big_five && (
                   <BigFiveResultAdmin result={results.big_five} />
                 )}
-                {selectedTest === "riasec" && results.riasec && (
-                  <RIASECResultAdmin result={results.riasec} />
-                )}
-                {selectedTest === "enneagram" && results.enneagram && (
-                  <EnneagramResultAdmin result={results.enneagram} />
-                )}
+                {selectedTest === "riasec" &&
+                  (results.riasec_scores || results.riasec) && (
+                    <RIASECResultAdmin
+                      result={results.riasec_scores || results.riasec}
+                    />
+                  )}
+                {selectedTest === "enneagram" &&
+                  (results.enneagram_scores || results.enneagram) && (
+                    <EnneagramResultAdmin
+                      result={results.enneagram_scores || results.enneagram}
+                    />
+                  )}
               </div>
             </Tabs>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
