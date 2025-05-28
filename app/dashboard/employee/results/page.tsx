@@ -1,115 +1,192 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getResults } from "@/services/test.service";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
+import MBTIResultAdmin from "@/components/superadmin/MBTIResultAdmin";
+import BigFiveResultAdmin from "@/components/superadmin/BigFiveResultAdmin";
+import RIASECResultAdmin from "@/components/superadmin/RIASECResultAdmin";
+import EnneagramResultAdmin from "@/components/superadmin/EnneagramResultAdmin";
+
+// Import result components (to be reused)
+// These will be loaded dynamically to avoid hydration issues
+import dynamic from "next/dynamic";
 import { getUserId } from "@/utils/tokenUtils";
-import { TestResult } from "@/types/test"; // Assuming TestResult type exists, adjust if necessary
 
-// TODO: Import or create result display components for each test type
-import MBTIResultDisplay from "@/components/employee/results/MBTIResultDisplay";
-import BigFiveResultDisplay from "@/components/employee/results/BigFiveResultDisplay";
-import RIASECResultDisplay from "@/components/employee/results/RIASECResultDisplay";
-import EnneagramResultDisplay from "@/components/employee/results/EnneagramResultDisplay";
+const MBTIResult = dynamic(
+  () =>
+    import("@/app/dashboard/employee/test/result/mbti/page").then(
+      (m) => m.default
+    ),
+  { ssr: false }
+);
+const BigFiveResult = dynamic(
+  () =>
+    import("@/app/dashboard/employee/test/result/big5/page").then(
+      (m) => m.default
+    ),
+  { ssr: false }
+);
+const RIASECResult = dynamic(
+  () =>
+    import("@/app/dashboard/employee/test/result/riasec/page").then(
+      (m) => m.default
+    ),
+  { ssr: false }
+);
+const EnneagramResult = dynamic(
+  () =>
+    import("@/app/dashboard/employee/test/result/enneagram/page").then(
+      (m) => m.default
+    ),
+  { ssr: false }
+);
 
-const EmployeeResultsPage = () => {
-  const [results, setResults] = useState<TestResult[]>([]);
+export default function SuperadminEmployeeTestsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const employeeId = getUserId();
+  console.log("SuperadminEmployeeTestsPage employeeId:", employeeId);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<any>(null);
+  const [selectedTest, setSelectedTest] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const userId = getUserId(); // Assumes getUserId() returns string | null
-        if (!userId) {
-          setError("User ID not found. Please ensure you are logged in.");
-          setLoading(false);
-          return;
-        }
-        const data = await getResults(userId);
-        if (data && data.length > 0) {
-          setResults(data);
-        } else {
-          setResults([]); // Set to empty array if no results or undefined response
-        }
-      } catch (err) {
-        console.error("Error fetching results:", err);
-        setError("Failed to fetch results. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!employeeId) return;
+    setLoading(true);
+    getResults(String(employeeId))
+      .then((res) => {
+        setResults(res.data);
+        // Auto-select first available test
+        const available = getAvailableTests(res.data);
+        setSelectedTest(available[0] || null);
+      })
+      .finally(() => setLoading(false));
+  }, [employeeId]);
 
-    fetchResults();
-  }, []);
+  function getAvailableTests(data: any): string[] {
+    if (!data) return [];
+    const tests: string[] = [];
+    if (data.mbti && data.mbti.personality) tests.push("mbti");
+    if (
+      data.big_five &&
+      (data.big_five.Raw || data.big_five.raw) &&
+      Object.keys(data.big_five.Raw || data.big_five.raw).length > 0
+    )
+      tests.push("big5");
+    if (
+      (data.riasec_scores &&
+        Array.isArray(data.riasec_scores) &&
+        data.riasec_scores.length > 0) ||
+      (data.riasec && Array.isArray(data.riasec) && data.riasec.length > 0)
+    )
+      tests.push("riasec");
+    if (
+      (data.enneagram_scores &&
+        Array.isArray(data.enneagram_scores) &&
+        data.enneagram_scores.length > 0) ||
+      (data.enneagram &&
+        Array.isArray(data.enneagram) &&
+        data.enneagram.length > 0)
+    )
+      tests.push("enneagram");
+    return tests;
+  }
+
+  if (!employeeId) {
+    return (
+      <div className="text-center text-lg mt-10 text-red-600">
+        Invalid or missing employee ID.
+      </div>
+    );
+  }
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen"><p>Loading results...</p></div>; // Replace with a proper loader/spinner
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="animate-spin mr-2" /> Loading...
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="flex justify-center items-center h-screen"><p className="text-red-500">Error: {error}</p></div>; // Replace with a proper error component
+  if (!results) {
+    return (
+      <div className="text-center text-lg mt-10">
+        No test results found for this employee.
+      </div>
+    );
   }
 
-  if (results.length === 0) {
-    return <div className="text-center mt-10"><p>No exam results found.</p></div>;
-  }
+  const availableTests = getAvailableTests(results);
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Exam Results</h1>
-      <div className="space-y-8">
-        {results.map((result) => {
-          switch (result.testType) {
-            case "oejts": // Identifier for MBTI tests
-              return <MBTIResultDisplay key={result.id} result={result} />;
-            case "big_five": // Identifier for Big Five tests from types/personality.type.ts
-              return <BigFiveResultDisplay key={result.id} result={result} />;
-            case "qualtrics": // Possible alternative identifier for Big Five if it's from Qualtrics source
-              // Assuming Qualtrics results here are to be displayed as Big Five.
-              // If Qualtrics can be other things, this needs more specific handling.
-              return <BigFiveResultDisplay key={result.id} result={result} />;
-            case "riasec": // Identifier for RIASEC tests from types/personality-tests.ts & types/personality.type.ts
-              return <RIASECResultDisplay key={result.id} result={result} />;
-            case "enneagram": // Identifier for Enneagram tests from types/personality-tests.ts & types/personality.type.ts
-              return <EnneagramResultDisplay key={result.id} result={result} />;
-            default:
-              return (
-                <div key={result.id} className="p-6 border rounded-lg shadow-lg bg-white hover:shadow-xl transition-shadow duration-300 ease-in-out">
-                  <h2 className="text-2xl font-bold mb-3 text-gray-700">
-                    Test: <span className="text-indigo-600">{result.testType.toUpperCase()}</span>
-                  </h2>
-                  <p className="text-sm text-gray-500 mb-3">
-                    Completed on: {new Date(result.completedAt).toLocaleDateString()}
-                  </p>
-                  <div className="mt-3 bg-gray-50 p-3 rounded-md">
-                    <h3 className="text-md font-semibold text-gray-600">Scores:</h3>
-                    <pre className="bg-white p-2 rounded text-xs overflow-auto shadow-inner text-gray-700">
-                      {JSON.stringify(result.scores, null, 2)}
-                    </pre>
-                  </div>
-                  {result.interpretation && (
-                     <div className="mt-3 pt-3 border-t border-gray-200">
-                       <h3 className="text-md font-semibold text-gray-600">Interpretation:</h3>
-                       <p className="text-sm text-gray-700 whitespace-pre-line">{result.interpretation}</p>
-                     </div>
+    <div className="flex h-screen w-full bg-background overflow-hidden">
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center border-b px-8 py-4 min-w-0">
+          <div className="flex-1 text-xl font-semibold truncate">
+            Test Results
+          </div>
+          <button
+            className="text-sm text-blue-600 hover:underline border border-blue-100 rounded px-3 py-1 bg-blue-50"
+            onClick={() => router.back()}
+            type="button"
+          >
+            Back
+          </button>
+        </div>
+        <div className="flex-1 flex flex-col px-8 py-6 min-w-0 overflow-x-auto">
+          {availableTests.length === 0 ? (
+            <div className="text-center text-muted-foreground">
+              No test results available.
+            </div>
+          ) : (
+            <Tabs
+              value={selectedTest || undefined}
+              onValueChange={setSelectedTest}
+              className="w-full"
+            >
+              <TabsList className="mb-6">
+                {availableTests.includes("mbti") && (
+                  <TabsTrigger value="mbti">MBTI</TabsTrigger>
+                )}
+                {availableTests.includes("big5") && (
+                  <TabsTrigger value="big5">Big Five</TabsTrigger>
+                )}
+                {availableTests.includes("riasec") && (
+                  <TabsTrigger value="riasec">RIASEC</TabsTrigger>
+                )}
+                {availableTests.includes("enneagram") && (
+                  <TabsTrigger value="enneagram">Enneagram</TabsTrigger>
+                )}
+              </TabsList>
+              <div className="flex-1 overflow-auto">
+                {selectedTest === "mbti" && results.mbti && (
+                  <MBTIResultAdmin result={results.mbti} />
+                )}
+                {selectedTest === "big5" && results.big_five && (
+                  <BigFiveResultAdmin result={results.big_five} />
+                )}
+                {selectedTest === "riasec" &&
+                  (results.riasec_scores || results.riasec) && (
+                    <RIASECResultAdmin
+                      result={results.riasec_scores || results.riasec}
+                    />
                   )}
-                   {result.rawAnswers && Object.keys(result.rawAnswers).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <h3 className="text-md font-semibold text-gray-600">Raw Answers:</h3>
-                      <pre className="bg-white p-2 rounded text-xs overflow-auto shadow-inner text-gray-700">
-                        {JSON.stringify(result.rawAnswers, null, 2)}
-                      </pre>
-                    </div>
+                {selectedTest === "enneagram" &&
+                  (results.enneagram_scores || results.enneagram) && (
+                    <EnneagramResultAdmin
+                      result={results.enneagram_scores || results.enneagram}
+                    />
                   )}
-                </div>
-              );
-          }
-        })}
+              </div>
+            </Tabs>
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-export default EmployeeResultsPage;
+}

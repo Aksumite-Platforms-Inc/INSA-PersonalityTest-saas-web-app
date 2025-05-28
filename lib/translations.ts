@@ -33,7 +33,7 @@ export const translations = {
       tests: "Tests",
       testMonitoring: "Test Monitoring",
       takeTest: "Take Test",
-      results: "Results",
+      myResults: "My Results",
       settings: "Settings",
       open: "Open sidebar",
       close: "Close sidebar",
