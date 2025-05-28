@@ -11,9 +11,11 @@ import {
   Users,
   Folder,
   ClipboardList,
+  // BarChart is already imported, ensure it's used or remove if not
   BarChart,
   Settings,
   Home,
+  FileText, // Added for "My Results" if BarChart is taken
 } from "lucide-react";
 
 interface SidebarProps {
@@ -25,7 +27,7 @@ export function Sidebar({ open }: SidebarProps) {
   const pathname = usePathname();
 
   // Determine user role from pathname
-  const role = pathname.split("/")[2] || "employee";
+  const role = pathname?.split("/")[2] || "employee";
 
   return (
     <aside
@@ -55,7 +57,7 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/superadmin/organizations"
                 icon={Building2}
                 label={t("sidebar.organizations")}
-                active={pathname.includes("/organizations")}
+                active={pathname?.includes("/organizations") ?? false}
                 open={open}
               />
 
@@ -63,7 +65,7 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/superadmin/results/pdfs"
                 icon={BarChart3}
                 label={t("sidebar.results")}
-                active={pathname.includes("/results")}
+                active={pathname?.includes("/results") ?? false}
                 open={open}
               />
             </>
@@ -75,7 +77,7 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/organization/branches/"
                 icon={Building2}
                 label={t("sidebar.branches")}
-                active={pathname.includes("/branches")}
+                active={pathname?.includes("/branches") ?? false}
                 open={open}
               />
 
@@ -83,7 +85,7 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/organization/documents/"
                 icon={Folder}
                 label={t("sidebar.documents")}
-                active={pathname.includes("/documents")}
+                active={pathname?.includes("/documents") ?? false}
                 open={open}
               />
             </>
@@ -95,7 +97,7 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/branch/users"
                 icon={Users}
                 label={t("sidebar.users")}
-                active={pathname.includes("/users")}
+                active={pathname?.includes("/users") ?? false}
                 open={open}
               />
             </>
@@ -107,7 +109,14 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/employee/test"
                 icon={ClipboardList}
                 label={t("sidebar.takeTest")}
-                active={pathname.includes("/test")}
+                active={pathname?.includes("/dashboard/employee/test") ?? false}
+                open={open}
+              />
+              <SidebarItem
+                href="/dashboard/employee/results"
+                icon={BarChart} // Or FileText if BarChart has other semantic meaning here
+                label={t("sidebar.myResults")} // Assuming "My Results"
+                active={pathname === "/dashboard/employee/results"}
                 open={open}
               />
             </>
@@ -118,7 +127,7 @@ export function Sidebar({ open }: SidebarProps) {
             href={`/dashboard/${role}/settings`}
             icon={Settings}
             label={t("sidebar.settings")}
-            active={pathname.includes("/settings")}
+            active={pathname?.includes("/settings") ?? false}
             open={open}
           />
         </nav>
