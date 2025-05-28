@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { PageTitle } from "@/components/page-title"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -93,13 +94,17 @@ export default function EmployeeDashboard() {
             </CardContent>
             <CardFooter>
               {testStatus.hasCompletedTest ? (
-                <Button variant="outline" onClick={() => router.push("/dashboard/employee/results")}>
-                  {t("employee.viewResults")}
-                </Button>
+                <Link href="/dashboard/employee/results" passHref>
+                  <Button variant="outline">
+                    {t("employee.viewResults")}
+                  </Button>
+                </Link>
               ) : (
-                <Button onClick={() => router.push("/dashboard/employee/test/select")}>
-                  {t("employee.startTest")}
-                </Button>
+                <Link href="/dashboard/employee/test/select" passHref>
+                  <Button>
+                    {t("employee.startTest")}
+                  </Button>
+                </Link>
               )}
             </CardFooter>
           </Card>
@@ -132,9 +137,11 @@ export default function EmployeeDashboard() {
             </CardContent>
             {testStatus.hasCompletedTest && (
               <CardFooter>
-                <Button variant="outline" onClick={() => router.push("/dashboard/employee/results")}>
-                  {t("employee.exploreInsights")}
-                </Button>
+                <Link href="/dashboard/employee/results" passHref>
+                  <Button variant="outline">
+                    {t("employee.exploreInsights")}
+                  </Button>
+                </Link>
               </CardFooter>
             )}
           </Card>

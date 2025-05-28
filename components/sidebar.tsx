@@ -11,9 +11,11 @@ import {
   Users,
   Folder,
   ClipboardList,
-  BarChart,
+  // BarChart is already imported, ensure it's used or remove if not
+  BarChart, 
   Settings,
   Home,
+  FileText, // Added for "My Results" if BarChart is taken
 } from "lucide-react";
 
 interface SidebarProps {
@@ -107,7 +109,14 @@ export function Sidebar({ open }: SidebarProps) {
                 href="/dashboard/employee/test"
                 icon={ClipboardList}
                 label={t("sidebar.takeTest")}
-                active={pathname.includes("/test")}
+                active={pathname.includes("/dashboard/employee/test")}
+                open={open}
+              />
+              <SidebarItem
+                href="/dashboard/employee/results"
+                icon={BarChart} // Or FileText if BarChart has other semantic meaning here
+                label={t("sidebar.myResults")} // Assuming "My Results"
+                active={pathname === "/dashboard/employee/results"}
                 open={open}
               />
             </>
