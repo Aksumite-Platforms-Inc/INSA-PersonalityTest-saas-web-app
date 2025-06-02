@@ -31,27 +31,19 @@ export const createOrganization = async (data: {
   address: string;
   sector: string;
   phone_number: string;
-}): Promise<{ id: number }> => {
+}): Promise<Organization> => {
   console.log("Payload for createOrganization:", data);
   const response = await apiClient.post<ApiResponse<Organization>>(
     "/sys/organization",
     data
   );
 
-  console.log("Full API response:", response.data);
-
   if (!response.data?.success) {
     console.error("Create Org Error:", response.data);
     throw new Error(response.data?.message || "Failed to create organization.");
   }
 
-  const organization = response.data.data;
-  if (!organization || typeof organization.id !== "number") {
-    console.error("Organization ID is missing in the response:", response.data);
-    throw new Error("Organization creation failed: Missing ID.");
-  }
-
-  return { id: organization.id }; // Return the ID
+  return response.data.data;
 };
 
 /** Update an organization */

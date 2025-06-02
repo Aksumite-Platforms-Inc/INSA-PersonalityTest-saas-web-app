@@ -47,7 +47,7 @@ export default function NewOrganizationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !sector || !email || !adminEmail) {
+    if (!name || !sector || !email) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -66,14 +66,14 @@ export default function NewOrganizationPage() {
     }
 
     setIsSubmitting(true);
-    toast({
-      title: "Creating Organization...",
-      description: "Please wait while the organization is being created.",
-    });
+    // toast({
+    //   title: "Creating Organization...",
+    //   description: "Please wait while the organization is being created.",
+    // });
 
     try {
       // Call the API to create the organization
-      const organization = await createOrganization({
+      await createOrganization({
         name,
         sector,
         email,
@@ -81,27 +81,12 @@ export default function NewOrganizationPage() {
         address,
         status,
       });
-      console.log("Full organization response:", organization);
-
-      // Access the ID directly
-      const organizationId = organization.id;
-      if (!organizationId) {
-        throw new Error("Organization creation failed.");
-      }
-
-      console.log("Assigning admin to organization ID:", organizationId);
-      console.log("Payload for assignAdminToOrganization:", {
-        organizationId,
-        adminEmail,
-      });
-
-      // Call the API to assign the administrator
-      await assignAdminToOrganization(organizationId, adminEmail);
 
       toast({
         title: "Organization created",
         description: `The organization has been created successfully.`,
       });
+      router.back();
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -122,7 +107,7 @@ export default function NewOrganizationPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 ">
           <Card>
             <CardHeader>
               <CardTitle>Organization Details</CardTitle>
@@ -199,40 +184,6 @@ export default function NewOrganizationPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Administrator Account</CardTitle>
-              <CardDescription>
-                Create an admin account for this organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* <div className="space-y-2">
-                <Label htmlFor="admin-name">Admin Name *</Label>
-                <Input
-                  id="admin-name"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  required
-                />
-              </div> */}
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">Admin Email *</Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                A temporary password will be generated and sent to this email
-                address.
-              </p>
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button
