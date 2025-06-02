@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   createOrganization,
   assignAdminToOrganization,
+  // getOrganizationById,
 } from "@/services/organization.service";
 
 export default function NewOrganizationPage() {
@@ -46,7 +47,7 @@ export default function NewOrganizationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !sector || !email || !adminName || !adminEmail) {
+    if (!name || !sector || !email || !adminEmail) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -65,6 +66,10 @@ export default function NewOrganizationPage() {
     }
 
     setIsSubmitting(true);
+    toast({
+      title: "Creating Organization...",
+      description: "Please wait while the organization is being created.",
+    });
 
     try {
       // Call the API to create the organization
@@ -76,23 +81,29 @@ export default function NewOrganizationPage() {
         address,
         status,
       });
+      console.log("Full organization response:", organization);
 
-      toast({
-        title: "Organization created",
-        description: `${organization.name} has been created successfully.`,
+      // Access the ID directly
+      const organizationId = organization.id;
+      if (!organizationId) {
+        throw new Error("Organization creation failed.");
+      }
+
+      console.log("Assigning admin to organization ID:", organizationId);
+      console.log("Payload for assignAdminToOrganization:", {
+        organizationId,
+        adminEmail,
       });
 
       // Call the API to assign the administrator
-      // await assignAdminToOrganization(organization.id, {
-      //   name: adminName,
-      //   email: adminEmail,
-      // });
+      await assignAdminToOrganization(organizationId, adminEmail);
 
       toast({
-        title: "Administrator assigned",
-        description: `Admin ${adminName} has been assigned successfully.`,
+        title: "Organization created",
+        description: `The organization has been created successfully.`,
       });
     } catch (error) {
+      console.error("Error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -199,7 +210,7 @@ export default function NewOrganizationPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="admin-name">Admin Name *</Label>
                 <Input
                   id="admin-name"
@@ -207,7 +218,7 @@ export default function NewOrganizationPage() {
                   onChange={(e) => setAdminName(e.target.value)}
                   required
                 />
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="admin-email">Admin Email *</Label>
                 <Input
