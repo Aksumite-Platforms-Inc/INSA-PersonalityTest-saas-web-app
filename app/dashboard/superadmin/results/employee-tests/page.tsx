@@ -1,71 +1,140 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { getResults } from "@/services/test.service";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useEffect, useState, useMemo } from "react";
+import { listOrganizations } from "@/services/organization.service";
+import { getAllOrgMembers } from "@/services/user.service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
-
-// Import result components (to be reused)
-// These will be loaded dynamically to avoid hydration issues
+import { Organization } from "@/services/organization.service";
+import { User } from "@/services/user.service";
+import { getResults } from "@/services/test.service";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import dynamic from "next/dynamic";
 
-const MBTIResult = dynamic(
-  () =>
-    import("@/app/dashboard/employee/test/result/mbti/page").then(
-      (m) => m.default
-    ),
+// Dynamically import result components
+const MBTIResultAdmin = dynamic(
+  () => import("@/components/superadmin/MBTIResultAdmin"),
   { ssr: false }
 );
-const BigFiveResult = dynamic(
-  () =>
-    import("@/app/dashboard/employee/test/result/big5/page").then(
-      (m) => m.default
-    ),
+const BigFiveResultAdmin = dynamic(
+  () => import("@/components/superadmin/BigFiveResultAdmin"),
   { ssr: false }
 );
-const RIASECResult = dynamic(
-  () =>
-    import("@/app/dashboard/employee/test/result/riasec/page").then(
-      (m) => m.default
-    ),
+const RIASECResultAdmin = dynamic(
+  () => import("@/components/superadmin/RIASECResultAdmin"),
   { ssr: false }
 );
-const EnneagramResult = dynamic(
-  () =>
-    import("@/app/dashboard/employee/test/result/enneagram/page").then(
-      (m) => m.default
-    ),
+const EnneagramResultAdmin = dynamic(
+  () => import("@/components/superadmin/EnneagramResultAdmin"),
   { ssr: false }
 );
 
-import MBTIResultAdmin from "@/components/superadmin/MBTIResultAdmin";
-import BigFiveResultAdmin from "@/components/superadmin/BigFiveResultAdmin";
-import RIASECResultAdmin from "@/components/superadmin/RIASECResultAdmin";
-import EnneagramResultAdmin from "@/components/superadmin/EnneagramResultAdmin";
+type View = "employee_list" | "results_view";
 
 export default function SuperadminEmployeeTestsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const employeeId = searchParams?.get("employeeId");
-  console.log("SuperadminEmployeeTestsPage employeeId:", employeeId);
-  const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<any>(null);
-  const [selectedTest, setSelectedTest] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [errorOrgs, setErrorOrgs] = useState<string | null>(null);
+  const [errorEmployees, setErrorEmployees] = useState<string | null>(null);
 
+  const [currentView, setCurrentView] = useState<View>("employee_list");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [employeeResults, setEmployeeResults] = useState<any>(null);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [errorResults, setErrorResults] = useState<string | null>(null);
+  const [selectedTest, setSelectedTest] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch organizations on component mount
   useEffect(() => {
-    if (!employeeId) return;
-    setLoading(true);
-    getResults(employeeId)
+    setLoadingOrgs(true);
+    setErrorOrgs(null);
+    listOrganizations()
       .then((res) => {
-        setResults(res.data);
-        // Auto-select first available test
+        setOrganizations(res.data);
+      })
+      .catch((err) => {
+        setErrorOrgs("Failed to fetch organizations.");
+        console.error("Error fetching organizations:", err);
+      })
+      .finally(() => {
+        setLoadingOrgs(false);
+      });
+  }, []);
+
+  // Fetch employees when selectedOrgId changes
+  useEffect(() => {
+    if (!selectedOrgId) {
+      setEmployees([]);
+      return;
+    }
+
+    setLoadingEmployees(true);
+    setErrorEmployees(null);
+    // Ensure selectedOrgId is a number before calling the service
+    const numericOrgId = parseInt(selectedOrgId, 10);
+    if (isNaN(numericOrgId)) {
+      setErrorEmployees("Invalid organization ID.");
+      setLoadingEmployees(false);
+      return;
+    }
+
+    getAllOrgMembers(numericOrgId)
+      .then((res) => {
+        // getAllOrgMembers returns User[] directly
+        setEmployees(res);
+      })
+      .catch((err) => {
+        setErrorEmployees("Failed to fetch employees.");
+        console.error("Error fetching employees:", err);
+      })
+      .finally(() => {
+        setLoadingEmployees(false);
+      });
+  }, [selectedOrgId]);
+
+  // Fetch test results when selectedEmployeeId changes
+  useEffect(() => {
+    if (!selectedEmployeeId || currentView !== "results_view") {
+      setEmployeeResults(null);
+      return;
+    }
+
+    setLoadingResults(true);
+    setErrorResults(null);
+    getResults(selectedEmployeeId.toString()) // getResults expects string ID
+      .then((res) => {
+        setEmployeeResults(res.data);
         const available = getAvailableTests(res.data);
         setSelectedTest(available[0] || null);
       })
-      .finally(() => setLoading(false));
-  }, [employeeId]);
+      .catch((err) => {
+        setErrorResults("Failed to fetch test results.");
+        console.error("Error fetching test results:", err);
+      })
+      .finally(() => {
+        setLoadingResults(false);
+      });
+  }, [selectedEmployeeId, currentView]);
 
   function getAvailableTests(data: any): string[] {
     if (!data) return [];
@@ -96,95 +165,216 @@ export default function SuperadminEmployeeTestsPage() {
     return tests;
   }
 
-  if (!employeeId) {
+  const handleViewResults = (employeeId: number) => {
+    setSelectedEmployeeId(employeeId);
+    setCurrentView("results_view");
+  };
+
+  const handleBackToEmployees = () => {
+    setCurrentView("employee_list");
+    setSelectedEmployeeId(null);
+    setEmployeeResults(null);
+    setSelectedTest(null);
+    setErrorResults(null);
+  };
+
+  const renderEmployeeList = () => (
+    <>
+      <div className="mb-4">
+        <label htmlFor="organization-select" className="block text-sm font-medium text-gray-700 mb-1">
+          Select Organization
+        </label>
+        {loadingOrgs ? (
+          <div className="flex items-center">
+            <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading organizations...
+          </div>
+        ) : errorOrgs ? (
+          <div className="text-red-600">{errorOrgs}</div>
+        ) : (
+          <Select
+            onValueChange={(value) => {
+              setSelectedOrgId(value);
+              // Reset employee list and search term when org changes
+              setEmployees([]);
+              setSelectedEmployeeId(null);
+              setEmployeeResults(null);
+              setSearchTerm(""); // Reset search term
+            }}
+            value={selectedOrgId || ""}
+          >
+            <SelectTrigger id="organization-select" className="w-[300px]">
+              <SelectValue placeholder="Select an organization" />
+            </SelectTrigger>
+            <SelectContent>
+              {organizations.map((org) => (
+                <SelectItem key={org.id} value={org.id.toString()}> {/* Ensure value is string */}
+                  {org.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {selectedOrgId && (
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Employees</h2>
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+          {loadingEmployees ? (
+            <div className="flex items-center">
+              <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading employees...
+            </div>
+          ) : errorEmployees ? (
+            <div className="text-red-600">{errorEmployees}</div>
+          ) : filteredEmployees.length === 0 ? (
+            <div>
+              {searchTerm ? "No employees match your search." : "No employees found for this organization."}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                    <TableCell>{employee.department || "N/A"}</TableCell>
+                    <TableCell>{employee.position || "N/A"}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleViewResults(employee.id)}>
+                        View Results
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  const filteredEmployees = useMemo(() => {
+    if (!searchTerm) return employees;
+    return employees.filter(
+      (employee) =>
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [employees, searchTerm]);
+
+  const renderResultsView = () => {
+    if (loadingResults) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="animate-spin mr-2" /> Loading test results...
+        </div>
+      );
+    }
+
+    if (errorResults) {
+      return <div className="text-red-600 text-center mt-10">{errorResults}</div>;
+    }
+
+    if (!employeeResults) {
+      return (
+        <div className="text-center text-lg mt-10">
+          No test results found for this employee or results are still loading.
+        </div>
+      );
+    }
+
+    const availableTests = getAvailableTests(employeeResults);
+
+    if (availableTests.length === 0) {
+      return (
+        <div className="text-center text-muted-foreground mt-10">
+          No test results available for this employee.
+        </div>
+      );
+    }
+
     return (
-      <div className="text-center text-lg mt-10 text-red-600">
-        Invalid or missing employee ID.
+      <div>
+        <Tabs
+          value={selectedTest || undefined}
+          onValueChange={setSelectedTest}
+          className="w-full"
+        >
+          <TabsList className="mb-6">
+            {availableTests.includes("mbti") && (
+              <TabsTrigger value="mbti">MBTI</TabsTrigger>
+            )}
+            {availableTests.includes("big5") && (
+              <TabsTrigger value="big5">Big Five</TabsTrigger>
+            )}
+            {availableTests.includes("riasec") && (
+              <TabsTrigger value="riasec">RIASEC</TabsTrigger>
+            )}
+            {availableTests.includes("enneagram") && (
+              <TabsTrigger value="enneagram">Enneagram</TabsTrigger>
+            )}
+          </TabsList>
+          <div className="flex-1 overflow-auto">
+            {selectedTest === "mbti" && employeeResults.mbti && (
+              <MBTIResultAdmin result={employeeResults.mbti} />
+            )}
+            {selectedTest === "big5" && employeeResults.big_five && (
+              <BigFiveResultAdmin result={employeeResults.big_five} />
+            )}
+            {selectedTest === "riasec" &&
+              (employeeResults.riasec_scores || employeeResults.riasec) && (
+                <RIASECResultAdmin
+                  result={employeeResults.riasec_scores || employeeResults.riasec}
+                />
+              )}
+            {selectedTest === "enneagram" &&
+              (employeeResults.enneagram_scores || employeeResults.enneagram) && (
+                <EnneagramResultAdmin
+                  result={
+                    employeeResults.enneagram_scores || employeeResults.enneagram
+                  }
+                />
+              )}
+          </div>
+        </Tabs>
       </div>
     );
-  }
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="animate-spin mr-2" /> Loading...
-      </div>
-    );
-  }
-
-  if (!results) {
-    return (
-      <div className="text-center text-lg mt-10">
-        No test results found for this employee.
-      </div>
-    );
-  }
-
-  const availableTests = getAvailableTests(results);
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
-      {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center border-b px-8 py-4 min-w-0">
           <div className="flex-1 text-xl font-semibold truncate">
-            Test Results
+            {currentView === "employee_list" ? "Employee Test Results" : "Test Results"}
           </div>
-          <button
-            className="text-sm text-blue-600 hover:underline border border-blue-100 rounded px-3 py-1 bg-blue-50"
-            onClick={() => router.back()}
-            type="button"
-          >
-            Back
-          </button>
+          {currentView === "results_view" && (
+            <Button onClick={handleBackToEmployees} variant="outline">
+              Back to Employees
+            </Button>
+          )}
         </div>
         <div className="flex-1 flex flex-col px-8 py-6 min-w-0 overflow-x-auto">
-          {availableTests.length === 0 ? (
-            <div className="text-center text-muted-foreground">
-              No test results available.
-            </div>
-          ) : (
-            <Tabs
-              value={selectedTest || undefined}
-              onValueChange={setSelectedTest}
-              className="w-full"
-            >
-              <TabsList className="mb-6">
-                {availableTests.includes("mbti") && (
-                  <TabsTrigger value="mbti">MBTI</TabsTrigger>
-                )}
-                {availableTests.includes("big5") && (
-                  <TabsTrigger value="big5">Big Five</TabsTrigger>
-                )}
-                {availableTests.includes("riasec") && (
-                  <TabsTrigger value="riasec">RIASEC</TabsTrigger>
-                )}
-                {availableTests.includes("enneagram") && (
-                  <TabsTrigger value="enneagram">Enneagram</TabsTrigger>
-                )}
-              </TabsList>
-              <div className="flex-1 overflow-auto">
-                {selectedTest === "mbti" && results.mbti && (
-                  <MBTIResultAdmin result={results.mbti} />
-                )}
-                {selectedTest === "big5" && results.big_five && (
-                  <BigFiveResultAdmin result={results.big_five} />
-                )}
-                {selectedTest === "riasec" &&
-                  (results.riasec_scores || results.riasec) && (
-                    <RIASECResultAdmin
-                      result={results.riasec_scores || results.riasec}
-                    />
-                  )}
-                {selectedTest === "enneagram" &&
-                  (results.enneagram_scores || results.enneagram) && (
-                    <EnneagramResultAdmin
-                      result={results.enneagram_scores || results.enneagram}
-                    />
-                  )}
-              </div>
-            </Tabs>
-          )}
+          {currentView === "employee_list" ? renderEmployeeList() : renderResultsView()}
         </div>
       </div>
     </div>
