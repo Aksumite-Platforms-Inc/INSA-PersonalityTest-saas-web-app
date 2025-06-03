@@ -52,7 +52,7 @@ export default function NewOrganizationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !sector || !email) {
+    if (!name || !sector || !email || !phone) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -94,9 +94,23 @@ export default function NewOrganizationPage() {
       router.back();
     } catch (error) {
       console.error("Error:", error);
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -172,11 +186,12 @@ export default function NewOrganizationPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">Phone *</Label>
                 <Input
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -188,7 +203,7 @@ export default function NewOrganizationPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status *</Label>
+                <Label htmlFor="status">Status </Label>
                 <Select value={status} onValueChange={setStatus} required>
                   <SelectTrigger id="status">
                     <SelectValue placeholder="Select status" />
