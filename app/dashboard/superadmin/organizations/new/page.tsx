@@ -28,7 +28,9 @@ import { useToast } from "@/hooks/use-toast";
 import {
   createOrganization,
   assignAdminToOrganization,
+  // getOrganizationById,
 } from "@/services/organization.service";
+import AssignAdminModal from "@/components/superadmin/assign-admin-modal";
 
 export default function NewOrganizationPage() {
   const router = useRouter();
@@ -42,11 +44,15 @@ export default function NewOrganizationPage() {
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAssignAdminModalOpen, setAssignAdminModalOpen] = useState(false);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<
+    number | null
+  >(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !sector || !email || !adminName || !adminEmail) {
+    if (!name || !sector || !email) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -65,10 +71,14 @@ export default function NewOrganizationPage() {
     }
 
     setIsSubmitting(true);
+    // toast({
+    //   title: "Creating Organization...",
+    //   description: "Please wait while the organization is being created.",
+    // });
 
     try {
       // Call the API to create the organization
-      const organization = await createOrganization({
+      await createOrganization({
         name,
         sector,
         email,
@@ -79,20 +89,11 @@ export default function NewOrganizationPage() {
 
       toast({
         title: "Organization created",
-        description: `${organization.name} has been created successfully.`,
+        description: `The organization has been created successfully.`,
       });
-
-      // Call the API to assign the administrator
-      // await assignAdminToOrganization(organization.id, {
-      //   name: adminName,
-      //   email: adminEmail,
-      // });
-
-      toast({
-        title: "Administrator assigned",
-        description: `Admin ${adminName} has been assigned successfully.`,
-      });
+      router.back();
     } catch (error) {
+      console.error("Error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -103,6 +104,16 @@ export default function NewOrganizationPage() {
     }
   };
 
+  const handleAssignAdminClick = (organizationId: number) => {
+    setSelectedOrganizationId(organizationId);
+    setAssignAdminModalOpen(true);
+  };
+
+  const closeAssignAdminModal = () => {
+    setAssignAdminModalOpen(false);
+    setSelectedOrganizationId(null);
+  };
+
   return (
     <div className="space-y-6">
       <PageTitle
@@ -111,7 +122,7 @@ export default function NewOrganizationPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 ">
           <Card>
             <CardHeader>
               <CardTitle>Organization Details</CardTitle>
@@ -189,40 +200,6 @@ export default function NewOrganizationPage() {
                 </Select>
               </div>
             </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Administrator Account</CardTitle>
-              <CardDescription>
-                Create an admin account for this organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-name">Admin Name *</Label>
-                <Input
-                  id="admin-name"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">Admin Email *</Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                A temporary password will be generated and sent to this email
-                address.
-              </p>
-            </CardContent>
             <CardFooter className="flex justify-between">
               <Button
                 variant="outline"
@@ -238,6 +215,29 @@ export default function NewOrganizationPage() {
           </Card>
         </div>
       </form>
+      <div>
+        <table>
+          <tbody>
+            {/* Example row */}
+            <tr>
+              <td>Organization Name</td>
+              <td>
+                <button onClick={() => handleAssignAdminClick(1)}>
+                  Assign Admin
+                </button>
+              </td>
+            </tr>
+            {/* ...other rows... */}
+          </tbody>
+        </table>
+      </div>
+      {isAssignAdminModalOpen && selectedOrganizationId !== null && (
+        <AssignAdminModal
+          isOpen={isAssignAdminModalOpen}
+          onClose={closeAssignAdminModal}
+          organizationId={selectedOrganizationId}
+        />
+      )}
     </div>
   );
 }

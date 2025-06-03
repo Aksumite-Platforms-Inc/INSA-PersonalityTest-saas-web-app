@@ -30,6 +30,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAllOrgMembers } from "@/services/user.service";
+import { Modal } from "@/components/ui/modal";
+import { useToast } from "@/hooks/use-toast";
+import { assignAdminToOrganization } from "@/services/organization.service";
 
 // Define the props for the table
 interface Organization {
@@ -56,6 +59,10 @@ export function OrganizationsTable({
 }: OrganizationsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [userCounts, setUserCounts] = useState<Record<number, number>>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
+  const [adminEmail, setAdminEmail] = useState("");
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -116,6 +123,34 @@ export function OrganizationsTable({
     }
   };
 
+  const handleAssignAdmin = async () => {
+    if (!selectedOrgId || !adminEmail) {
+      toast({
+        title: "Error",
+        description: "Please provide a valid email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await assignAdminToOrganization(selectedOrgId, adminEmail);
+      toast({
+        title: "Success",
+        description: "Admin assigned successfully.",
+      });
+      setIsModalOpen(false);
+      setAdminEmail("");
+    } catch (error) {
+      console.error("Error assigning admin:", error);
+      toast({
+        title: "Error",
+        description: "Failed to assign admin. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center">
@@ -129,6 +164,26 @@ export function OrganizationsTable({
           />
         </div>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="p-4">
+          <h2 className="text-lg font-bold">Assign Admin</h2>
+          <Input
+            placeholder="Enter admin email"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            className="mt-2"
+          />
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="ml-2" onClick={handleAssignAdmin}>
+              Assign
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <div className="rounded-md border">
         <Table>
@@ -166,57 +221,74 @@ export function OrganizationsTable({
                     {new Date(org.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/superadmin/organizations/${org.id}/edit`
-                            )
-                          }
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/superadmin/organizations/${org.id}`
-                            )
-                          }
-                        >
-                          <Shield className="mr-2 h-4 w-4" />
-                          <span>Details</span>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-                        {org.status === "active" ? (
-                          <DropdownMenuItem className="text-red-600">
-                            <Ban className="mr-2 h-4 w-4" />
-                            <span>Suspend</span>
+                    <div className="flex items-center space-x-2 group relative">
+                      {/* Assign Admin Icon with Tooltip */}
+                      <div className="relative flex items-center">
+                        <Shield
+                          className="h-4 w-4 cursor-pointer"
+                          onClick={() => {
+                            setSelectedOrgId(org.id);
+                            setIsModalOpen(true);
+                          }}
+                          aria-label="Assign Admin"
+                        />
+                        {/* Tooltip */}
+                        <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10 transition-opacity">
+                          Assign Admin
+                        </span>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/superadmin/organizations/${org.id}/edit`
+                              )
+                            }
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            <span>Edit</span>
                           </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem className="text-green-600">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/superadmin/organizations/${org.id}`
+                              )
+                            }
+                          >
                             <Shield className="mr-2 h-4 w-4" />
-                            <span>Activate</span>
+                            <span>Details</span>
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => onDelete(org.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+
+                          <DropdownMenuSeparator />
+                          {org.status === "active" ? (
+                            <DropdownMenuItem className="text-red-600">
+                              <Ban className="mr-2 h-4 w-4" />
+                              <span>Suspend</span>
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem className="text-green-600">
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Activate</span>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={() => onDelete(org.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

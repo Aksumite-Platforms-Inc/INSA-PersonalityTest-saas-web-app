@@ -15,6 +15,13 @@ export interface Organization {
   created_at: Date;
   updated_at: Date;
 }
+export interface Admin {
+  id: number;
+  name: string;
+  email: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 /** Create a new organization */
 export const createOrganization = async (data: {
@@ -135,15 +142,40 @@ export const deactivateOrganization = async (id: number): Promise<void> => {
 /** Assign admin to organization */
 export const assignAdminToOrganization = async (
   orgId: number,
-  adminId: number
-): Promise<void> => {
-  const response = await apiClient.post<ApiResponse<null>>(
+  Email: string
+  // adminName: string
+): Promise<Admin> => {
+  const response = await apiClient.post<ApiResponse<Admin>>(
     `/sys/organization/${orgId}/admin`,
-    { adminId }
+    {
+      Email,
+      //  adminName
+    }
   );
 
   if (!response.data?.success) {
     console.error("Assign Admin Error:", response.data);
     throw new Error(response.data?.message || "Failed to assign admin.");
   }
+
+  return response.data.data;
 };
+// export const getOrganizatioByEmail = async (
+//   email: string
+// ): Promise<Organization | null> => {
+//   try {
+//     const response = await apiClient.get<ApiResponse<Organization>>(
+//       `/sys/organization/email/${email}`
+//     );
+
+//     if (!response.data?.success) {
+//       console.error("Fetch Org By Email Error:", response.data);
+//       return null;
+//     }
+
+//     return response.data.data;
+//   } catch (error) {
+//     console.error("Error fetching organization by email:", error);
+//     return null;
+//   }
+// };
