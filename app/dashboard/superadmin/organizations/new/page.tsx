@@ -30,6 +30,7 @@ import {
   assignAdminToOrganization,
   // getOrganizationById,
 } from "@/services/organization.service";
+import AssignAdminModal from "@/components/superadmin/assign-admin-modal";
 
 export default function NewOrganizationPage() {
   const router = useRouter();
@@ -43,6 +44,10 @@ export default function NewOrganizationPage() {
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAssignAdminModalOpen, setAssignAdminModalOpen] = useState(false);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<
+    number | null
+  >(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +102,16 @@ export default function NewOrganizationPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAssignAdminClick = (organizationId: number) => {
+    setSelectedOrganizationId(organizationId);
+    setAssignAdminModalOpen(true);
+  };
+
+  const closeAssignAdminModal = () => {
+    setAssignAdminModalOpen(false);
+    setSelectedOrganizationId(null);
   };
 
   return (
@@ -200,6 +215,29 @@ export default function NewOrganizationPage() {
           </Card>
         </div>
       </form>
+      <div>
+        <table>
+          <tbody>
+            {/* Example row */}
+            <tr>
+              <td>Organization Name</td>
+              <td>
+                <button onClick={() => handleAssignAdminClick(1)}>
+                  Assign Admin
+                </button>
+              </td>
+            </tr>
+            {/* ...other rows... */}
+          </tbody>
+        </table>
+      </div>
+      {isAssignAdminModalOpen && selectedOrganizationId !== null && (
+        <AssignAdminModal
+          isOpen={isAssignAdminModalOpen}
+          onClose={closeAssignAdminModal}
+          organizationId={selectedOrganizationId}
+        />
+      )}
     </div>
   );
 }
