@@ -7,6 +7,7 @@ import { UserMenu } from "@/components/user-menu";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTranslation } from "@/hooks/use-translation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   return (
     <header className="h-16 border-b flex items-center justify-between px-4 sticky top-0 z-30 bg-background">
@@ -27,12 +29,18 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
         >
           {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
-        <Logo />
+        {!isMobile && <Logo />}
       </div>
       <div className="flex items-center gap-2">
-        <LanguageSwitcher />
-        <ThemeToggle />
-        <UserMenu />
+        {isMobile ? (
+          <UserMenu />
+        ) : (
+          <>
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <UserMenu />
+          </>
+        )}
       </div>
     </header>
   );
