@@ -62,7 +62,7 @@ export function Sidebar({ open }: SidebarProps) {
               />
 
               <SidebarItem
-                href="/dashboard/superadmin/results/pdfs"
+                href="/dashboard/superadmin/results"
                 icon={BarChart3}
                 label={t("sidebar.results")}
                 active={pathname?.includes("/results") ?? false}
