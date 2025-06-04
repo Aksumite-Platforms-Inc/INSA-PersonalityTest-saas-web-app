@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllBranchMembers } from "@/services/user.service";
+import { getAllBranchMembers, deleteOrgMember } from "@/services/user.service";
 import {
   Table,
   TableBody,
@@ -13,7 +13,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  ExternalLink,
+  Mail,
+  FileText,
+  UserCog,
+  Shield,
+  Ban,
+  Trash2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmployeeListProps {
   organizationId: number;
@@ -21,13 +42,12 @@ interface EmployeeListProps {
   onViewDetails?: (employeeId: number) => void;
 }
 
-export function EmployeeList({
-  organizationId,
-  branchId,
-}: EmployeeListProps) {
+export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [employees, setEmployees] = useState<any[]>([]);
+  const { toast } = useToast();
+  // const [loading, setLoading] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -35,8 +55,12 @@ export function EmployeeList({
       if (!branchId || branchId === 0) return; // avoid invalid API calls
 
       try {
-        const fetchedEmployees = await getAllBranchMembers(organizationId, branchId);
+        const fetchedEmployees = await getAllBranchMembers(
+          organizationId,
+          branchId
+        );
         setEmployees(fetchedEmployees);
+        console.log("orgid and branch id:", organizationId, branchId);
       } catch (error) {
         console.error("Error fetching branch employees:", error);
       }
@@ -44,6 +68,49 @@ export function EmployeeList({
 
     fetchEmployees();
   }, [organizationId, branchId]);
+
+  const handleDelete = async (empId: number) => {
+    if (!confirm("Are you sure you want to delete this employee?")) return;
+    // setLoading(true);
+    try {
+      await deleteOrgMember(organizationId, empId);
+
+      // setEmployees((prev) => prev.filter((emp) => emp.id !== empId));
+      // Refresh the employee list after successful deletion
+      const fetchedEmployees = await getAllBranchMembers(
+        organizationId,
+        branchId
+      );
+      setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Employee Removed",
+        description: `Employee has been removed successfully.`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      // setLoading(false);
+    }
+  };
 
   const filteredEmployees = employees.filter((employee) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,7 +128,9 @@ export function EmployeeList({
       case "completed":
         return <Badge className="bg-green-100 text-green-700">Completed</Badge>;
       case "in-progress":
-        return <Badge className="bg-yellow-100 text-yellow-700">In Progress</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-700">In Progress</Badge>
+        );
       case "not-started":
         return <Badge className="bg-red-100 text-red-700">Not Started</Badge>;
       default:
@@ -91,6 +160,7 @@ export function EmployeeList({
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Registered On</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,6 +180,53 @@ export function EmployeeList({
                     {employee.created_at
                       ? new Date(employee.created_at).toLocaleDateString()
                       : "N/A"}
+                  </TableCell>
+                  {/* create and action button to delete employee */}
+                  <TableCell>
+                    <div className="flex items-center space-x-2 group relative">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                          {/* <DropdownMenuItem
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/superadmin/organizations/${org.id}`
+                              )
+                            }
+                          >
+                            <Shield className="mr-2 h-4 w-4" />
+                            <span>Details</span>
+                          </DropdownMenuItem> */}
+
+                          {/* <DropdownMenuSeparator /> */}
+                          {employee.status === "active" ? (
+                            <DropdownMenuItem className="text-red-600">
+                              <Ban className="mr-2 h-4 w-4" />
+                              <span>Suspend</span>
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem className="text-green-600">
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Activate</span>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={handleDelete.bind(null, employee.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -134,7 +251,9 @@ export function EmployeeList({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
