@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllBranchMembers, deleteOrgMember } from "@/services/user.service";
+import {
+  getAllBranchMembers,
+  deleteOrgMember,
+  updateEmployeeStatus,
+} from "@/services/user.service";
 import {
   Table,
   TableBody,
@@ -68,6 +72,47 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
 
     fetchEmployees();
   }, [organizationId, branchId]);
+
+  const handleUpdateStatus = async (empId: number, newStatus: string) => {
+    if (!confirm(`Are you sure you want to update the status to ${newStatus}?`))
+      return;
+
+    try {
+      await updateEmployeeStatus(empId, newStatus);
+
+      // Refresh the employee list after successful status update
+      const fetchedEmployees = await getAllBranchMembers(
+        organizationId,
+        branchId
+      );
+      setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Status Updated",
+        description: `Employee status has been updated to ${newStatus}.`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDelete = async (empId: number) => {
     if (!confirm("Are you sure you want to delete this employee?")) return;
@@ -207,12 +252,22 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
 
                           {/* <DropdownMenuSeparator /> */}
                           {employee.status === "active" ? (
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() =>
+                                handleUpdateStatus(employee.id, "inactive")
+                              }
+                            >
                               <Ban className="mr-2 h-4 w-4" />
                               <span>Suspend</span>
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem className="text-green-600">
+                            <DropdownMenuItem
+                              className="text-green-600"
+                              onClick={() =>
+                                handleUpdateStatus(employee.id, "active")
+                              }
+                            >
                               <Shield className="mr-2 h-4 w-4" />
                               <span>Activate</span>
                             </DropdownMenuItem>

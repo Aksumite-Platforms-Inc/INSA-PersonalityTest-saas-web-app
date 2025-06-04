@@ -154,6 +154,26 @@ export const bulkAddUsers = async (
 
   return response.data.data;
 };
+export const updateEmployeeStatus = async (
+  memberId: number,
+  status: string
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.patch<ApiResponse<null>>(
+    `/organization/members/${memberId}/status`,
+    { status }
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to update employee status."
+    );
+  }
+
+  return { success: true, message: response.data.message };
+};
 
 export const activateAccount = async (
   email: string,
