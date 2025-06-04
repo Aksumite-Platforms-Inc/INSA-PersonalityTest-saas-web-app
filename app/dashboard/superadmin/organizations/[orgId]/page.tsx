@@ -159,8 +159,8 @@ export default function OrganizationDetailsPage({
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="employees">Employees</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {/* <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -308,7 +308,7 @@ export default function OrganizationDetailsPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="documents">
+        {/* <TabsContent value="documents">
           <Card>
             <CardHeader>
               <CardTitle>Documents</CardTitle>
@@ -336,7 +336,7 @@ export default function OrganizationDetailsPage({
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
