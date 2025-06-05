@@ -32,7 +32,11 @@ import { useRouter } from "next/navigation";
 import { getAllOrgMembers } from "@/services/user.service";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/hooks/use-toast";
-import { assignAdminToOrganization } from "@/services/organization.service";
+import {
+  assignAdminToOrganization,
+  activateOrganization,
+  deactivateOrganization,
+} from "@/services/organization.service";
 
 // Define the props for the table
 interface Organization {
@@ -82,6 +86,91 @@ export function OrganizationsTable({
     fetchUserCounts();
   }, [organizations]);
 
+  const handleActivateOrg = async (orgId: number) => {
+    if (
+      !confirm(`Are you sure you want to update to activate this organization?`)
+    )
+      return;
+
+    try {
+      await activateOrganization(orgId);
+
+      // Refresh the employee list after successful status update
+      // const fetchedEmployees = await getAllBranchMembers(
+      //   organizationId,
+      //   branchId
+      // );
+      // setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Status Updated",
+        description: `Organization has been activated successfully!`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeactivateOrg = async (orgId: number) => {
+    if (
+      !confirm(`Are you sure you want to update to suspend this organization?`)
+    )
+      return;
+
+    try {
+      await activateOrganization(orgId);
+
+      // Refresh the employee list after successful status update
+      // const fetchedEmployees = await getAllBranchMembers(
+      //   organizationId,
+      //   branchId
+      // );
+      // setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Status Updated",
+        description: `Organization has been deactivated successfully!`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
   const filteredOrganizations = organizations.filter(
     (org) =>
       org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -269,12 +358,18 @@ export function OrganizationsTable({
 
                           <DropdownMenuSeparator />
                           {org.status === "active" ? (
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeactivateOrg(org.id)}
+                            >
                               <Ban className="mr-2 h-4 w-4" />
                               <span>Suspend</span>
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem className="text-green-600">
+                            <DropdownMenuItem
+                              className="text-green-600"
+                              onClick={() => handleActivateOrg(org.id)}
+                            >
                               <Shield className="mr-2 h-4 w-4" />
                               <span>Activate</span>
                             </DropdownMenuItem>

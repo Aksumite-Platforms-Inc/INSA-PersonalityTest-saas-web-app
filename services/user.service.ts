@@ -209,3 +209,48 @@ export const resetPassword = async (
     throw error;
   }
 };
+/**
+ * Activates an organization
+ * @param orgId - ID of the organization
+ */
+export const activateOrganization = async (
+  orgId: number
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.post<ApiResponse<null>>(
+    `/sys/organization/${orgId}/activate`
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to activate organization."
+    );
+  }
+
+  return { success: true, message: response.data.message };
+};
+
+/**
+ * Deactivates an organization
+ * @param orgId - ID of the organization
+ */
+export const deactivateOrganization = async (
+  orgId: number
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.post<ApiResponse<null>>(
+    `/sys/organization/${orgId}/inactive`
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to deactivate organization."
+    );
+  }
+
+  return { success: true, message: response.data.message };
+};
