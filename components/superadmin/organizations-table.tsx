@@ -32,11 +32,7 @@ import { useRouter } from "next/navigation";
 import { getAllOrgMembers } from "@/services/user.service";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/hooks/use-toast";
-import {
-  assignAdminToOrganization,
-  activateOrganization,
-  deactivateOrganization,
-} from "@/services/organization.service";
+import { assignAdminToOrganization } from "@/services/organization.service";
 
 // Define the props for the table
 interface Organization {
@@ -55,11 +51,15 @@ interface Organization {
 interface OrganizationsTableProps {
   organizations: Organization[];
   onDelete: (id: number) => void;
+  onActivate: (id: number) => void;
+  onDeactivate: (id: number) => void;
 }
 
 export function OrganizationsTable({
   organizations,
   onDelete,
+  onActivate,
+  onDeactivate,
 }: OrganizationsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [userCounts, setUserCounts] = useState<Record<number, number>>({});
@@ -86,26 +86,24 @@ export function OrganizationsTable({
     fetchUserCounts();
   }, [organizations]);
 
-  const handleActivateOrg = async (orgId: number) => {
-    if (
-      !confirm(`Are you sure you want to update to activate this organization?`)
-    )
+  const handleAssignAdmin = async () => {
+    if (!selectedOrgId || !adminEmail) {
+      toast({
+        title: "Error",
+        description: "Please provide a valid email.",
+        variant: "destructive",
+      });
       return;
+    }
 
     try {
-      await activateOrganization(orgId);
-
-      // Refresh the employee list after successful status update
-      // const fetchedEmployees = await getAllBranchMembers(
-      //   organizationId,
-      //   branchId
-      // );
-      // setEmployees(fetchedEmployees);
-
+      await assignAdminToOrganization(selectedOrgId, adminEmail);
       toast({
-        title: "Status Updated",
-        description: `Organization has been activated successfully!`,
+        title: "Success",
+        description: "Admin assigned successfully.",
       });
+      setIsModalOpen(false);
+      setAdminEmail("");
     } catch (error) {
       let errorMessage = "Something went wrong. Please try again.";
       if (
@@ -129,48 +127,6 @@ export function OrganizationsTable({
     }
   };
 
-  const handleDeactivateOrg = async (orgId: number) => {
-    if (
-      !confirm(`Are you sure you want to update to suspend this organization?`)
-    )
-      return;
-
-    try {
-      await activateOrganization(orgId);
-
-      // Refresh the employee list after successful status update
-      // const fetchedEmployees = await getAllBranchMembers(
-      //   organizationId,
-      //   branchId
-      // );
-      // setEmployees(fetchedEmployees);
-
-      toast({
-        title: "Status Updated",
-        description: `Organization has been deactivated successfully!`,
-      });
-    } catch (error) {
-      let errorMessage = "Something went wrong. Please try again.";
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        typeof (error as any).response === "object" &&
-        (error as any).response !== null &&
-        "data" in (error as any).response &&
-        typeof (error as any).response.data === "object" &&
-        (error as any).response.data !== null &&
-        "message" in (error as any).response.data
-      ) {
-        errorMessage = (error as any).response.data.message;
-      }
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  };
   const filteredOrganizations = organizations.filter(
     (org) =>
       org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -209,34 +165,6 @@ export function OrganizationsTable({
         );
       default:
         return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const handleAssignAdmin = async () => {
-    if (!selectedOrgId || !adminEmail) {
-      toast({
-        title: "Error",
-        description: "Please provide a valid email.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await assignAdminToOrganization(selectedOrgId, adminEmail);
-      toast({
-        title: "Success",
-        description: "Admin assigned successfully.",
-      });
-      setIsModalOpen(false);
-      setAdminEmail("");
-    } catch (error) {
-      console.error("Error assigning admin:", error);
-      toast({
-        title: "Error",
-        description: "Failed to assign admin. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -360,7 +288,7 @@ export function OrganizationsTable({
                           {org.status === "active" ? (
                             <DropdownMenuItem
                               className="text-red-600"
-                              onClick={() => handleDeactivateOrg(org.id)}
+                              onClick={() => onDeactivate(org.id)}
                             >
                               <Ban className="mr-2 h-4 w-4" />
                               <span>Suspend</span>
@@ -368,7 +296,7 @@ export function OrganizationsTable({
                           ) : (
                             <DropdownMenuItem
                               className="text-green-600"
-                              onClick={() => handleActivateOrg(org.id)}
+                              onClick={() => onActivate(org.id)}
                             >
                               <Shield className="mr-2 h-4 w-4" />
                               <span>Activate</span>

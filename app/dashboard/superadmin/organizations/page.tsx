@@ -12,7 +12,11 @@ import {
   createOrganization,
   deleteOrganization,
   updateOrganization,
+  assignAdminToOrganization,
+  activateOrganization,
+  deactivateOrganization,
 } from "@/services/organization.service";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrganizationWithDetails {
   id: number;
@@ -35,6 +39,7 @@ export default function OrganizationsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const { toast } = useToast();
   const [formData, setFormData] = useState<{
     id?: number;
     name: string;
@@ -85,6 +90,87 @@ export default function OrganizationsPage() {
     }
   };
 
+  const handleActivateOrg = async (orgId: number) => {
+    if (
+      !confirm(`Are you sure you want to update to activate this organization?`)
+    )
+      return;
+
+    try {
+      await activateOrganization(orgId);
+
+      // Refresh the employee list after successful status update
+      // const fetchedEmployees = await getAllBranchMembers(
+      //   organizationId,
+      //   branchId
+      // );
+      // setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Status Updated",
+        description: `Organization has been activated successfully!`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeactivateOrg = async (orgId: number) => {
+    if (
+      !confirm(`Are you sure you want to update to suspend this organization?`)
+    )
+      return;
+
+    try {
+      await deactivateOrganization(orgId);
+
+      // Refresh the page after successful status update
+      router.refresh();
+      toast({
+        title: "Status Updated",
+        description: `Organization has been Suspended successfully!`,
+      });
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -104,6 +190,8 @@ export default function OrganizationsPage() {
       <OrganizationsTable
         organizations={organizations}
         onDelete={handleDelete}
+        onActivate={handleActivateOrg}
+        onDeactivate={handleDeactivateOrg}
       />
 
       {successMessage && (
