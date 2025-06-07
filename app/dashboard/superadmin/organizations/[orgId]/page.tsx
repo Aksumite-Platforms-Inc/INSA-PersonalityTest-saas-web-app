@@ -310,7 +310,9 @@ export default function OrganizationDetailsPage({
               <div>
                 <Button
                   onClick={() =>
-                    router.push("/dashboard/organization/branches/new")
+                    router.push(
+                      `/dashboard/superadmin/organizations/branches/new/${organization.id}`
+                    )
                   }
                   className="mr-5"
                   disabled={loading}
