@@ -52,7 +52,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
   const [employees, setEmployees] = useState<any[]>([]);
   const { toast } = useToast();
   // const [loading, setLoading] = useState(false);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchEmployees = async () => {
