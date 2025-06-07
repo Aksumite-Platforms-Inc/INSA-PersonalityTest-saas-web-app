@@ -320,7 +320,7 @@ export default function OrganizationDetailsPage({
                   <PlusCircle className="mr-2 h-4 w-4" />
                   {loading ? "Loading..." : "Add Branch"}
                 </Button>
-                <Button size="sm">
+                <Button size="sm" disabled>
                   <Users className="mr-2 h-4 w-4" />
                   Export List
                 </Button>
@@ -341,7 +341,7 @@ export default function OrganizationDetailsPage({
                   Manage employees in this organization
                 </CardDescription>
               </div>
-              <Button size="sm">
+              <Button size="sm" disabled>
                 <Users className="mr-2 h-4 w-4" />
                 Export List
               </Button>
