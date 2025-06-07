@@ -73,6 +73,11 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     fetchEmployees();
   }, [organizationId, branchId]);
 
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const handleUpdateStatus = async (empId: number, newStatus: string) => {
     if (!confirm(`Are you sure you want to update the status to ${newStatus}?`))
       return;
@@ -158,7 +163,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
   };
 
   const filteredEmployees = employees.filter((employee) =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+    employee.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
