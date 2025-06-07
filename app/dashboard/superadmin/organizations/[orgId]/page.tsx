@@ -26,6 +26,7 @@ import { OrganizationBranchesTable } from "@/components/superadmin/organization-
 import { OrganizationEmployeesTable } from "@/components/superadmin/organization-employees-table";
 import { getOrganizationById } from "@/services/organization.service";
 import { getAllBranches } from "@/services/branch.service";
+import { PlusCircle } from "lucide-react";
 import { getAllOrgMembers } from "@/services/user.service";
 import { use } from "react";
 
@@ -307,9 +308,15 @@ export default function OrganizationDetailsPage({
                 </CardDescription>
               </div>
               <div>
-                <Button size="sm" className="mr-5">
-                  <Split className="mr-2 h-4 w-4" />
-                  Add Branch
+                <Button
+                  onClick={() =>
+                    router.push("/dashboard/organization/branches/new")
+                  }
+                  className="mr-5"
+                  disabled={loading}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  {loading ? "Loading..." : "Add Branch"}
                 </Button>
                 <Button size="sm">
                   <Users className="mr-2 h-4 w-4" />

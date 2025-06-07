@@ -91,20 +91,18 @@ export default function OrganizationsPage() {
   };
 
   const handleActivateOrg = async (orgId: number) => {
-    if (
-      !confirm(`Are you sure you want to update to activate this organization?`)
-    )
+    if (!confirm(`Are you sure you want to activate this organization?`))
       return;
 
     try {
       await activateOrganization(orgId);
 
-      // Refresh the employee list after successful status update
-      // const fetchedEmployees = await getAllBranchMembers(
-      //   organizationId,
-      //   branchId
-      // );
-      // setEmployees(fetchedEmployees);
+      // Update the organization status locally without refreshing the page
+      setOrganizations((prev) =>
+        prev.map((org) =>
+          org.id === orgId ? { ...org, status: "active" } : org
+        )
+      );
 
       toast({
         title: "Status Updated",
@@ -134,19 +132,21 @@ export default function OrganizationsPage() {
   };
 
   const handleDeactivateOrg = async (orgId: number) => {
-    if (
-      !confirm(`Are you sure you want to update to suspend this organization?`)
-    )
-      return;
+    if (!confirm(`Are you sure you want to suspend this organization?`)) return;
 
     try {
       await deactivateOrganization(orgId);
 
-      // Refresh the page after successful status update
-      router.refresh();
+      // Update the organization status locally without refreshing the page
+      setOrganizations((prev) =>
+        prev.map((org) =>
+          org.id === orgId ? { ...org, status: "Inactive" } : org
+        )
+      );
+
       toast({
         title: "Status Updated",
-        description: `Organization has been Suspended successfully!`,
+        description: `Organization has been suspended successfully!`,
       });
     } catch (error) {
       let errorMessage = "Something went wrong. Please try again.";
