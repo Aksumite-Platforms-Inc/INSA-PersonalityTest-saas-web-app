@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageTitle } from "@/components/page-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -17,31 +17,75 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { getOrganizationId } from "@/utils/tokenUtils";
+import {
+  getOrganizationById,
+  updateOrganization,
+} from "@/services/organization.service";
 
 export default function OrganizationSettingsPage() {
   const { toast } = useToast();
-  const [orgName, setOrgName] = useState("Ministry of Education");
-  const [orgEmail, setOrgEmail] = useState("info@moe.gov.et");
-  const [orgPhone, setOrgPhone] = useState("+251 111 234567");
-  const [orgAddress, setOrgAddress] = useState("Addis Ababa, Ethiopia");
+  const [orgName, setOrgName] = useState("");
+  const [orgEmail, setOrgEmail] = useState("");
+  // const [orgPhone, setOrgPhone] = useState("");
+  const [orgAddress, setOrgAddress] = useState("");
+  const [orgSector, setOrgSector] = useState("");
+  const [orgStatus, setOrgStatus] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [orgId, setOrgId] = useState<number | null>(null);
 
-  const [autoAssignTests, setAutoAssignTests] = useState(true);
-  const [welcomeMessage, setWelcomeMessage] = useState(
-    "Welcome to the Ministry of Education Personality Testing Platform. This assessment will help us understand your strengths and areas for development."
-  );
+  useEffect(() => {
+    const fetchOrg = async () => {
+      setLoading(true);
+      try {
+        const id = getOrganizationId();
+        setOrgId(id);
+        if (!id) throw new Error("Organization ID not found");
+        const org = await getOrganizationById(id);
+        setOrgName(org.name || "");
+        setOrgEmail(org.email || "");
+        // setOrgPhone(org.phone_number || "");
+        setOrgAddress(org.address || "");
+        setOrgSector(org.sector || "");
+        setOrgStatus(org.status || "");
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Failed to load organization info",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrg();
+  }, []);
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Settings saved",
-      description: "Organization profile has been updated successfully.",
-    });
-  };
-
-  const handleSaveTests = () => {
-    toast({
-      title: "Settings saved",
-      description: "Test settings have been updated successfully.",
-    });
+  const handleSaveProfile = async () => {
+    if (!orgId) return;
+    setLoading(true);
+    try {
+      await updateOrganization(orgId, {
+        name: orgName,
+        email: orgEmail,
+        // phone_number: orgPhone,
+        address: orgAddress,
+        sector: orgSector,
+        status: orgStatus,
+      });
+      toast({
+        title: "Settings saved",
+        description: "Organization profile has been updated successfully.",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update organization info",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,100 +94,85 @@ export default function OrganizationSettingsPage() {
         title="Organization Settings"
         description="Manage your organization settings and preferences"
       />
-
-      <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="profile">Organization Profile</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profile" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Information</CardTitle>
-              <CardDescription>
-                Update your organization's basic information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="org-name">Organization Name</Label>
-                <Input
-                  id="org-name"
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="org-email">Email</Label>
-                <Input
-                  id="org-email"
-                  type="email"
-                  value={orgEmail}
-                  onChange={(e) => setOrgEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="org-phone">Phone</Label>
-                <Input
-                  id="org-phone"
-                  value={orgPhone}
-                  onChange={(e) => setOrgPhone(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="org-address">Address</Label>
-                <Input
-                  id="org-address"
-                  value={orgAddress}
-                  onChange={(e) => setOrgAddress(e.target.value)}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveProfile}>Save Changes</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tests" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Test Configuration</CardTitle>
-              <CardDescription>
-                Configure test settings for your organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="auto-assign"
-                  checked={autoAssignTests}
-                  onCheckedChange={setAutoAssignTests}
-                />
-                <Label htmlFor="auto-assign">
-                  Automatically assign tests to new employees
-                </Label>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="welcome-message">Welcome Message</Label>
-                <Textarea
-                  id="welcome-message"
-                  value={welcomeMessage}
-                  onChange={(e) => setWelcomeMessage(e.target.value)}
-                  rows={4}
-                />
-                <p className="text-sm text-muted-foreground">
-                  This message will be displayed to employees before they start
-                  a test.
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveTests}>Save Changes</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {loading ? (
+        <div>Loading organization info...</div>
+      ) : (
+        <Tabs defaultValue="profile" className="space-y-4">
+          {/* <TabsList>
+            <TabsTrigger value="profile">Organization Profile</TabsTrigger>
+          </TabsList> */}
+          <TabsContent value="profile" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Organization Information</CardTitle>
+                <CardDescription>
+                  Update your organization's basic information
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="org-name">Organization Name</Label>
+                  <Input
+                    id="org-name"
+                    placeholder={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="org-email">Email</Label>
+                  <Input
+                    id="org-email"
+                    type="email"
+                    placeholder={orgEmail}
+                    onChange={(e) => setOrgEmail(e.target.value)}
+                  />
+                </div>
+                {/* <div className="space-y-2">
+                  <Label htmlFor="org-phone">Phone</Label>
+                  <Input
+                    id="org-phone"
+                    placeholder={orgPhone}
+                    onChange={(e) => setOrgPhone(e.target.value)}
+                  />
+                </div> */}
+                <div className="space-y-2">
+                  <Label htmlFor="org-address">Address</Label>
+                  <Input
+                    id="org-address"
+                    placeholder={orgAddress}
+                    onChange={(e) => setOrgAddress(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="org-sector">Sector</Label>
+                  <Input
+                    id="org-sector"
+                    placeholder={orgSector}
+                    onChange={(e) => setOrgSector(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="org-status">Status</Label>
+                  <select
+                    id="org-status"
+                    value={orgStatus}
+                    onChange={(e) => setOrgStatus(e.target.value)}
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSaveProfile} disabled={loading}>
+                  Save Changes
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
