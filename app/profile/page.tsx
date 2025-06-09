@@ -28,17 +28,20 @@ export default function ProfilePage() {
   // const [phone, setPhone] = useState("");
   const [position, setPosition] = useState("");
   const [department, setDepartment] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUserId = getUserId();
     const storedOrgId = getOrganizationId();
-    if (storedUserId) {
-      setUserId(storedUserId);
-    }
-    if (storedOrgId) {
-      setOrgId(storedOrgId);
-    }
+    if (storedUserId) setUserId(storedUserId);
+    if (storedOrgId) setOrgId(storedOrgId);
+  }, []);
+
+  useEffect(() => {
+    if (userId === null || orgId === null) return;
+    console.log("ProfilePage: userId", userId, "orgId", orgId);
     const loadUserInfo = async () => {
+      setLoading(true);
       try {
         const userInfo = await fetchUserInfo(Number(orgId), Number(userId));
         setUserId(userInfo.id);
@@ -49,11 +52,12 @@ export default function ProfilePage() {
         setDepartment(userInfo.department);
       } catch (error) {
         console.error("Failed to load user information:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
     loadUserInfo();
-  }, []);
+  }, [userId, orgId]);
 
   const handleSaveProfile = async () => {
     if (userId === null || orgId === null) {
@@ -64,9 +68,9 @@ export default function ProfilePage() {
       });
       return;
     }
-
+    setLoading(true);
     try {
-      await updateUser(userId, orgId, {
+      await updateUser(userId, {
         name: fullName,
         email,
         position,
@@ -83,8 +87,12 @@ export default function ProfilePage() {
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) return <div>Loading profile...</div>;
 
   return (
     <div className="container max-w-4xl py-6 space-y-6">
@@ -104,7 +112,7 @@ export default function ProfilePage() {
               <Label htmlFor="full-name">Full Name</Label>
               <Input
                 id="full-name"
-                value={fullName}
+                placeholder={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
             </div>
@@ -112,7 +120,7 @@ export default function ProfilePage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                value={email}
+                placeholder={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -128,7 +136,7 @@ export default function ProfilePage() {
               <Label htmlFor="position">Position</Label>
               <Input
                 id="position"
-                value={position}
+                placeholder={position}
                 onChange={(e) => setPosition(e.target.value)}
               />
             </div>
@@ -136,7 +144,7 @@ export default function ProfilePage() {
               <Label htmlFor="department">Department</Label>
               <Input
                 id="department"
-                value={department}
+                placeholder={department}
                 onChange={(e) => setDepartment(e.target.value)}
               />
             </div>
@@ -146,7 +154,9 @@ export default function ProfilePage() {
           <Button variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button onClick={handleSaveProfile}>Save Changes</Button>
+          <Button onClick={handleSaveProfile} disabled={loading}>
+            Save Changes
+          </Button>
         </CardFooter>
       </Card>
     </div>

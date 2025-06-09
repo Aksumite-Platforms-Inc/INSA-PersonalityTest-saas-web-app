@@ -106,7 +106,6 @@ export const deleteOrgMember = async (
 
 export const updateUser = async (
   userId: number,
-  org_id: number,
   data: {
     name?: string;
     email?: string;
