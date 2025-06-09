@@ -15,6 +15,13 @@ export interface Branch {
   updated_at: string;
 }
 
+export interface Admin {
+  id: number;
+  name: string;
+  email: string;
+  created_at: Date;
+  updated_at: Date;
+}
 /**
  * Fetches all branches for the logged-in user's organization
  */
@@ -63,6 +70,28 @@ export const createBranch = async (
 
   if (!response.data.success) {
     throw new Error(response.data.message || "Failed to create branch.");
+  }
+
+  return response.data.data;
+};
+
+export const assignAdminToBranch = async (
+  orgId: number,
+  branchId: number,
+  Email: string
+  // adminName: string
+): Promise<Admin> => {
+  const response = await apiClient.post<ApiResponse<Admin>>(
+    `/organization/${orgId}/branches/${branchId}/admin`,
+    {
+      Email,
+      //  adminName
+    }
+  );
+
+  if (!response.data?.success) {
+    console.error("Assign Admin Error:", response.data);
+    throw new Error(response.data?.message || "Failed to assign admin.");
   }
 
   return response.data.data;
@@ -140,9 +169,14 @@ export const updateBranch = async (
 
 /**
  * Fetches details of a specific branch
+ * @param org_id - Organization ID
  * @param branchId - Branch ID
+ *
  */
-export const getBranchById = async (branchId: number): Promise<Branch> => {
+export const getBranchById = async (
+  org_id: number,
+  branchId: number
+): Promise<Branch> => {
   const token = getAccessToken();
   if (!token) {
     console.error("Authorization token is missing. Please log in again.");
@@ -150,7 +184,7 @@ export const getBranchById = async (branchId: number): Promise<Branch> => {
   }
 
   const response = await apiClient.get<ApiResponse<Branch>>(
-    `/organization/branches/${branchId}`
+    `/organization/${org_id}/branches/${branchId}`
   );
 
   if (!response.data.success) {
