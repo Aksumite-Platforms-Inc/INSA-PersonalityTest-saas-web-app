@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeCompletionChart } from "@/components/organization/employee-completion-chart";
 import { RecentEmployeeActivity } from "@/components/organization/recent-employee-activity";
 import { DocumentNotifications } from "@/components/organization/document-notifications";
+import { getOrganizationId } from "@/utils/tokenUtils";
+import { getAllBranches } from "@/services/branch.service";
+import { getAllOrgMembers } from "@/services/user.service";
 
 export default function OrganizationDashboard() {
   const router = useRouter();
@@ -18,6 +21,40 @@ export default function OrganizationDashboard() {
     changeInEmployees: 0,
     changeInCompletionRate: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const orgId = getOrganizationId();
+        if (!orgId) {
+          setError("Organization ID not found. Please log in again.");
+          setLoading(false);
+          return;
+        }
+        const [branches, employees] = await Promise.all([
+          getAllBranches(orgId),
+          getAllOrgMembers(orgId),
+        ]);
+        setStats((prev) => ({
+          ...prev,
+          totalBranches: branches.length,
+          totalEmployees: employees.length,
+        }));
+      } catch (err) {
+        setError("Failed to fetch organization stats.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) return <div>Loading organization stats...</div>;
+  if (error) return <div className="text-red-500 font-semibold">{error}</div>;
 
   return (
     <div className="space-y-6">
