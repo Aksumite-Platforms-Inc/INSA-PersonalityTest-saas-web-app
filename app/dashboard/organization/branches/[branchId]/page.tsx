@@ -35,7 +35,10 @@ export default function BranchEditPage() {
     const fetchBranch = async () => {
       setLoading(true);
       try {
-        const res = await getBranchById(Number(branchId));
+        const res = await getBranchById(
+          Number(organizationId),
+          Number(branchId)
+        );
         setBranch(res);
       } catch (err) {
         setError("An error occurred while fetching branch details.");
