@@ -23,10 +23,7 @@ import {
 import { Search, MoreHorizontal, Edit, Trash2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import {
-  deleteBranch,
-  getAllBranches,
-} from "@/services/branch.service";
+import { deleteBranch, getAllBranches } from "@/services/branch.service";
 import { getOrganizationById } from "@/services/organization.service";
 
 export function BranchesTable({ organizationId }: { organizationId: number }) {
@@ -60,7 +57,18 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
     fetchOrganization();
   }, [organizationId]);
 
-  const filteredBranches = branches.filter((branch) => branch && branch.name);
+  const filteredBranches = branches.filter(
+    (branch) =>
+      (branch &&
+        branch.name &&
+        (branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (branch.address &&
+            branch.address
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())))) ||
+      (branch.phone_number &&
+        branch.phone_number.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const handleDelete = async (branchId: number) => {
     if (!confirm("Are you sure you want to delete this branch?")) return;
@@ -105,18 +113,25 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
           <TableBody>
             {filteredBranches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No branches found
                 </TableCell>
               </TableRow>
             ) : (
               filteredBranches.map((branch) => (
                 <TableRow key={branch.id}>
-                  <TableCell className="font-medium">{branch.name || "Unnamed Branch"}</TableCell>
+                  <TableCell className="font-medium">
+                    {branch.name || "Unnamed Branch"}
+                  </TableCell>
                   <TableCell>{organization?.name || "N/A"}</TableCell>
                   <TableCell>{branch.address}</TableCell>
                   <TableCell>{branch.phone_number}</TableCell>
-                  <TableCell>{new Date(branch.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(branch.created_at).toLocaleDateString()}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -126,18 +141,27 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/organization/branches/${branch.id}`)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/organization/branches/${branch.id}`
+                            )
+                          }
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
                             if (branch.id && branch.id !== 0) {
-                              router.push(`/dashboard/organization/employees?branchId=${branch.id}`);
+                              router.push(
+                                `/dashboard/organization/employees?branchId=${branch.id}`
+                              );
                             } else {
                               toast({
                                 title: "Error",
-                                description: "Invalid branch ID. Cannot manage employees.",
+                                description:
+                                  "Invalid branch ID. Cannot manage employees.",
                                 variant: "destructive",
                               });
                             }
@@ -147,7 +171,10 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
                           <span>Manage Employees</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(branch.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDelete(branch.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           <span>Delete</span>
                         </DropdownMenuItem>

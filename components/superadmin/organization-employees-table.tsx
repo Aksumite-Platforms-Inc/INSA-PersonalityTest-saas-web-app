@@ -165,19 +165,31 @@ export function OrganizationEmployeesTable({
                       : "N/A"}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger
                         asChild
                         onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
+                      > */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Navigate to the superadmin employee test results page
+                        // Use Next.js router for navigation
+                        const employeeId = employee.id;
+                        // You may need to import useRouter at the top if not already
+                        // This is a workaround since this is not a page component
+                        window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
+                      }}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                    {/* </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
+                    {/* <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
                             onViewDetails?.(employee.id);
@@ -185,12 +197,12 @@ export function OrganizationEmployeesTable({
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
                           <span>Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <Mail className="mr-2 h-4 w-4" />
                           <span>Send Email</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
                             // Navigate to the superadmin employee test results page
@@ -202,15 +214,15 @@ export function OrganizationEmployeesTable({
                           }}
                         >
                           <FileText className="mr-2 h-4 w-4" />
-                          <span>View Tests</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                          <span>View Test Results</span>
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuSeparator /> */}
+                    {/* <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <UserCog className="mr-2 h-4 w-4" />
                           <span>Edit Profile</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </DropdownMenuItem> */}
+                    {/* </DropdownMenuContent>
+                    </DropdownMenu> */}
                   </TableCell>
                 </TableRow>
               ))

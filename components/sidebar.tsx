@@ -81,13 +81,13 @@ export function Sidebar({ open }: SidebarProps) {
                 open={open}
               />
 
-              <SidebarItem
+              {/* <SidebarItem
                 href="/dashboard/organization/documents/"
                 icon={Folder}
                 label={t("sidebar.documents")}
                 active={pathname?.includes("/documents") ?? false}
                 open={open}
-              />
+              /> */}
             </>
           )}
 

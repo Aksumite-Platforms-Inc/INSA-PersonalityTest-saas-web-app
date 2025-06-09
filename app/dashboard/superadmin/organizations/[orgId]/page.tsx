@@ -12,11 +12,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Building, Mail, MapPin, Phone, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Building,
+  Mail,
+  MapPin,
+  Phone,
+  Users,
+  Split,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { OrganizationBranchesTable } from "@/components/superadmin/organization-branches-table";
 import { OrganizationEmployeesTable } from "@/components/superadmin/organization-employees-table";
 import { getOrganizationById } from "@/services/organization.service";
 import { getAllBranches } from "@/services/branch.service";
+import { PlusCircle } from "lucide-react";
 import { getAllOrgMembers } from "@/services/user.service";
 import { use } from "react";
 
@@ -158,9 +168,9 @@ export default function OrganizationDetailsPage({
       >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="branches">Branches</TabsTrigger>
           <TabsTrigger value="employees">Employees</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -288,6 +298,40 @@ export default function OrganizationDetailsPage({
           </Card>
         </TabsContent>
 
+        <TabsContent value="branches">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Branches</CardTitle>
+                <CardDescription>
+                  Manage branches in this organization
+                </CardDescription>
+              </div>
+              <div>
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/superadmin/organizations/branches/new/${organization.id}`
+                    )
+                  }
+                  className="mr-5"
+                  disabled={loading}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  {loading ? "Loading..." : "Add Branch"}
+                </Button>
+                <Button size="sm" disabled>
+                  <Users className="mr-2 h-4 w-4" />
+                  Export List
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <OrganizationBranchesTable organizationId={organization.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="employees" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -297,7 +341,7 @@ export default function OrganizationDetailsPage({
                   Manage employees in this organization
                 </CardDescription>
               </div>
-              <Button size="sm">
+              <Button size="sm" disabled>
                 <Users className="mr-2 h-4 w-4" />
                 Export List
               </Button>
@@ -308,22 +352,7 @@ export default function OrganizationDetailsPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="documents">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-              <CardDescription>
-                Shared documents will be shown here.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                No documents have been shared with this organization yet.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
+        {/*
         <TabsContent value="settings">
           <Card>
             <CardHeader>
@@ -336,7 +365,7 @@ export default function OrganizationDetailsPage({
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

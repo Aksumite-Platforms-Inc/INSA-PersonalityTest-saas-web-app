@@ -106,7 +106,6 @@ export const deleteOrgMember = async (
 
 export const updateUser = async (
   userId: number,
-  org_id: number,
   data: {
     name?: string;
     email?: string;
@@ -154,23 +153,44 @@ export const bulkAddUsers = async (
 
   return response.data.data;
 };
+export const updateEmployeeStatus = async (
+  memberId: number,
+  status: string
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.patch<ApiResponse<null>>(
+    `/organization/members/${memberId}/status`,
+    { status }
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to update employee status."
+    );
+  }
+
+  return { success: true, message: response.data.message };
+};
 
 export const activateAccount = async (
   email: string,
   code: string,
   password: string
 ) => {
-  try {
-    const response = await apiClient.post(
-      "/organization/members/activate",
-      { email, activation_code: code, new_password: password },
-      { withCredentials: true }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error activating account:", error);
-    throw error;
+  const response = await apiClient.post<ApiResponse<User>>(
+    "/organization/members/activate",
+    { email, activation_code: code, new_password: password },
+    { withCredentials: true }
+  );
+
+  if (!response.data?.success) {
+    console.error("Activate Account Error:", response.data);
+    throw new Error(response.data?.message || "Failed to activate account.");
   }
+
+  return response.data.data;
 };
 export const resetPassword = async (
   email: string,
@@ -188,4 +208,49 @@ export const resetPassword = async (
     console.error("Error resetting password:", error);
     throw error;
   }
+};
+/**
+ * Activates an organization
+ * @param orgId - ID of the organization
+ */
+export const activateOrganization = async (
+  orgId: number
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.post<ApiResponse<null>>(
+    `/sys/organization/${orgId}/activate`
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to activate organization."
+    );
+  }
+
+  return { success: true, message: response.data.message };
+};
+
+/**
+ * Deactivates an organization
+ * @param orgId - ID of the organization
+ */
+export const deactivateOrganization = async (
+  orgId: number
+): Promise<{ success: boolean; message?: string }> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.post<ApiResponse<null>>(
+    `/sys/organization/${orgId}/inactive`
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to deactivate organization."
+    );
+  }
+
+  return { success: true, message: response.data.message };
 };

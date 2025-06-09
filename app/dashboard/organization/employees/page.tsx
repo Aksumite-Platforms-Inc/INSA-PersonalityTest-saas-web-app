@@ -3,7 +3,7 @@
 import { PageTitle } from "@/components/page-title";
 import { EmployeeList } from "@/components/branch/employee-list";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Upload } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { getBranchId, getOrganizationId } from "@/utils/tokenUtils";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,11 @@ export default function BranchesPage() {
   );
 }
 
-function BranchesPageContent({ searchParams }: { searchParams: URLSearchParams }) {
+function BranchesPageContent({
+  searchParams,
+}: {
+  searchParams: URLSearchParams;
+}) {
   const router = useRouter();
   const [orgId, setOrgId] = useState<number | null>(null);
   const [branchId, setBranchId] = useState<number | null>(null);
@@ -59,12 +63,20 @@ function BranchesPageContent({ searchParams }: { searchParams: URLSearchParams }
           title={`Branch (${branch?.name || ""}) Employees Management`}
           description="Manage employees in your branch"
         />
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Employee
+        <Button
+          onClick={() =>
+            router.push("/dashboard/organization/employees/upload")
+          }
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          {/* {translate("users.bulkUpload")} */}
+          Bulk Upload Employees
         </Button>
       </div>
-      <EmployeeList organizationId={Number(orgId)} branchId={Number(branchId)} />
+      <EmployeeList
+        organizationId={Number(orgId)}
+        branchId={Number(branchId)}
+      />
     </div>
   );
 }

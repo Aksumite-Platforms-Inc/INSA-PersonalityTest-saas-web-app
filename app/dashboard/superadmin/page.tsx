@@ -85,14 +85,14 @@ export default function SuperadminDashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <RecentActivity />
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

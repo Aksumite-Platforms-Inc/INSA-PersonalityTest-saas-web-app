@@ -18,20 +18,23 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createBranch, assignBranchAdmin } from "@/services/branch.service";
+import { createBranch } from "@/services/branch.service";
 import { getOrganizationId } from "@/utils/tokenUtils";
+import { use } from "react";
 
-export default function NewBranchPage() {
+export default function NewBranchPage({
+  params,
+}: {
+  params: Promise<{ organizationId: string }>;
+}) {
   const router = useRouter();
   const { toast } = useToast();
-  const organizationId = getOrganizationId(); // Get the organization ID from the token
   const [name, setBranchName] = useState("");
+  const { organizationId } = use(params);
   // const [branchLocation, setBranchLocation] = useState("");
   const [address, setBranchAddress] = useState("");
   const [phone_number, setBranchPhone] = useState("");
   const [email, setBranchEmail] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminName, setAdminName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,29 +59,35 @@ export default function NewBranchPage() {
         address,
       };
 
-      console.log("Payload being sent:", data);
+      console.log("Payload being sent:", name, email, phone_number, address);
 
       // Call the API to create the branch
       const branch = await createBranch(Number(organizationId), data);
 
       toast({
         title: "Branch created",
-        description: `${branch.name} has been created successfully.`,
+        description: "Branch has been created successfully.",
       });
 
-      // // Call the API to assign the administrator
-      // await assignBranchAdmin(1, branch.id, adminEmail); // Replace `1` with the actual organization ID
-
-      // toast({
-      //   title: "Administrator assigned",
-      //   description: `Admin ${adminName} has been assigned successfully.`,
-      // });
-
-      router.push("/dashboard/organization/branches");
+      router.back();
     } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -94,7 +103,7 @@ export default function NewBranchPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Branch Details</CardTitle>
@@ -119,6 +128,7 @@ export default function NewBranchPage() {
                   id="branch-address"
                   value={address}
                   onChange={(e) => setBranchAddress(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -127,6 +137,7 @@ export default function NewBranchPage() {
                   id="branch-phone"
                   value={phone_number}
                   onChange={(e) => setBranchPhone(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -136,34 +147,6 @@ export default function NewBranchPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setBranchEmail(e.target.value)}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Administrator Account</CardTitle>
-              <CardDescription>
-                Assign an admin account for this branch
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-name">Admin Name</Label>
-                <Input
-                  id="admin-name"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">Admin Email *</Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
                   required
                 />
               </div>

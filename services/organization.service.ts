@@ -125,6 +125,7 @@ export const activateOrganization = async (id: number): Promise<void> => {
   }
 };
 
+
 /** Deactivate an organization */
 export const deactivateOrganization = async (id: number): Promise<void> => {
   const response = await apiClient.post<ApiResponse<null>>(

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { PageTitle } from '@/components/page-title';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import SearchParamsWrapper from '@/components/SearchParamsWrapper';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PageTitle } from "@/components/page-title";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import SearchParamsWrapper from "@/components/SearchParamsWrapper";
 import {
   Table,
   TableBody,
@@ -13,8 +13,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +22,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTranslation } from '@/hooks/use-translation';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   PlusCircle,
@@ -45,7 +45,7 @@ export default function UsersPage() {
   const [orgId, setOrgId] = useState<number | null>(null);
   const [branchId, setBranchId] = useState<number | null>(null);
   const [branch, setBranch] = useState<any | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   return (
     <SearchParamsWrapper>
@@ -56,11 +56,11 @@ export default function UsersPage() {
 
           setBranchId(Number(branchId));
           setOrgId(organizationId);
-          console.log('Org ID:', organizationId);
-          console.log('Branch ID:', branchId);
+          console.log("Org ID:", organizationId);
+          console.log("Branch ID:", branchId);
 
           if (!organizationId) {
-            console.error('Token data is missing or invalid.');
+            console.error("Token data is missing or invalid.");
             return;
           }
         }, [searchParams]);
@@ -74,22 +74,24 @@ export default function UsersPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <PageTitle
-                title={translate('users.title')}
-                description={translate('users.description')}
+                title={translate("users.title")}
+                description={translate("users.description")}
               />
 
               <div className="flex flex-col sm:flex-row gap-2">
-                <Button onClick={() => router.push('/dashboard/branch/users/upload')}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  {translate('users.bulkUpload')}
-                </Button>
                 <Button
+                  onClick={() => router.push("/dashboard/branch/users/upload")}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {translate("users.bulkUpload")}
+                </Button>
+                {/* <Button
                   variant="outline"
                   onClick={() => router.push('/dashboard/branch/users/new')}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   {translate('users.addEmployee')}
-                </Button>
+                </Button> */}
               </div>
             </div>
 
