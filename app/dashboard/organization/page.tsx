@@ -60,7 +60,7 @@ export default function OrganizationDashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Test Completion Rate
@@ -75,21 +75,21 @@ export default function OrganizationDashboard() {
               % from last month
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Chart */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Employee Test Completion</CardTitle>
         </CardHeader>
         <CardContent className="h-80">
           <EmployeeCompletionChart />
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Recent Employee Activity */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div className="col-span-full">
           <DocumentNotifications />
         </div>
@@ -101,7 +101,7 @@ export default function OrganizationDashboard() {
             <RecentEmployeeActivity />
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -39,7 +39,9 @@ export default function BranchesPage() {
           description="Manage all branches in your organization"
         />
         <Button
-          onClick={() => router.push("/dashboard/organization/branches/new")}
+          onClick={() =>
+            router.push(`/dashboard/organization/branches/new/${orgId}`)
+          }
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Branch

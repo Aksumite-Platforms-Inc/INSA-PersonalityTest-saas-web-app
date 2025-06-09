@@ -180,17 +180,18 @@ export const activateAccount = async (
   code: string,
   password: string
 ) => {
-  try {
-    const response = await apiClient.post(
-      "/organization/members/activate",
-      { email, activation_code: code, new_password: password },
-      { withCredentials: true }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error activating account:", error);
-    throw error;
+  const response = await apiClient.post<ApiResponse<User>>(
+    "/organization/members/activate",
+    { email, activation_code: code, new_password: password },
+    { withCredentials: true }
+  );
+
+  if (!response.data?.success) {
+    console.error("Activate Account Error:", response.data);
+    throw new Error(response.data?.message || "Failed to activate account.");
   }
+
+  return response.data.data;
 };
 export const resetPassword = async (
   email: string,
