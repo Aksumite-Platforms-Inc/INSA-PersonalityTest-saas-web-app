@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { OrganizationsTable } from "@/components/superadmin/organizations-table";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import {
   listOrganizations,
@@ -186,14 +187,21 @@ export default function OrganizationsPage() {
           {loading ? "Loading..." : "Add Organization"}
         </Button>
       </div>
-
-      <OrganizationsTable
-        organizations={organizations}
-        onDelete={handleDelete}
-        onActivate={handleActivateOrg}
-        onDeactivate={handleDeactivateOrg}
-      />
-
+      {loading ? (
+        <div className="flex items-center">
+          <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading
+          organizations...
+        </div>
+      ) : error ? (
+        <div className="text-red-600">{error}</div>
+      ) : (
+        <OrganizationsTable
+          organizations={organizations}
+          onDelete={handleDelete}
+          onActivate={handleActivateOrg}
+          onDeactivate={handleDeactivateOrg}
+        />
+      )}
       {successMessage && (
         <div className="fixed top-10 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {successMessage}
