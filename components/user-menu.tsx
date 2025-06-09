@@ -86,10 +86,12 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/profile")}>
-          <User className="mr-2 h-4 w-4" />
-          <span>{t("userMenu.profile")}</span>
-        </DropdownMenuItem>
+        {tokenUser?.role !== "super_admin" && (
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
+            <User className="mr-2 h-4 w-4" />
+            <span>{t("userMenu.profile")}</span>
+          </DropdownMenuItem>
+        )}
         {/* <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Settings className="mr-2 h-4 w-4" />
           <span>{t("userMenu.settings")}</span>
