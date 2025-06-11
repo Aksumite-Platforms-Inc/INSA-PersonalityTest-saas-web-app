@@ -94,7 +94,7 @@ export default function NewOrganizationPage() {
       router.back();
     } catch (error) {
       console.error("Error:", error);
-      let errorMessage = "Something went wrong. Please try again.";
+      let errorMessage = "Something went wrong. Please check your internet.";
       if (
         typeof error === "object" &&
         error !== null &&

@@ -97,7 +97,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
         description: `Employee status has been updated to ${newStatus}.`,
       });
     } catch (error) {
-      let errorMessage = "Something went wrong. Please try again.";
+      let errorMessage = "Something went wrong. Please check your internet.";
       if (
         typeof error === "object" &&
         error !== null &&
@@ -138,7 +138,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
         description: `Employee has been removed successfully.`,
       });
     } catch (error) {
-      let errorMessage = "Something went wrong. Please try again.";
+      let errorMessage = "Something went wrong. Please check your internet.";
       if (
         typeof error === "object" &&
         error !== null &&

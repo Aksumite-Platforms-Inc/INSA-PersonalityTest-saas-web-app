@@ -167,9 +167,11 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
           <h2 className="text-lg font-bold">Assign Admin</h2>
           <Input
             placeholder="Enter admin email"
+            type="email"
             value={adminEmail}
             onChange={(e) => setAdminEmail(e.target.value)}
             className="mt-2"
+            required
           />
           <div className="flex justify-end mt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
