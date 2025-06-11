@@ -71,7 +71,7 @@ export const getAllBranchMembers = async (
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<User[]>>(
-    `/organization/${orgId}/branchs/${branchId}/members`
+    `/organization/${orgId}/branches/${branchId}/members`
   );
 
   if (!response.data.success) {
