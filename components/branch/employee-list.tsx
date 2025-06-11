@@ -39,6 +39,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { ComponentLoader } from "@/components/ui/loaders";
 
 interface EmployeeListProps {
   organizationId: number;
@@ -50,14 +51,14 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  // const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      if (!branchId || branchId === 0) return; // avoid invalid API calls
-
+      if (!branchId || branchId === 0) return;
+      setLoading(true);
       try {
         const fetchedEmployees = await getAllBranchMembers(
           organizationId,
@@ -67,6 +68,8 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
         console.log("orgid and branch id:", organizationId, branchId);
       } catch (error) {
         console.error("Error fetching branch employees:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -201,100 +204,87 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
           />
         </div>
       </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Registered On</TableHead>
-              <TableHead className="w-[80px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedEmployees.length === 0 ? (
+      <ComponentLoader loading={loading} size={40}>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">
-                  No employees found.
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Registered On</TableHead>
+                <TableHead className="w-[80px]"></TableHead>
               </TableRow>
-            ) : (
-              paginatedEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell>{employee.name}</TableCell>
-                  <TableCell>{employee.email}</TableCell>
-                  <TableCell>{renderStatusBadge(employee.status)}</TableCell>
-                  <TableCell>
-                    {employee.created_at
-                      ? new Date(employee.created_at).toLocaleDateString()
-                      : "N/A"}
-                  </TableCell>
-                  {/* create and action button to delete employee */}
-                  <TableCell>
-                    <div className="flex items-center space-x-2 group relative">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                          {/* <DropdownMenuItem
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/superadmin/organizations/${org.id}`
-                              )
-                            }
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            <span>Details</span>
-                          </DropdownMenuItem> */}
-
-                          {/* <DropdownMenuSeparator /> */}
-                          {employee.status === "active" ? (
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() =>
-                                handleUpdateStatus(employee.id, "inactive")
-                              }
-                            >
-                              <Ban className="mr-2 h-4 w-4" />
-                              <span>Suspend</span>
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              className="text-green-600"
-                              onClick={() =>
-                                handleUpdateStatus(employee.id, "active")
-                              }
-                            >
-                              <Shield className="mr-2 h-4 w-4" />
-                              <span>Activate</span>
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem
-                            onClick={handleDelete.bind(null, employee.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {paginatedEmployees.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    No employees found.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                paginatedEmployees.map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                    <TableCell>{renderStatusBadge(employee.status)}</TableCell>
+                    <TableCell>
+                      {employee.created_at
+                        ? new Date(employee.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2 group relative">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
+                            {employee.status === "active" ? (
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() =>
+                                  handleUpdateStatus(employee.id, "inactive")
+                                }
+                              >
+                                <Ban className="mr-2 h-4 w-4" />
+                                <span>Suspend</span>
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                className="text-green-600"
+                                onClick={() =>
+                                  handleUpdateStatus(employee.id, "active")
+                                }
+                              >
+                                <Shield className="mr-2 h-4 w-4" />
+                                <span>Activate</span>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={handleDelete.bind(null, employee.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </ComponentLoader>
       {totalPages > 1 && (
         <div className="flex justify-end space-x-2">
           <Button

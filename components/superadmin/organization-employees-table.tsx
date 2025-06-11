@@ -34,6 +34,7 @@ import {
   UserCog,
   Trash,
 } from "lucide-react";
+import { ComponentLoader } from "@/components/ui/loaders";
 
 interface OrganizationEmployeesTableProps {
   organizationId: number;
@@ -46,9 +47,11 @@ export function OrganizationEmployeesTable({
 }: OrganizationEmployeesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchEmployees = async () => {
+      setLoading(true);
       try {
         const members = await getAllOrgMembers(organizationId);
         const normalizedMembers = members.map((member) => ({
@@ -62,6 +65,8 @@ export function OrganizationEmployeesTable({
         setEmployees(normalizedMembers);
       } catch (error) {
         console.error("Error fetching employees:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -138,135 +143,135 @@ export function OrganizationEmployeesTable({
           />
         </div>
       </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEmployees.length === 0 ? (
+      <ComponentLoader loading={loading} size={40}>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No employees found
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="w-[80px]">Action</TableHead>
               </TableRow>
-            ) : (
-              filteredEmployees.map((employee) => (
-                <TableRow
-                  key={employee.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onViewDetails?.(employee.id)}
-                >
-                  <TableCell className="font-medium">
-                    {employee.name || "N/A"}
-                  </TableCell>
-                  <TableCell>{employee.email || "N/A"}</TableCell>
-                  <TableCell>{employee.department || "N/A"}</TableCell>
-                  <TableCell>{employee.position || "N/A"}</TableCell>
-                  <TableCell>{renderStatusBadge(employee.status)}</TableCell>
-                  <TableCell>
-                    {employee.created_at
-                      ? new Date(employee.created_at).toLocaleDateString()
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate to the superadmin employee test results page
-                            // Use Next.js router for navigation
-                            const employeeId = employee.id;
-                            // You may need to import useRouter at the top if not already
-                            // This is a workaround since this is not a page component
-                            window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
-                          }}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onViewDetails?.(employee.id);
-                          }}
-                          disabled
-                        >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          <span>Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => e.stopPropagation()}
-                          disabled
-                        >
-                          <Mail className="mr-2 h-4 w-4" />
-                          <span>Send Email</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate to the superadmin employee test results page
-                            // Use Next.js router for navigation
-                            const employeeId = employee.id;
-                            // You may need to import useRouter at the top if not already
-                            // This is a workaround since this is not a page component
-                            window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
-                          }}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          <span>View Test Results</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={(e) => e.stopPropagation()}
-                          disabled
-                        >
-                          <UserCog className="mr-2 h-4 w-4" />
-                          <span>Edit Profile</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            //
-                            const employeeId = employee.id;
-
-                            handleDeleteEmployee(employeeId);
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash className="mr-2 h-4 w-4 " />
-                          <span>Remove Employee</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            </TableHeader>
+            <TableBody>
+              {filteredEmployees.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No employees found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                filteredEmployees.map((employee) => (
+                  <TableRow
+                    key={employee.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => onViewDetails?.(employee.id)}
+                  >
+                    <TableCell className="font-medium">
+                      {employee.name || "N/A"}
+                    </TableCell>
+                    <TableCell>{employee.email || "N/A"}</TableCell>
+                    <TableCell>{employee.department || "N/A"}</TableCell>
+                    <TableCell>{employee.position || "N/A"}</TableCell>
+                    <TableCell>{renderStatusBadge(employee.status)}</TableCell>
+                    <TableCell>
+                      {employee.created_at
+                        ? new Date(employee.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Navigate to the superadmin employee test results page
+                              // Use Next.js router for navigation
+                              const employeeId = employee.id;
+                              // You may need to import useRouter at the top if not already
+                              // This is a workaround since this is not a page component
+                              window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
+                            }}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewDetails?.(employee.id);
+                            }}
+                            disabled
+                          >
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            <span>Details</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => e.stopPropagation()}
+                            disabled
+                          >
+                            <Mail className="mr-2 h-4 w-4" />
+                            <span>Send Email</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Navigate to the superadmin employee test results page
+                              // Use Next.js router for navigation
+                              const employeeId = employee.id;
+                              // You may need to import useRouter at the top if not already
+                              // This is a workaround since this is not a page component
+                              window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
+                            }}
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>View Test Results</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={(e) => e.stopPropagation()}
+                            disabled
+                          >
+                            <UserCog className="mr-2 h-4 w-4" />
+                            <span>Edit Profile</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              //
+                              const employeeId = employee.id;
+                              handleDeleteEmployee(employeeId);
+                            }}
+                            className="text-red-600"
+                          >
+                            <Trash className="mr-2 h-4 w-4 " />
+                            <span>Remove Employee</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </ComponentLoader>
     </div>
   );
 }

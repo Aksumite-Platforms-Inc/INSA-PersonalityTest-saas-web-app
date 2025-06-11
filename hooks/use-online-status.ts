@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 
-// Professional hook to check internet connection status
-export function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(true);
+/**
+ * Professional hook to check for internet connection status.
+ * Returns true if online, false if offline.
+ */
+export function useOnlineStatus(): boolean {
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
 
   useEffect(() => {
-    function updateOnlineStatus() {
-      setIsOnline(navigator.onLine);
+    function handleOnline() {
+      setIsOnline(true);
     }
-    window.addEventListener("online", updateOnlineStatus);
-    window.addEventListener("offline", updateOnlineStatus);
-    updateOnlineStatus();
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener("online", updateOnlineStatus);
-      window.removeEventListener("offline", updateOnlineStatus);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
