@@ -247,12 +247,21 @@ export default function UploadEmployeesPage() {
                   <li>Position</li>
                 </ul>
               </div>
-              <Button variant="outline" className="w-full" asChild>
-                <a href="/NewBulkUserUploadTemplate.xlsx" download>
-                  <Download className="mr-2 h-4 w-4" />
-                  {t("upload.downloadTemplate")}
-                </a>
-              </Button>
+              <div className="flex justify-between">
+                <Button variant="outline" className="" asChild>
+                  <a href="/NewBulkUserUploadTemplate.xlsx" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t("upload.downloadTemplate")}
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={uploading}
+                >
+                  {t("common.cancel")}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
