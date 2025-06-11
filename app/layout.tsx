@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { ToastProvider } from "../components/toast-provider";
 import { AuthProvider } from "../app/contexts/auth-context";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -22,6 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script src="https://www.google.com/recaptcha/api.js?render=6LcWfFwrAAAAAHsmcmfGTzpPCXQY3JPCl_MQjD_H"></script>
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

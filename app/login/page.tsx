@@ -1,5 +1,12 @@
 "use client";
 
+// Add grecaptcha to the Window interface for TypeScript
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
+
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -21,7 +28,21 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { decodeToken } from "@/utils/tokenUtils";
 import { useToast } from "@/hooks/use-toast";
+  import dotenv from "dotenv";
+  dotenv.config();
+export interface RawAuthResponse {
+  token: string;
+  role: string;
+  // any other fields
+}
 
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  status: string;
+}
+
+const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -97,19 +118,42 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const { role } = await loginUser(email, password);
+      const grecaptcha = window.grecaptcha;
+      if (!grecaptcha) throw new Error("reCAPTCHA not loaded");
 
-      let redirect = "/dashboard";
-      if (role === "super_admin") redirect = "/dashboard/superadmin";
-      else if (role === "org_admin") redirect = "/dashboard/organization";
-      else if (role === "branch_admin") redirect = "/dashboard/branch";
-      else if (role === "org_member") redirect = "/dashboard/employee/test";
+      grecaptcha.ready(() => {
+        grecaptcha
+          .execute(SITE_KEY, {
+            action: "login",
+          })
+          .then(async (recaptchaToken: string) => {
+            try {
+              // Send credentials to backend for verification
+              const { role } = await loginUser(email, password, recaptchaToken);
 
-      window.location.href = redirect;
+              let redirect = "/dashboard";
+              if (role === "super_admin") redirect = "/dashboard/superadmin";
+              else if (role === "org_admin")
+                redirect = "/dashboard/organization";
+              else if (role === "branch_admin") redirect = "/dashboard/branch";
+              else if (role === "org_member")
+                redirect = "/dashboard/employee/test";
+
+              window.location.href = redirect;
+            } catch (err: any) {
+              toast({
+                title: "Login Failed",
+                description: err.message || "Invalid credentials or captcha",
+                variant: "destructive",
+              });
+              setIsLoading(false);
+            }
+          });
+      });
     } catch (err: any) {
       toast({
-        title: "Login Failed",
-        description: err.message || "Invalid credentials",
+        title: "reCAPTCHA Error",
+        description: err.message || "Could not validate captcha",
         variant: "destructive",
       });
       setIsLoading(false);

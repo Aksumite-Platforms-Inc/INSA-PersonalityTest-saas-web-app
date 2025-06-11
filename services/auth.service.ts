@@ -15,11 +15,12 @@ export interface RawAuthResponse {
 
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
+  recaptchaToken: string
 ): Promise<RawAuthResponse> => {
   const res = await apiClient.post<ApiResponse<RawAuthResponse>>(
     "/sso/login",
-    { email, password },
+    { email, password, recaptchaToken },
     { withCredentials: true }
   );
 
@@ -27,6 +28,7 @@ export const loginUser = async (
   localStorage.setItem("authToken", data.token);
   return data;
 };
+
 
 /**
  * Logs out a user by removing the token and cookie.
