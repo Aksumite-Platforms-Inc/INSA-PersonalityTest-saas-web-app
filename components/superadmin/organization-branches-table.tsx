@@ -28,8 +28,15 @@ import {
   Mail,
   FileText,
   UserCog,
+  Trash,
+  Edit,
 } from "lucide-react";
-import { getAllBranches, Branch } from "@/services/branch.service";
+import {
+  getAllBranches,
+  Branch,
+  deleteBranch,
+} from "@/services/branch.service";
+import employee from "@/app/dashboard/employee";
 
 interface OrganizationBranchesTableProps {
   organizationId: number;
@@ -62,6 +69,18 @@ export function OrganizationBranchesTable({
 
     fetchBranches();
   }, [organizationId]);
+
+  const handleDeleteBranch = async (branchId: number) => {
+    if (!confirm("Are you sure you want to remove this branch?")) return;
+    try {
+      // You need to implement deleteOrgMember in your user.service
+      await deleteBranch(organizationId, branchId);
+      setBranches((prev) => prev.filter((emp) => emp.id !== branchId));
+    } catch (error) {
+      alert("Failed to remove branch.");
+      console.error(error);
+    }
+  };
 
   const filteredBranches = useMemo(() => {
     return Branches.filter((branch) => {
@@ -162,7 +181,63 @@ export function OrganizationBranchesTable({
                       ? new Date(Branch.created_at).toLocaleDateString()
                       : "N/A"}
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Navigate to the superadmin employee test results page
+                            // Use Next.js router for navigation
+                            const branchId = Branch.id;
+                          }}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetails?.(Branch.id);
+                          }}
+                          disabled
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          <span>Details</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => e.stopPropagation()}
+                          disabled
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>Edit Branch</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            //
+                            const branchId = Branch.id;
+
+                            handleDeleteBranch(branchId);
+                          }}
+                          className="text-red-500"
+                        >
+                          <Trash className="mr-2 h-4 w-4 " />
+                          <span>Remove Branch</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             )}

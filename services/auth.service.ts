@@ -15,13 +15,12 @@ export interface RawAuthResponse {
 
 export const loginUser = async (
   email: string,
-  password: string,
-  recaptchaToken: string,
+  password: string
 ): Promise<RawAuthResponse> => {
   const res = await apiClient.post<ApiResponse<RawAuthResponse>>(
     "/sso/login",
-    { email, password, recaptchaToken },
-    { withCredentials: true },
+    { email, password },
+    { withCredentials: true }
   );
 
   const data = res.data.data;
@@ -41,7 +40,7 @@ export const logoutUser = (): void => {
  * Resets the password for a user by sending a reset password email.
  */
 export const performResetPassword = async (
-  email: string,
+  email: string
 ): Promise<{ message: string }> => {
   const endpoint = "organization/members/resetpassword";
 
@@ -52,7 +51,7 @@ export const performResetPassword = async (
       headers: {
         "Content-Type": "application/json",
       },
-    },
+    }
   );
 
   if (!response.data.success) {
@@ -70,13 +69,13 @@ export const performResetPassword = async (
 export const performPasswordReset = async (
   email: string,
   code: string,
-  password: string,
+  password: string
 ): Promise<{ message: string }> => {
   const endpoint = "/organization/members/validateresetpassword";
   const response = await apiClient.post<ApiResponse<null>>(
     endpoint,
     { email, reset_code: code, new_password: password },
-    { withCredentials: true },
+    { withCredentials: true }
   );
   if (!response.data.success) {
     throw new Error(response.data.message || "Password reset failed.");
@@ -92,13 +91,13 @@ export const performPasswordReset = async (
 export const activateMember = async (
   organizationId: string,
   memberId: string,
-  password: string,
+  password: string
 ): Promise<{ message: string }> => {
   const endpoint = `/organization/${organizationId}/members/${memberId}/activate`;
   const response = await apiClient.post<ApiResponse<null>>(
     endpoint,
     { password },
-    { withCredentials: true },
+    { withCredentials: true }
   );
   if (!response.data.success) {
     throw new Error(response.data.message || "Activation failed.");
