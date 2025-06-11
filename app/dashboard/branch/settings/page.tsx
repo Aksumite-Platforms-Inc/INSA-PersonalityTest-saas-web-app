@@ -1,34 +1,92 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { PageTitle } from "@/components/page-title"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import { PageTitle } from "@/components/page-title";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { getBranchById, updateBranch } from "@/services/branch.service";
+import { getOrganizationId, getBranchId } from "@/utils/tokenUtils";
 
 export default function BranchSettingsPage() {
-  const { toast } = useToast()
-  const [branchName, setBranchName] = useState("Addis Ababa HQ")
-  const [branchEmail, setBranchEmail] = useState("addis@moe.gov.et")
-  const [branchPhone, setBranchPhone] = useState("+251 111 234567")
-  const [branchAddress, setBranchAddress] = useState("Addis Ababa, Ethiopia")
-  const [branchManager, setBranchManager] = useState("Abebe Kebede")
-  
-  const handleSaveProfile = () => {
-    toast({
-      title: "Settings saved",
-      description: "Branch profile has been updated successfully.",
-    })
+  const { toast } = useToast();
+  const [branchName, setBranchName] = useState("");
+  const [branchEmail, setBranchEmail] = useState("");
+  const [branchPhone, setBranchPhone] = useState("");
+  const [branchAddress, setBranchAddress] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBranch = async () => {
+      try {
+        const orgId = getOrganizationId();
+        const branchId = getBranchId();
+        if (!orgId || !branchId) return;
+        const branch = await getBranchById(orgId, branchId);
+        setBranchName(branch.name || "");
+        setBranchEmail(branch.email || "");
+        setBranchPhone(branch.phone_number || "");
+        setBranchAddress(branch.address || "");
+      } catch (err) {
+        toast({ title: "Error", description: "Failed to fetch branch info." });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBranch();
+  }, [toast]);
+
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      const branchId = getBranchId();
+      if (!branchId) throw new Error("Branch ID missing");
+      await updateBranch(branchId, {
+        id: branchId,
+        name: branchName,
+        email: branchEmail,
+        phone_number: branchPhone,
+        address: branchAddress,
+      });
+      toast({
+        title: "Settings saved",
+        description: "Branch profile has been updated successfully.",
+      });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to update branch info." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Branch Settings" description="Manage your branch settings and preferences" />
+      <PageTitle
+        title="Branch Settings"
+        description="Manage your branch settings and preferences"
+      />
 
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
@@ -39,12 +97,18 @@ export default function BranchSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Branch Information</CardTitle>
-              <CardDescription>Update your branch's basic information</CardDescription>
+              <CardDescription>
+                Update your branch's basic information
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="branch-name">Branch Name</Label>
-                <Input id="branch-name" value={branchName} onChange={(e) => setBranchName(e.target.value)} />
+                <Input
+                  id="branch-name"
+                  value={branchName}
+                  onChange={(e) => setBranchName(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="branch-email">Email</Label>
@@ -57,15 +121,19 @@ export default function BranchSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="branch-phone">Phone</Label>
-                <Input id="branch-phone" value={branchPhone} onChange={(e) => setBranchPhone(e.target.value)} />
+                <Input
+                  id="branch-phone"
+                  value={branchPhone}
+                  onChange={(e) => setBranchPhone(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="branch-address">Address</Label>
-                <Input id="branch-address" value={branchAddress} onChange={(e) => setBranchAddress(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="branch-manager">Branch Manager</Label>
-                <Input id="branch-manager" value={branchManager} onChange={(e) => setBranchManager(e.target.value)} />
+                <Input
+                  id="branch-address"
+                  value={branchAddress}
+                  onChange={(e) => setBranchAddress(e.target.value)}
+                />
               </div>
             </CardContent>
             <CardFooter>
@@ -75,5 +143,5 @@ export default function BranchSettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

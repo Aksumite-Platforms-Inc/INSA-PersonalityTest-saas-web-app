@@ -4,6 +4,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/app/contexts/auth-context";
 import { useRouter, usePathname } from "next/navigation";
+import { isTokenExpired } from "@/utils/tokenUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface RouteGuardProps {
   allowedRoles: string[];
@@ -21,12 +23,19 @@ export const RouteGuard = ({ allowedRoles, children }: RouteGuardProps) => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
+      // Check for missing or expired token
+      if (!user || isTokenExpired()) {
         router.replace("/login");
+        toast({
+          title: "Session expired",
+          description: "Please log in again.",
+          variant: "destructive",
+        });
         return;
       }
 
