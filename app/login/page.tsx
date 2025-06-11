@@ -21,6 +21,7 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { decodeToken } from "@/utils/tokenUtils";
 import { useToast } from "@/hooks/use-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,6 +32,7 @@ export default function LoginPage() {
 
   const { toast } = useToast();
   const router = useRouter();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -92,12 +94,33 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // New handleLogin with reCAPTCHA v3
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
+
+    let recaptchaToken = "";
+    if (executeRecaptcha) {
+      try {
+        recaptchaToken = await executeRecaptcha("login");
+      } catch {
+        setError("reCAPTCHA failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      setError("reCAPTCHA not ready. Please try again.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const { role } = await loginUser(email, password);
+      // Pass the recaptchaToken to your backend with the login request
+      const response = await loginUser(email, password, recaptchaToken);
+
+      // Assuming your loginUser returns a user object with a role property
+      const { role } = response;
 
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
@@ -109,9 +132,10 @@ export default function LoginPage() {
     } catch (err: any) {
       toast({
         title: "Login Failed",
-        description: err.message || "Invalid credentials",
+        description: err?.message || "Invalid credentials",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -149,7 +173,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
 
-        <form ref={formRef} onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-destructive/10 text-destructive text-center py-2 px-3 rounded-md text-sm">
