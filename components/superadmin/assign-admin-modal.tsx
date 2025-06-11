@@ -69,6 +69,7 @@ const AssignAdminModal: React.FC<AssignAdminModalProps> = ({
               onChange={(e) => setAdminEmail(e.target.value)}
               placeholder="Enter admin email"
               required
+              disabled={isSubmitting}
             />
           </div>
           <div className="flex justify-end space-x-2">
