@@ -49,23 +49,23 @@ export default function LoginPage() {
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 0.5 }
+      { opacity: 1, duration: 0.5 },
     );
     tl.fromTo(
       logoRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       descriptionRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.01 },
-      "-=0.6"
+      "-=0.6",
     );
 
     formFieldsRef.current.forEach((field, index) => {
@@ -73,20 +73,20 @@ export default function LoginPage() {
         field,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.05 },
-        "-=0.2"
+        "-=0.2",
       );
     });
 
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       footerRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.01 },
-      "-=0.6"
+      "-=0.6",
     );
 
     return () => {

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { ToastProvider } from "../components/toast-provider";
 import { AuthProvider } from "../app/contexts/auth-context";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,19 +24,29 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
+        <GoogleReCaptchaProvider
+          reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+          scriptProps={{
+            async: true,
+            defer: true,
+            appendTo: "head",
+            nonce: undefined,
+          }}
         >
-          <LanguageProvider>
-            <AuthProvider>
-              {children}
-              <ToastProvider />
-            </AuthProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <LanguageProvider>
+              <AuthProvider>
+                {children}
+                <ToastProvider />
+              </AuthProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </GoogleReCaptchaProvider>
       </body>
     </html>
   );
