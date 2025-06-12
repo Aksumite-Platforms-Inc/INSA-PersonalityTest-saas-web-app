@@ -22,7 +22,7 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { useToast } from "@/hooks/use-toast";
 
-const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+const SITE_KEY = "6LeHsV0rAAAAAFWzy-EicLf5N-yScVffpbfqbzvL";
 
 // Optional: Show an error if the site key is missing (for dev/debug)
 if (!SITE_KEY) {
