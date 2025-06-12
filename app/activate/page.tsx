@@ -46,7 +46,7 @@ const ActivatePageContent = ({
       setSuccess(true);
       toast({
         title: "Success",
-        description: "Account activated successfully.",
+        description: "Your password has been reset successfully.",
       });
     } catch (error) {
       let errorMessage = "Something went wrong. Please check your internet.";

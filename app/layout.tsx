@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { ToastProvider } from "../components/toast-provider";
 import { AuthProvider } from "../app/contexts/auth-context";
+import { SafeRecaptchaProvider } from "@/components/safe-recaptcha-provider"; // Import the new provider
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,19 +24,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <LanguageProvider>
-            <AuthProvider>
-              {children}
-              <ToastProvider />
-            </AuthProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <SafeRecaptchaProvider> {/* Use SafeRecaptchaProvider */}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <LanguageProvider>
+              <AuthProvider>
+                {children}
+                <ToastProvider />
+              </AuthProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </SafeRecaptchaProvider>
       </body>
     </html>
   );

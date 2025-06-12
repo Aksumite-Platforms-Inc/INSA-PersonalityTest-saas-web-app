@@ -202,7 +202,7 @@ export default function OrganizationsPage() {
           onDeactivate={handleDeactivateOrg}
         />
       )}
-      {/* {successMessage && (
+      {successMessage && (
         <div className="fixed top-10 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {successMessage}
         </div>
@@ -211,7 +211,7 @@ export default function OrganizationsPage() {
         <div className="fixed top-20 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {error}
         </div>
-      )} */}
+      )}
     </div>
   );
 }

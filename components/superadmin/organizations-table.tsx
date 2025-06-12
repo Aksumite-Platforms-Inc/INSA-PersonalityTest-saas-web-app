@@ -212,7 +212,7 @@ export function OrganizationsTable({
               <TableHead>Users</TableHead>
               {/* <TableHead>Tests Completed</TableHead> */}
               <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

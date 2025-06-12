@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import {
-  getAllOrgMembers,
-  deleteOrgMember,
-  User,
-} from "@/services/user.service";
+import { getAllOrgMembers, User } from "@/services/user.service";
 import {
   Table,
   TableBody,
@@ -32,7 +28,6 @@ import {
   Mail,
   FileText,
   UserCog,
-  Trash,
 } from "lucide-react";
 
 interface OrganizationEmployeesTableProps {
@@ -67,18 +62,6 @@ export function OrganizationEmployeesTable({
 
     fetchEmployees();
   }, [organizationId]);
-
-  const handleDeleteEmployee = async (employeeId: number) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
-    try {
-      // You need to implement deleteOrgMember in your user.service
-      await deleteOrgMember(organizationId, employeeId);
-      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
-    } catch (error) {
-      alert("Failed to delete employee.");
-      console.error(error);
-    }
-  };
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
@@ -149,7 +132,7 @@ export function OrganizationEmployeesTable({
               <TableHead>Position</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Action</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -182,48 +165,44 @@ export function OrganizationEmployeesTable({
                       : "N/A"}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger
                         asChild
                         onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate to the superadmin employee test results page
-                            // Use Next.js router for navigation
-                            const employeeId = employee.id;
-                            // You may need to import useRouter at the top if not already
-                            // This is a workaround since this is not a page component
-                            window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
-                          }}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
+                      > */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Navigate to the superadmin employee test results page
+                        // Use Next.js router for navigation
+                        const employeeId = employee.id;
+                        // You may need to import useRouter at the top if not already
+                        // This is a workaround since this is not a page component
+                        window.location.href = `/dashboard/superadmin/results/employee-tests?employeeId=${employeeId}`;
+                      }}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                    {/* </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
+                    {/* <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
                             onViewDetails?.(employee.id);
                           }}
-                          disabled
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
                           <span>Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => e.stopPropagation()}
-                          disabled
-                        >
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <Mail className="mr-2 h-4 w-4" />
                           <span>Send Email</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
                             // Navigate to the superadmin employee test results page
@@ -236,30 +215,14 @@ export function OrganizationEmployeesTable({
                         >
                           <FileText className="mr-2 h-4 w-4" />
                           <span>View Test Results</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={(e) => e.stopPropagation()}
-                          disabled
-                        >
+                        </DropdownMenuItem> */}
+                    {/* <DropdownMenuSeparator /> */}
+                    {/* <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <UserCog className="mr-2 h-4 w-4" />
                           <span>Edit Profile</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            //
-                            const employeeId = employee.id;
-
-                            handleDeleteEmployee(employeeId);
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash className="mr-2 h-4 w-4 " />
-                          <span>Remove Employee</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </DropdownMenuItem> */}
+                    {/* </DropdownMenuContent>
+                    </DropdownMenu> */}
                   </TableCell>
                 </TableRow>
               ))
