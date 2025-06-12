@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,8 @@ import { ExamProcessAnimation } from "@/components/animations/exam-process-anima
 import { AnimatedText } from "@/components/animations/animated-text";
 import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation"; 
 
 export default function LoginPage() {
   // Refs for animation targets
@@ -29,7 +31,40 @@ export default function LoginPage() {
   const benefitsRef = useRef<HTMLElement>(null);
   const testimonialsRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [dashboardRoute, setDashboardRoute] = useState("/login");
+  const router = useRouter();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token"); 
+    if (!token) return;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const role = decoded?.role;
+
+      if (role) {
+        setIsLoggedIn(true);
+        switch (role) {
+          case "Org Admin":
+            setDashboardRoute("/dashboard/org");
+            break;
+          case "Branch Admin":
+            setDashboardRoute("/dashboard/branch");
+            break;
+          case "Employee":
+            setDashboardRoute("/dashboard/employee");
+            break;
+          default:
+            setDashboardRoute("/login");
+        }
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+      setIsLoggedIn(false);
+    }
+  }, []);
+  
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navigation */}
@@ -66,14 +101,12 @@ export default function LoginPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium hover:underline underline-offset-4"
+            <Button
+              onClick={() =>
+                router.push(isLoggedIn ? dashboardRoute : "/login")
+              }
             >
-              Login
-            </Link>
-            <Button asChild>
-              <Link href="#">Get Started</Link>
+              {isLoggedIn ? "Go to Dashboard" : "Login"}
             </Button>
           </div>
         </div>
