@@ -21,7 +21,7 @@ import { AnimatedText } from "@/components/animations/animated-text";
 import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
 import { jwtDecode } from "jwt-decode";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   // Refs for animation targets
@@ -36,7 +36,8 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); 
+    const token =
+      localStorage.getItem("authToken") || localStorage.getItem("token");
     if (!token) return;
 
     try {
@@ -44,27 +45,25 @@ export default function LoginPage() {
       const role = decoded?.role;
 
       if (role) {
-        setIsLoggedIn(true);
         switch (role) {
           case "Org Admin":
-            setDashboardRoute("/dashboard/org");
+            router.push("/dashboard/org");
             break;
           case "Branch Admin":
-            setDashboardRoute("/dashboard/branch");
+            router.push("/dashboard/branch");
             break;
           case "Employee":
-            setDashboardRoute("/dashboard/employee");
+            router.push("/dashboard/employee");
             break;
           default:
-            setDashboardRoute("/login");
+            break;
         }
       }
-    } catch (error) {
-      console.error("Invalid token:", error);
-      setIsLoggedIn(false);
+    } catch (e) {
+      console.error("Invalid token, skipping redirect.");
     }
   }, []);
-  
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navigation */}
