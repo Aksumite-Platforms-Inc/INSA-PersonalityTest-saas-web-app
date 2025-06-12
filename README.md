@@ -19,7 +19,7 @@ The INSA Personality Testing Platform is designed to replace traditional paper-b
 - **Superadmin**: Full platform oversight, organization management, and compliance monitoring
 - **Organization Admin**: Branch management, employee oversight, and test monitoring
 - **Branch Admin**: Employee management, test administration, and results analysis
-- **Employee**: Test-taking and personal results viewing
+- **Employee**: Test-taking and personal results viewing test
 
 ### Custom Test Engine
 
