@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
 
@@ -111,6 +112,7 @@ export default function LoginPage() {
           "expired-callback": () => setRecaptchaToken(""),
         },
       );
+      setRecaptchaReady(true);
       return;
     }
     const script = document.createElement("script");
@@ -135,6 +137,7 @@ export default function LoginPage() {
             "expired-callback": () => setRecaptchaToken(""),
           },
         );
+        setRecaptchaReady(true);
       }
     };
     document.body.appendChild(script);
@@ -187,6 +190,11 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    if (!recaptchaReady) {
+      setError("reCAPTCHA is still loading. Please wait a moment.");
+      setIsLoading(false);
+      return;
+    }
     if (window.grecaptcha && recaptchaWidgetId.current !== null) {
       window.grecaptcha.execute(recaptchaWidgetId.current);
     } else {
