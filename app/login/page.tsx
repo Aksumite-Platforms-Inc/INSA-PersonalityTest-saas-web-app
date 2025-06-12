@@ -24,6 +24,14 @@ import { useToast } from "@/hooks/use-toast";
 
 const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
+// Optional: Show an error if the site key is missing (for dev/debug)
+if (!SITE_KEY) {
+  // eslint-disable-next-line no-console
+  console.error(
+    "reCAPTCHA site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file.",
+  );
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -203,7 +211,7 @@ export default function LoginPage() {
             <div className="flex justify-center">
               <ReCAPTCHA
                 ref={recaptchaRef}
-                sitekey={SITE_KEY!}
+                sitekey={SITE_KEY || ""}
                 size="invisible"
               />
             </div>

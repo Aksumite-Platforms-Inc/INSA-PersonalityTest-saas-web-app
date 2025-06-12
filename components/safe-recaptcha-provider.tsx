@@ -7,7 +7,9 @@ interface SafeRecaptchaProviderProps {
   children: ReactNode;
 }
 
-export function SafeRecaptchaProvider({ children }: SafeRecaptchaProviderProps) {
+export function SafeRecaptchaProvider({
+  children,
+}: SafeRecaptchaProviderProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -21,10 +23,20 @@ export function SafeRecaptchaProvider({ children }: SafeRecaptchaProviderProps) 
     return <>{children}</>;
   }
 
+  // Get the site key from the environment variable
+  const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+  if (!SITE_KEY) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "GoogleReCaptchaProvider site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file.",
+    );
+  }
+
   // On the client side, after mount, render the actual GoogleReCaptchaProvider
   return (
     <GoogleReCaptchaProvider
-      reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+      reCaptchaKey={SITE_KEY}
       scriptProps={{
         async: true,
         defer: true,
