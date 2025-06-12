@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -28,9 +29,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-  const [recaptchaReady, setRecaptchaReady] = useState(false);
-  const recaptchaRef = useRef<HTMLDivElement | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -92,23 +91,21 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Load reCAPTCHA script for invisible v2 and set ready when loaded
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setRecaptchaReady(true);
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  // No need to manually load the script when using react-google-recaptcha
 
-  // This function will be called after reCAPTCHA is solved
-  const onRecaptchaSuccess = async (token: string) => {
+  // On submit, trigger invisible reCAPTCHA and handle login
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
-      const response = await loginUser(email, password, token);
+      const recaptchaToken = await recaptchaRef.current?.executeAsync();
+      if (!recaptchaToken) {
+        setError("reCAPTCHA failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+      const response = await loginUser(email, password, recaptchaToken);
       const { role } = response;
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
@@ -116,42 +113,15 @@ export default function LoginPage() {
       else if (role === "branch_admin") redirect = "/dashboard/branch";
       else if (role === "org_member") redirect = "/dashboard/employee/test";
       window.location.href = redirect;
+      recaptchaRef.current?.reset();
     } catch (err: any) {
       toast({
         title: "Login Failed",
         description: err?.message || "Invalid credentials",
         variant: "destructive",
       });
+      setError(err?.message || "Login failed.");
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Expose callback for reCAPTCHA only in the browser
-  useEffect(() => {
-    // @ts-ignore
-    window.onRecaptchaSubmit = function (token: string) {
-      setRecaptchaToken(token);
-      onRecaptchaSuccess(token);
-    };
-  }, [email, password]);
-
-  // No longer needed: recaptchaWidgetId or renderRecaptcha for invisible v2
-
-  // On submit, trigger invisible reCAPTCHA
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    if (!recaptchaReady) {
-      setError("reCAPTCHA is still loading. Please wait a moment.");
-      setIsLoading(false);
-      return;
-    }
-    if (window.grecaptcha) {
-      window.grecaptcha.execute();
-    } else {
-      setError("reCAPTCHA not ready. Please try again.");
       setIsLoading(false);
     }
   };
@@ -236,12 +206,10 @@ export default function LoginPage() {
                 formFieldsRef.current[2] = el;
               }}
             >
-              <div
+              <ReCAPTCHA
                 ref={recaptchaRef}
-                className="g-recaptcha"
-                data-sitekey={SITE_KEY}
-                data-callback="onRecaptchaSubmit"
-                data-size="invisible"
+                sitekey={SITE_KEY!}
+                size="invisible"
               />
             </div>
             <Button
