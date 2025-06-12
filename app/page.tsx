@@ -73,7 +73,7 @@ export default function LoginPage() {
               Login
             </Link>
             <Button asChild>
-              <Link href="/contact">Get Started</Link>
+              <Link href="#">Get Started</Link>
             </Button>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 }}
               >
                 <Button size="lg" asChild>
-                  <Link href="/contact">
+                  <Link href="#">
                     Request Demo <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -607,7 +607,7 @@ export default function LoginPage() {
               }}
             >
               <Button size="lg" variant="secondary" asChild>
-                <Link href="/contact">
+                <Link href="#">
                   Request Demo <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

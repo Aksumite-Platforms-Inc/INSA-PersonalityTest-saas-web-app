@@ -200,6 +200,7 @@ export const getBranchById = async (
  * @param branchId - Branch ID to delete
  */
 export const deleteBranch = async (
+  orgId: number,
   branchId: number
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
@@ -209,7 +210,7 @@ export const deleteBranch = async (
   }
 
   const response = await apiClient.delete<ApiResponse<null>>(
-    `/organization/branches/${branchId}`
+    `/organization/${orgId}/branches/${branchId}`
   );
 
   if (!response.data.success) {
