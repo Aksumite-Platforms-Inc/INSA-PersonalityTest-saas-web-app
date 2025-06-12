@@ -2,14 +2,11 @@
 "use client";
 
 import { RouteGuard } from "@/components/route-guard";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeProgressChart } from "@/components/branch/employee-progress-chart";
 import { EmployeeList } from "@/components/branch/employee-list";
-import { getAllBranchMembers } from "@/services/user.service";
-import { getBranchById } from "@/services/branch.service";
-import { getOrganizationId, getBranchId } from "@/utils/tokenUtils";
 
 function BranchDashboardContent() {
   const [stats, setStats] = useState({
@@ -20,43 +17,6 @@ function BranchDashboardContent() {
     changeInTests: 0,
     changeInCompletionRate: 0,
   });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const orgId = getOrganizationId();
-        const branchId = getBranchId();
-        if (!orgId || !branchId) return;
-        // Fetch all branch members
-        const members = await getAllBranchMembers(orgId, branchId);
-        // Calculate stats
-        const totalEmployees = members.length;
-        const testsCompleted = members.filter(
-          (m) => m.status === "completed"
-        ).length;
-        const completionRate =
-          totalEmployees > 0
-            ? Math.round((testsCompleted / totalEmployees) * 100)
-            : 0;
-        // TODO: Fetch and calculate changeInEmployees, changeInTests, changeInCompletionRate from backend if available
-        setStats((prev) => ({
-          ...prev,
-          totalEmployees,
-          testsCompleted,
-          completionRate,
-        }));
-      } catch (err) {
-        // Optionally handle error
-        setStats((prev) => ({
-          ...prev,
-          totalEmployees: 0,
-          testsCompleted: 0,
-          completionRate: 0,
-        }));
-      }
-    };
-    fetchStats();
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -116,23 +76,23 @@ function BranchDashboardContent() {
         </Card>
       </div>
 
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle className="text-center">Employee Progress</CardTitle>
         </CardHeader>
         <CardContent className="h-80">
           <EmployeeProgressChart />
         </CardContent>
-      </Card> */}
+      </Card>
 
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Employee Test Status</CardTitle>
         </CardHeader>
-        <CardContent> */}
-      {/* <EmployeeList organizationId={} branchId={} /> */}
-      {/* </CardContent>
-      </Card> */}
+        <CardContent>
+          {/* <EmployeeList organizationId={} branchId={} /> */}
+        </CardContent>
+      </Card>
     </div>
   );
 }
