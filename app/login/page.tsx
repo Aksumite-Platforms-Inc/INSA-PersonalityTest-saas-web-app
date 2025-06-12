@@ -127,12 +127,14 @@ export default function LoginPage() {
     }
   };
 
-  // Expose callback for reCAPTCHA
-  // @ts-ignore
-  window.onRecaptchaSubmit = function (token: string) {
-    setRecaptchaToken(token);
-    onRecaptchaSuccess(token);
-  };
+  // Expose callback for reCAPTCHA only in the browser
+  useEffect(() => {
+    // @ts-ignore
+    window.onRecaptchaSubmit = function (token: string) {
+      setRecaptchaToken(token);
+      onRecaptchaSuccess(token);
+    };
+  }, [email, password]);
 
   // No longer needed: recaptchaWidgetId or renderRecaptcha for invisible v2
 
