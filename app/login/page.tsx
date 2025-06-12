@@ -92,9 +92,8 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Load reCAPTCHA script and render widget
+  // Load reCAPTCHA script and render invisible widget
   useEffect(() => {
-    // If grecaptcha already exists, render immediately
     if (
       window.grecaptcha &&
       recaptchaRef.current &&
@@ -104,16 +103,18 @@ export default function LoginPage() {
         recaptchaRef.current,
         {
           sitekey: SITE_KEY,
-          callback: (token: string) => setRecaptchaToken(token),
+          size: "invisible",
+          callback: (token: string) => {
+            setRecaptchaToken(token);
+            onRecaptchaSuccess(token);
+          },
           "expired-callback": () => setRecaptchaToken(""),
         },
       );
       return;
     }
-
-    // Otherwise, load the script and render after load
     const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.src = "https://www.google.com/recaptcha/api.js";
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -126,18 +127,43 @@ export default function LoginPage() {
           recaptchaRef.current,
           {
             sitekey: SITE_KEY,
-            callback: (token: string) => setRecaptchaToken(token),
+            size: "invisible",
+            callback: (token: string) => {
+              setRecaptchaToken(token);
+              onRecaptchaSuccess(token);
+            },
             "expired-callback": () => setRecaptchaToken(""),
           },
         );
       }
     };
     document.body.appendChild(script);
-
     return () => {
       document.body.removeChild(script);
     };
   }, []);
+
+  // This function will be called after reCAPTCHA is solved
+  const onRecaptchaSuccess = async (token: string) => {
+    try {
+      const response = await loginUser(email, password, token);
+      const { role } = response;
+      let redirect = "/dashboard";
+      if (role === "super_admin") redirect = "/dashboard/superadmin";
+      else if (role === "org_admin") redirect = "/dashboard/organization";
+      else if (role === "branch_admin") redirect = "/dashboard/branch";
+      else if (role === "org_member") redirect = "/dashboard/employee/test";
+      window.location.href = redirect;
+    } catch (err: any) {
+      toast({
+        title: "Login Failed",
+        description: err?.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   function renderRecaptcha() {
     if (
@@ -156,33 +182,15 @@ export default function LoginPage() {
     }
   }
 
+  // On submit, trigger invisible reCAPTCHA
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA challenge.");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await loginUser(email, password, recaptchaToken);
-      const { role } = response;
-      let redirect = "/dashboard";
-      if (role === "super_admin") redirect = "/dashboard/superadmin";
-      else if (role === "org_admin") redirect = "/dashboard/organization";
-      else if (role === "branch_admin") redirect = "/dashboard/branch";
-      else if (role === "org_member") redirect = "/dashboard/employee/test";
-      window.location.href = redirect;
-    } catch (err: any) {
-      toast({
-        title: "Login Failed",
-        description: err?.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
+    if (window.grecaptcha && recaptchaWidgetId.current !== null) {
+      window.grecaptcha.execute(recaptchaWidgetId.current);
+    } else {
+      setError("reCAPTCHA not ready. Please try again.");
       setIsLoading(false);
     }
   };
@@ -267,12 +275,7 @@ export default function LoginPage() {
                 formFieldsRef.current[2] = el;
               }}
             >
-              <div className="w-full">
-                <label className="block text-sm font-medium mb-2 text-center">
-                  Please complete the reCAPTCHA challenge
-                </label>
-                <div ref={recaptchaRef} className="flex justify-center" />
-              </div>
+              <div ref={recaptchaRef} />
             </div>
             <Button
               ref={buttonRef}
