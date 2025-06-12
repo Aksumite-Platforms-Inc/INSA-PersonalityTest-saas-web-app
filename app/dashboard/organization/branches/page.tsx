@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 export default function BranchesPage() {
   const router = useRouter();
   const [orgId, setOrgId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const organizationId = getOrganizationId(); // Assuming this function retrieves the token data

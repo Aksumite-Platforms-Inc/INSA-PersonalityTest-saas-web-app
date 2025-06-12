@@ -42,16 +42,20 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
     const fetchBranches = async () => {
+      setLoading(true);
       try {
         const response = await getAllBranches(organizationId);
         setBranches(response);
       } catch (error) {
         console.error("Error fetching branches:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchBranches();
@@ -124,7 +128,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
 
   const handleDelete = async (branchId: number) => {
     if (!confirm("Are you sure you want to delete this branch?")) return;
-    const { success } = await deleteBranch(branchId);
+    const { success } = await deleteBranch(organizationId, branchId);
     if (success) {
       setBranches((prev) => prev.filter((b) => b.id !== branchId));
     } else {
@@ -135,6 +139,15 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <span className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mr-2"></span>
+        <span className="text-muted-foreground">Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -154,9 +167,11 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
           <h2 className="text-lg font-bold">Assign Admin</h2>
           <Input
             placeholder="Enter admin email"
+            type="email"
             value={adminEmail}
             onChange={(e) => setAdminEmail(e.target.value)}
             className="mt-2"
+            required
           />
           <div className="flex justify-end mt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>

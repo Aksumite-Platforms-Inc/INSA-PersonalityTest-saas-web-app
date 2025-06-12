@@ -2,6 +2,7 @@
 import apiClient from "./apiClient";
 import { getAccessToken } from "@/utils/tokenUtils";
 import { ApiResponse } from "@/types/api-response.type";
+import { User } from "./user.service";
 
 // Define the shape of a branch
 export interface Branch {
@@ -117,12 +118,12 @@ export const assignAdminToBranch = async (
 export const getBranchMembers = async (
   orgId: number,
   branchId: number
-): Promise<Branch[]> => {
+): Promise<User[]> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
-  const response = await apiClient.get<ApiResponse<Branch[]>>(
-    `/organization/${orgId}/branchs/${branchId}/members`
+  const response = await apiClient.get<ApiResponse<User[]>>(
+    `/organization/${orgId}/branches/${branchId}/members`
   );
 
   if (!response.data.success) {

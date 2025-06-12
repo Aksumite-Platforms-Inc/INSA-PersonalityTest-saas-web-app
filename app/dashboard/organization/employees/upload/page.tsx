@@ -124,10 +124,24 @@ export default function UploadEmployeesPage() {
       });
       router.back();
     } catch (error) {
-      console.error("Upload failed:", error);
+      let errorMessage = "Something went wrong. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      router.back();
       toast({
-        title: t("upload.uploadError"),
-        description: t("upload.failedToAddUsers"),
+        title: "Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -233,10 +247,21 @@ export default function UploadEmployeesPage() {
                   <li>Position</li>
                 </ul>
               </div>
-              <Button variant="outline" className="w-full">
-                <Download className="mr-2 h-4 w-4" />
-                {t("upload.downloadTemplate")}
-              </Button>
+              <div className="flex justify-between">
+                <Button variant="outline" className="" asChild>
+                  <a href="/NewBulkUserUploadTemplate.xlsx" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t("upload.downloadTemplate")}
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={uploading}
+                >
+                  {t("common.cancel")}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

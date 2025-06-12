@@ -105,7 +105,7 @@ export function OrganizationsTable({
       setIsModalOpen(false);
       setAdminEmail("");
     } catch (error) {
-      let errorMessage = "Something went wrong. Please try again.";
+      let errorMessage = "Something went wrong. Please check your internet.";
       if (
         typeof error === "object" &&
         error !== null &&

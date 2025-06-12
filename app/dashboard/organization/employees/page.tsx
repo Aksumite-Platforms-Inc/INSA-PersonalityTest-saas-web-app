@@ -9,6 +9,7 @@ import { getBranchId, getOrganizationId } from "@/utils/tokenUtils";
 import { useRouter } from "next/navigation";
 import { getBranchById } from "@/services/branch.service";
 import SearchParamsWrapper from "@/components/SearchParamsWrapper";
+import { BranchEmployeesTable } from "@/components/organization/branch-employees-table";
 
 export default function BranchesPage() {
   return (
@@ -42,7 +43,7 @@ function BranchesPageContent({
     }
     const fetchOrganization = async () => {
       try {
-        const response = await getBranchById(Number(branchId));
+        const response = await getBranchById(Number(orgId), Number(branchId));
         setBranch(response);
       } catch (error: any) {
         if (error?.response?.status === 404) {
@@ -60,7 +61,7 @@ function BranchesPageContent({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <PageTitle
-          title={`Branch (${branch?.name || ""}) Employees Management`}
+          title={`${branch?.name || ""} Branch Employees `}
           description="Manage employees in your branch"
         />
         <Button
@@ -73,7 +74,11 @@ function BranchesPageContent({
           Bulk Upload Employees
         </Button>
       </div>
-      <EmployeeList
+      {/* <EmployeeList
+        organizationId={Number(orgId)}
+        branchId={Number(branchId)}
+      /> */}
+      <BranchEmployeesTable
         organizationId={Number(orgId)}
         branchId={Number(branchId)}
       />
