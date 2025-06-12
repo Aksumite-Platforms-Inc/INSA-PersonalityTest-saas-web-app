@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -22,7 +21,12 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { useToast } from "@/hooks/use-toast";
 
-const SITE_KEY = "6LeHsV0rAAAAAFWzy-EicLf5N-yScVffpbfqbzvL";
+var SITE_KEY: string;
+
+if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+  SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+}
+SITE_KEY = "6LcdsV0rAAAAADqv49UKncRxPs_0debWYdcGtGYm";
 
 // Optional: Show an error if the site key is missing (for dev/debug)
 if (!SITE_KEY) {
@@ -37,7 +41,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const recaptchaWidgetRef = useRef<HTMLDivElement | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -99,17 +104,38 @@ export default function LoginPage() {
     };
   }, []);
 
-  // No need to manually load the script when using react-google-recaptcha
+  // Load reCAPTCHA script on mount
+  useEffect(() => {
+    if (!window.grecaptcha) {
+      const script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, []);
 
-  // On submit, trigger invisible reCAPTCHA and handle login
+  // Callback for reCAPTCHA
+  // This will be called by the widget when the user completes the challenge
+  // We must attach this function to window so reCAPTCHA can call it
+  useEffect(() => {
+    // @ts-ignore
+    window.onRecaptchaSuccess = (token: string) => {
+      setRecaptchaToken(token);
+    };
+  }, []);
+
+  // On submit, check for reCAPTCHA token and handle login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     try {
-      const recaptchaToken = await recaptchaRef.current?.executeAsync();
       if (!recaptchaToken) {
-        setError("reCAPTCHA failed. Please try again.");
+        setError("Please complete the reCAPTCHA challenge.");
         setIsLoading(false);
         return;
       }
@@ -121,7 +147,11 @@ export default function LoginPage() {
       else if (role === "branch_admin") redirect = "/dashboard/branch";
       else if (role === "org_member") redirect = "/dashboard/employee/test";
       window.location.href = redirect;
-      recaptchaRef.current?.reset();
+      setRecaptchaToken(""); // reset for next login attempt
+      // Optionally reset the widget
+      if (window.grecaptcha && recaptchaWidgetRef.current) {
+        window.grecaptcha.reset();
+      }
     } catch (err: any) {
       toast({
         title: "Login Failed",
@@ -209,10 +239,13 @@ export default function LoginPage() {
               />
             </div>
             <div className="flex justify-center">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={SITE_KEY || ""}
-                size="invisible"
+              <div
+                ref={recaptchaWidgetRef}
+                className="g-recaptcha"
+                data-sitekey={SITE_KEY || ""}
+                data-callback="onRecaptchaSuccess"
+                data-theme="light"
+                data-size="normal"
               />
             </div>
             <Button
