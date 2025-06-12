@@ -94,20 +94,49 @@ export default function LoginPage() {
 
   // Load reCAPTCHA script and render widget
   useEffect(() => {
-    if (!window.grecaptcha) {
-      const script = document.createElement("script");
-      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
-      script.async = true;
-      script.defer = true;
-      script.onload = renderRecaptcha;
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
-    } else {
-      renderRecaptcha();
+    // If grecaptcha already exists, render immediately
+    if (
+      window.grecaptcha &&
+      recaptchaRef.current &&
+      recaptchaWidgetId.current === null
+    ) {
+      recaptchaWidgetId.current = window.grecaptcha.render(
+        recaptchaRef.current,
+        {
+          sitekey: SITE_KEY,
+          callback: (token: string) => setRecaptchaToken(token),
+          "expired-callback": () => setRecaptchaToken(""),
+        },
+      );
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // Otherwise, load the script and render after load
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (
+        window.grecaptcha &&
+        recaptchaRef.current &&
+        recaptchaWidgetId.current === null
+      ) {
+        recaptchaWidgetId.current = window.grecaptcha.render(
+          recaptchaRef.current,
+          {
+            sitekey: SITE_KEY,
+            callback: (token: string) => setRecaptchaToken(token),
+            "expired-callback": () => setRecaptchaToken(""),
+          },
+        );
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   function renderRecaptcha() {
