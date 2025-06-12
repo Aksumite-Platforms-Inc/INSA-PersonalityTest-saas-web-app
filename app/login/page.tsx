@@ -238,7 +238,12 @@ export default function LoginPage() {
                 formFieldsRef.current[2] = el;
               }}
             >
-              <div ref={recaptchaRef} />
+              <div className="w-full">
+                <label className="block text-sm font-medium mb-2 text-center">
+                  Please complete the reCAPTCHA challenge
+                </label>
+                <div ref={recaptchaRef} className="flex justify-center" />
+              </div>
             </div>
             <Button
               ref={buttonRef}
