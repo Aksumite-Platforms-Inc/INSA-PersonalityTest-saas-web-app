@@ -19,19 +19,18 @@ import {
 } from "@/components/ui/card";
 
 import { loginUser } from "@/services/auth.service";
-import { decodeToken } from "@/utils/tokenUtils";
 import { useToast } from "@/hooks/use-toast";
 
 const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
+  const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -45,9 +44,9 @@ export default function LoginPage() {
   const buttonRef = useRef(null);
   const footerRef = useRef(null);
 
+  // Animate on mount
   useEffect(() => {
     const tl = gsap.timeline();
-
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
@@ -69,7 +68,6 @@ export default function LoginPage() {
       { opacity: 1, y: 0, duration: 0.01 },
       "-=0.6",
     );
-
     formFieldsRef.current.forEach((field, index) => {
       tl.fromTo(
         field,
@@ -78,7 +76,6 @@ export default function LoginPage() {
         "-=0.2",
       );
     });
-
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
@@ -90,13 +87,46 @@ export default function LoginPage() {
       { opacity: 1, duration: 0.01 },
       "-=0.6",
     );
-
     return () => {
       tl.kill();
     };
   }, []);
 
-  // New handleLogin with reCAPTCHA v2
+  // Load reCAPTCHA script and render widget
+  useEffect(() => {
+    if (!window.grecaptcha) {
+      const script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.onload = renderRecaptcha;
+      document.body.appendChild(script);
+      return () => {
+        document.body.removeChild(script);
+      };
+    } else {
+      renderRecaptcha();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function renderRecaptcha() {
+    if (
+      window.grecaptcha &&
+      recaptchaRef.current &&
+      recaptchaWidgetId.current === null
+    ) {
+      recaptchaWidgetId.current = window.grecaptcha.render(
+        recaptchaRef.current,
+        {
+          sitekey: SITE_KEY,
+          callback: (token: string) => setRecaptchaToken(token),
+          "expired-callback": () => setRecaptchaToken(""),
+        },
+      );
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -109,18 +139,13 @@ export default function LoginPage() {
     }
 
     try {
-      // Pass the recaptchaToken to your backend with the login request
       const response = await loginUser(email, password, recaptchaToken);
-
-      // Assuming your loginUser returns a user object with a role property
       const { role } = response;
-
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
       else if (role === "org_admin") redirect = "/dashboard/organization";
       else if (role === "branch_admin") redirect = "/dashboard/branch";
       else if (role === "org_member") redirect = "/dashboard/employee/test";
-
       window.location.href = redirect;
     } catch (err: any) {
       toast({
@@ -146,16 +171,13 @@ export default function LoginPage() {
           </Link>
         </Button>
       </div>
-
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
-
       <div ref={logoRef} className="mb-8 flex items-center justify-center">
         <Shield className="h-12 w-12 text-secondary" />
       </div>
-
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle ref={titleRef} className="text-center text-2xl">
@@ -165,7 +187,6 @@ export default function LoginPage() {
             Enter your credentials to access the personality testing platform
           </CardDescription>
         </CardHeader>
-
         <form ref={formRef} onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             {error && (
@@ -173,7 +194,6 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-
             <div
               className="space-y-2"
               ref={(el) => {
@@ -193,7 +213,6 @@ export default function LoginPage() {
                 placeholder="name@example.com"
               />
             </div>
-
             <div
               className="space-y-2"
               ref={(el) => {
@@ -213,25 +232,14 @@ export default function LoginPage() {
                 placeholder="********"
               />
             </div>
-
             <div
-              className="space-y-2"
+              className="flex justify-center"
               ref={(el) => {
                 formFieldsRef.current[2] = el;
               }}
             >
-              {/* <label htmlFor="isSystemAdmin" className="text-sm font-medium">
-                <input
-                  id="isSystemAdmin"
-                  type="checkbox"
-                  checked={isSystemAdmin}
-                  onChange={(e) => setIsSystemAdmin(e.target.checked)}
-                  className="mr-2"
-                />
-                Login as System Admin
-              </label> */}
+              <div ref={recaptchaRef} />
             </div>
-
             <Button
               ref={buttonRef}
               type="submit"
@@ -242,7 +250,6 @@ export default function LoginPage() {
             </Button>
           </CardContent>
         </form>
-
         <CardFooter ref={footerRef} className="flex flex-col space-y-2">
           <div className="text-center text-sm">
             <Link
@@ -260,3 +267,6 @@ export default function LoginPage() {
     </div>
   );
 }
+
+// Add this to global.d.ts or at the top of the file if you get TS errors:
+// declare global { interface Window { grecaptcha: any } }
