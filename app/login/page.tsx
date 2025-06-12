@@ -31,7 +31,6 @@ export default function LoginPage() {
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaReady, setRecaptchaReady] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
-  const recaptchaWidgetId = useRef<number | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -93,53 +92,13 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Load reCAPTCHA script and render invisible widget
+  // Load reCAPTCHA script for invisible v2 and set ready when loaded
   useEffect(() => {
-    if (
-      window.grecaptcha &&
-      recaptchaRef.current &&
-      recaptchaWidgetId.current === null
-    ) {
-      recaptchaWidgetId.current = window.grecaptcha.render(
-        recaptchaRef.current,
-        {
-          sitekey: SITE_KEY,
-          size: "invisible",
-          callback: (token: string) => {
-            setRecaptchaToken(token);
-            onRecaptchaSuccess(token);
-          },
-          "expired-callback": () => setRecaptchaToken(""),
-        },
-      );
-      setRecaptchaReady(true);
-      return;
-    }
     const script = document.createElement("script");
     script.src = "https://www.google.com/recaptcha/api.js";
     script.async = true;
     script.defer = true;
-    script.onload = () => {
-      if (
-        window.grecaptcha &&
-        recaptchaRef.current &&
-        recaptchaWidgetId.current === null
-      ) {
-        recaptchaWidgetId.current = window.grecaptcha.render(
-          recaptchaRef.current,
-          {
-            sitekey: SITE_KEY,
-            size: "invisible",
-            callback: (token: string) => {
-              setRecaptchaToken(token);
-              onRecaptchaSuccess(token);
-            },
-            "expired-callback": () => setRecaptchaToken(""),
-          },
-        );
-        setRecaptchaReady(true);
-      }
-    };
+    script.onload = () => setRecaptchaReady(true);
     document.body.appendChild(script);
     return () => {
       document.body.removeChild(script);
@@ -168,22 +127,14 @@ export default function LoginPage() {
     }
   };
 
-  function renderRecaptcha() {
-    if (
-      window.grecaptcha &&
-      recaptchaRef.current &&
-      recaptchaWidgetId.current === null
-    ) {
-      recaptchaWidgetId.current = window.grecaptcha.render(
-        recaptchaRef.current,
-        {
-          sitekey: SITE_KEY,
-          callback: (token: string) => setRecaptchaToken(token),
-          "expired-callback": () => setRecaptchaToken(""),
-        },
-      );
-    }
-  }
+  // Expose callback for reCAPTCHA
+  // @ts-ignore
+  window.onRecaptchaSubmit = function (token: string) {
+    setRecaptchaToken(token);
+    onRecaptchaSuccess(token);
+  };
+
+  // No longer needed: recaptchaWidgetId or renderRecaptcha for invisible v2
 
   // On submit, trigger invisible reCAPTCHA
   const handleLogin = async (e: React.FormEvent) => {
@@ -195,8 +146,8 @@ export default function LoginPage() {
       setIsLoading(false);
       return;
     }
-    if (window.grecaptcha && recaptchaWidgetId.current !== null) {
-      window.grecaptcha.execute(recaptchaWidgetId.current);
+    if (window.grecaptcha) {
+      window.grecaptcha.execute();
     } else {
       setError("reCAPTCHA not ready. Please try again.");
       setIsLoading(false);
@@ -283,7 +234,13 @@ export default function LoginPage() {
                 formFieldsRef.current[2] = el;
               }}
             >
-              <div ref={recaptchaRef} />
+              <div
+                ref={recaptchaRef}
+                className="g-recaptcha"
+                data-sitekey={SITE_KEY}
+                data-callback="onRecaptchaSubmit"
+                data-size="invisible"
+              />
             </div>
             <Button
               ref={buttonRef}
