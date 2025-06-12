@@ -200,12 +200,7 @@ export default function LoginPage() {
                 placeholder="********"
               />
             </div>
-            <div
-              className="flex justify-center"
-              ref={(el) => {
-                formFieldsRef.current[2] = el;
-              }}
-            >
+            <div className="flex justify-center">
               <ReCAPTCHA
                 ref={recaptchaRef}
                 sitekey={SITE_KEY!}
