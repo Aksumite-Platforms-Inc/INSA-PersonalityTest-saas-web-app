@@ -22,12 +22,16 @@ import { loginUser } from "@/services/auth.service";
 import { decodeToken } from "@/utils/tokenUtils";
 import { useToast } from "@/hooks/use-toast";
 
+const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSystemAdmin, setIsSystemAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const recaptchaWidgetId = useRef<number | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -47,23 +51,23 @@ export default function LoginPage() {
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 0.5 }
+      { opacity: 1, duration: 0.5 },
     );
     tl.fromTo(
       logoRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       descriptionRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.01 },
-      "-=0.6"
+      "-=0.6",
     );
 
     formFieldsRef.current.forEach((field, index) => {
@@ -71,20 +75,20 @@ export default function LoginPage() {
         field,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.05 },
-        "-=0.2"
+        "-=0.2",
       );
     });
 
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.01 }
+      { opacity: 1, y: 0, duration: 0.01 },
     );
     tl.fromTo(
       footerRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.01 },
-      "-=0.6"
+      "-=0.6",
     );
 
     return () => {
@@ -92,12 +96,24 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // New handleLogin with reCAPTCHA v2
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA challenge.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const { role } = await loginUser(email, password);
+      // Pass the recaptchaToken to your backend with the login request
+      const response = await loginUser(email, password, recaptchaToken);
+
+      // Assuming your loginUser returns a user object with a role property
+      const { role } = response;
 
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
@@ -109,9 +125,10 @@ export default function LoginPage() {
     } catch (err: any) {
       toast({
         title: "Login Failed",
-        description: err.message || "Invalid credentials",
+        description: err?.message || "Invalid credentials",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -149,7 +166,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
 
-        <form ref={formRef} onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-destructive/10 text-destructive text-center py-2 px-3 rounded-md text-sm">
