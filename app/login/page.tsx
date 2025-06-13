@@ -41,8 +41,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-  const recaptchaWidgetRef = useRef<HTMLDivElement | null>(null);
+  // const [recaptchaToken, setRecaptchaToken] = useState("");
+  // const recaptchaWidgetRef = useRef<HTMLDivElement | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -105,28 +105,28 @@ export default function LoginPage() {
   }, []);
 
   // Load reCAPTCHA script on mount
-  useEffect(() => {
-    if (!window.grecaptcha) {
-      const script = document.createElement("script");
-      script.src = "https://www.google.com/recaptcha/api.js";
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!window.grecaptcha) {
+  //     const script = document.createElement("script");
+  //     script.src = "https://www.google.com/recaptcha/api.js";
+  //     script.async = true;
+  //     script.defer = true;
+  //     document.body.appendChild(script);
+  //     return () => {
+  //       document.body.removeChild(script);
+  //     };
+  //   }
+  // }, []);
 
   // Callback for reCAPTCHA
   // This will be called by the widget when the user completes the challenge
   // We must attach this function to window so reCAPTCHA can call it
-  useEffect(() => {
-    // @ts-ignore
-    window.onRecaptchaSuccess = (token: string) => {
-      setRecaptchaToken(token);
-    };
-  }, []);
+  // useEffect(() => {
+  //   // @ts-ignore
+  //   window.onRecaptchaSuccess = (token: string) => {
+  //     setRecaptchaToken(token);
+  //   };
+  // }, []);
 
   // On submit, check for reCAPTCHA token and handle login
   const handleLogin = async (e: React.FormEvent) => {
@@ -134,12 +134,12 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
     try {
-      if (!recaptchaToken) {
-        setError("Please complete the reCAPTCHA challenge.");
-        setIsLoading(false);
-        return;
-      }
-      const response = await loginUser(email, password, recaptchaToken);
+      // if (!recaptchaToken) {
+      //   setError("Please complete the reCAPTCHA challenge.");
+      //   setIsLoading(false);
+      //   return;
+      // }
+      const response = await loginUser(email, password /*, recaptchaToken */);
       const { role } = response;
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
@@ -147,11 +147,11 @@ export default function LoginPage() {
       else if (role === "branch_admin") redirect = "/dashboard/branch";
       else if (role === "org_member") redirect = "/dashboard/employee/test";
       window.location.href = redirect;
-      setRecaptchaToken(""); // reset for next login attempt
+      // setRecaptchaToken(""); // reset for next login attempt
       // Optionally reset the widget
-      if (window.grecaptcha && recaptchaWidgetRef.current) {
-        window.grecaptcha.reset();
-      }
+      // if (window.grecaptcha && recaptchaWidgetRef.current) {
+      //   window.grecaptcha.reset();
+      // }
     } catch (err: any) {
       toast({
         title: "Login Failed",
@@ -238,7 +238,7 @@ export default function LoginPage() {
                 placeholder="********"
               />
             </div>
-            <div className="flex justify-center">
+            {/* <div className="flex justify-center">
               <div
                 ref={recaptchaWidgetRef}
                 className="g-recaptcha"
@@ -247,7 +247,7 @@ export default function LoginPage() {
                 data-theme="light"
                 data-size="normal"
               />
-            </div>
+            </div> */}
             <Button
               ref={buttonRef}
               type="submit"
