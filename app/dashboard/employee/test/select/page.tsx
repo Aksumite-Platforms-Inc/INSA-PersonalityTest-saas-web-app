@@ -147,16 +147,16 @@ export default function EmployeeTestSelectPage() {
               </CardContent>
               <CardFooter>
                 <Button
-                  variant={selectedTest === test.id ? "default" : "outline"}
+                  variant="default"
                   className="w-full"
                   onClick={() => {
                     setSelectedTest(test.id);
-                    setTimeout(() => handleStartTest(), 300);
+                    setTimeout(() => {
+                      router.push(`/dashboard/employee/test/take/${test.id}`);
+                    }, 100);
                   }}
                 >
-                  {selectedTest === test.id
-                    ? t("test.startTest")
-                    : t("test.selectTest")}
+                  {t("test.startTest")}
                 </Button>
               </CardFooter>
             </Card>

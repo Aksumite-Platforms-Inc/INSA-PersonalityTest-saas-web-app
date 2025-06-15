@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { mbtiTest } from "@/data/tests/mbti";
+import { useToast } from "@/hooks/use-toast";
 import { submitMBTIAnswers } from "@/services/test.service";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -20,10 +21,12 @@ export default function MBTITestPage() {
   const [aAnswers, setAAnswers] = useState<Record<number, number>>({});
   const [bAnswers, setBAnswers] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const questions = currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
+  const questions =
+    currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
 
   const handleAnswer = (questionId: number, value: number) => {
     if (currentGroup === 0) {
@@ -34,14 +37,21 @@ export default function MBTITestPage() {
   };
 
   const handleNextGroup = async () => {
+    // Prevent next or submit if not all questions in the current group are answered
+    const unanswered = questions.filter((q) => !isAnswered(q.id));
+    if (unanswered.length > 0) {
+      toast({
+        title: "Please answer all questions before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (currentGroup === 0) {
       setCurrentGroup(1);
       return;
     }
-
     setIsSubmitting(true);
     setError(null);
-
     try {
       const response = await submitMBTIAnswers(aAnswers, bAnswers);
       if (response.success) {
@@ -58,7 +68,9 @@ export default function MBTITestPage() {
   };
 
   const isAnswered = (id: number) =>
-    currentGroup === 0 ? aAnswers[id] !== undefined : bAnswers[id] !== undefined;
+    currentGroup === 0
+      ? aAnswers[id] !== undefined
+      : bAnswers[id] !== undefined;
 
   return (
     <div className="container mx-auto py-6">
@@ -94,7 +106,9 @@ export default function MBTITestPage() {
               {currentGroup === 0 ? (
                 <div className="grid grid-cols-7 items-center">
                   {"left" in q && (
-                    <span className="col-span-2 text-right font-medium">{q.left}</span>
+                    <span className="col-span-2 text-right font-medium">
+                      {q.left}
+                    </span>
                   )}
                   <div className="col-span-3 flex justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((val) => (
@@ -124,7 +138,9 @@ export default function MBTITestPage() {
                           key={val}
                           onClick={() => handleAnswer(q.id, val)}
                           className={`w-6 h-6 rounded-full border ${
-                            bAnswers[q.id] === val ? "bg-blue-500" : "bg-gray-200"
+                            bAnswers[q.id] === val
+                              ? "bg-blue-500"
+                              : "bg-gray-200"
                           } hover:bg-blue-100 focus:outline-none focus:ring`}
                         />
                       ))}
@@ -138,7 +154,10 @@ export default function MBTITestPage() {
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button onClick={() => setCurrentGroup(0)} disabled={currentGroup === 0}>
+          <Button
+            onClick={() => setCurrentGroup(0)}
+            disabled={currentGroup === 0}
+          >
             Previous
           </Button>
           <Button

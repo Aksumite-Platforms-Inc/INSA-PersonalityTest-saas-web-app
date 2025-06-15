@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { riasecTest } from "@/data/tests/riasec";
 import { submitRIASECAnswers } from "@/services/test.service";
 import {
@@ -13,17 +13,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
 export default function RIASECPage() {
   const [answers, setAnswers] = useState<boolean[]>(Array(42).fill(undefined));
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   const questions = riasecTest.questions;
   const categories = Object.keys(questions) as Array<keyof typeof questions>;
-  const maxQuestions = Math.max(...categories.map((cat) => questions[cat].length));
+  const maxQuestions = Math.max(
+    ...categories.map((cat) => questions[cat].length)
+  );
 
   const orderedQuestions: { question: string; category: string }[] = [];
   for (let i = 0; i < maxQuestions; i++) {
@@ -44,7 +47,10 @@ export default function RIASECPage() {
 
   const handleSubmit = async () => {
     if (answeredCount !== 42) {
-      toast.error("Please answer all 42 questions.");
+      toast({
+        title: "Please answer all questions before submitting.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -56,7 +62,11 @@ export default function RIASECPage() {
         router.push(`/dashboard/employee/test/result/riasec?data=${encoded}`);
       }
     } catch (error) {
-      toast.error("Submission failed. Please try again.");
+      toast({
+        title: "Error submitting test",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -80,7 +90,9 @@ export default function RIASECPage() {
 
         <CardContent>
           <div className="text-center mb-6">
-            <p className="text-lg font-medium">{answeredCount} of 42 answered</p>
+            <p className="text-lg font-medium">
+              {answeredCount} of 42 answered
+            </p>
             <Progress value={(answeredCount / 42) * 100} className="h-2 mt-2" />
           </div>
 
@@ -124,7 +136,10 @@ export default function RIASECPage() {
           >
             <X className="h-5 w-5" />
           </Button>
-          <Button onClick={handleSubmit} disabled={loading || answeredCount < 42}>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading || answeredCount < 42}
+          >
             {loading ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />

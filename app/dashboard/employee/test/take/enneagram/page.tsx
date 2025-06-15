@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X, Loader2 } from "lucide-react";
 import { submitEnneagramAnswers } from "@/services/test.service";
-import toast from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -22,6 +22,7 @@ export default function EnneagramPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const { toast } = useToast();
   const questionsPerGroup = 9;
   const questions = enneagramTest.questions;
   const totalPages = Math.ceil(questions.length / questionsPerGroup);
@@ -40,7 +41,10 @@ export default function EnneagramPage() {
 
   const handleNext = () => {
     if (currentQuestions.some((q) => !answers[q.id])) {
-      toast.error("Please answer all questions before continuing.");
+      toast({
+        title: "Please answer all questions before continuing.",
+        variant: "destructive",
+      });
       return;
     }
     setCurrentGroup(currentGroup + 1);
@@ -53,7 +57,10 @@ export default function EnneagramPage() {
   const handleSubmit = async () => {
     const unanswered = questions.filter((q) => !answers[q.id]);
     if (unanswered.length) {
-      toast.error("Please answer all questions before submitting.");
+      toast({
+        title: "Please answer all questions before submitting.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -68,14 +75,27 @@ export default function EnneagramPage() {
       setLoading(true);
       const response = await submitEnneagramAnswers(payload);
       if (response.success) {
-        toast.success("Submission successful!");
+        toast({
+          title: "Submitted successfully!",
+          variant: "destructive",
+        });
         const encoded = encodeURIComponent(JSON.stringify(response.data));
-        router.push(`/dashboard/employee/test/result/enneagram?data=${encoded}`);
+        router.push(
+          `/dashboard/employee/test/result/enneagram?data=${encoded}`
+        );
       } else {
-        toast.error("Submission failed. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to submit answers. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting your answers.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -106,10 +126,7 @@ export default function EnneagramPage() {
             <p className="text-lg font-medium">
               Page {currentGroup + 1} of {totalPages}
             </p>
-            <Progress
-              value={progress}
-              className="h-2 rounded-lg"
-            />
+            <Progress value={progress} className="h-2 rounded-lg" />
           </div>
 
           <p className="text-muted-foreground mb-6 text-center">

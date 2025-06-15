@@ -29,7 +29,7 @@ export default function Big5TestPage() {
   const totalGroups = Math.ceil(questions.length / questionsPerGroup);
   const currentQuestions = questions.slice(
     currentGroup * questionsPerGroup,
-    (currentGroup + 1) * questionsPerGroup,
+    (currentGroup + 1) * questionsPerGroup
   );
 
   const handleAnswer = (questionId: number, value: string) => {
@@ -37,6 +37,7 @@ export default function Big5TestPage() {
   };
 
   const handleNext = () => {
+    // Prevent going next if not all current questions are answered
     if (currentQuestions.some((q) => !answers[q.id])) {
       toast({
         title: "Please answer all questions before continuing.",
@@ -60,7 +61,7 @@ export default function Big5TestPage() {
 
     const payload = {
       answers: Object.fromEntries(
-        Object.entries(answers).map(([key, value]) => [key, Number(value)]),
+        Object.entries(answers).map(([key, value]) => [key, Number(value)])
       ),
     };
 
@@ -90,7 +91,7 @@ export default function Big5TestPage() {
   };
 
   const progress = Math.round(
-    (Object.keys(answers).length / questions.length) * 100,
+    (Object.keys(answers).length / questions.length) * 100
   );
 
   return (
