@@ -25,7 +25,7 @@ export const checkTestTaken = async (
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<boolean>>(
-    "/organization/checktest/members/${memberId}/tests/${testId}"
+    `/organization/checktest/members/${memberId}/tests/${testId}`
   );
 
   if (!response.data.success) {

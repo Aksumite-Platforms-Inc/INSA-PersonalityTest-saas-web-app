@@ -17,6 +17,8 @@ import { useTranslation } from "@/hooks/use-translation";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
+import { checkTestTaken } from "@/services/test.service";
+import { getUserId } from "@/utils/tokenUtils";
 
 // Demo test data
 const availableTests = [
@@ -63,6 +65,27 @@ export default function EmployeeTestSelectPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
+  const [takenTests, setTakenTests] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const fetchTaken = async () => {
+      const userId = getUserId();
+      if (!userId) return;
+      const results: Record<string, boolean> = {};
+      for (const test of availableTests) {
+        try {
+          // Always convert test.id to a number for checkTestTaken
+          const testId = Number(test.id);
+          const taken = await checkTestTaken(Number(userId), testId);
+          results[test.id] = taken;
+        } catch {
+          results[test.id] = false;
+        }
+      }
+      setTakenTests(results);
+    };
+    fetchTaken();
+  }, []);
 
   const handleStartTest = () => {
     if (!selectedTest) {
@@ -121,8 +144,8 @@ export default function EmployeeTestSelectPage() {
                 selectedTest === test.id
                   ? "border-primary ring-2 ring-primary ring-opacity-50"
                   : ""
-              }`}
-              onClick={() => setSelectedTest(test.id)}
+              } ${takenTests[test.id] ? "opacity-60 pointer-events-none" : ""}`}
+              onClick={() => !takenTests[test.id] && setSelectedTest(test.id)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -146,18 +169,24 @@ export default function EmployeeTestSelectPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button
-                  variant="default"
-                  className="w-full"
-                  onClick={() => {
-                    setSelectedTest(test.id);
-                    setTimeout(() => {
-                      router.push(`/dashboard/employee/test/take/${test.id}`);
-                    }, 100);
-                  }}
-                >
-                  {t("test.startTest")}
-                </Button>
+                {takenTests[test.id] ? (
+                  <Button variant="outline" className="w-full" disabled>
+                    ✅ {t("test.taken")}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedTest(test.id);
+                      setTimeout(() => {
+                        router.push(`/dashboard/employee/test/take/${test.id}`);
+                      }, 100);
+                    }}
+                  >
+                    {t("test.startTest")}
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </motion.div>
