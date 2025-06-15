@@ -151,7 +151,7 @@ export default function OrganizationSettingsPage() {
                     onChange={(e) => setOrgSector(e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="org-status">Status</Label>
                   <select
                     id="org-status"
@@ -162,7 +162,7 @@ export default function OrganizationSettingsPage() {
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
-                </div>
+                </div> */}
               </CardContent>
               <CardFooter>
                 <Button onClick={handleSaveProfile} disabled={loading}>
