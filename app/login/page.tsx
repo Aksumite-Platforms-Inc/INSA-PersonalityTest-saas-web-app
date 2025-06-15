@@ -32,11 +32,13 @@ SITE_KEY = "6LcdsV0rAAAAADqv49UKncRxPs_0debWYdcGtGYm";
 if (!SITE_KEY) {
   // eslint-disable-next-line no-console
   console.error(
-    "reCAPTCHA site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file.",
+    "reCAPTCHA site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file."
   );
 }
 
 export default function LoginPage() {
+  // All hooks must be called unconditionally at the top
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -56,53 +58,78 @@ export default function LoginPage() {
   const buttonRef = useRef(null);
   const footerRef = useRef(null);
 
-  // Animate on mount
+  // Prevent login page flash for authenticated users
   useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const role = payload.role;
+        let redirect = "/dashboard";
+        if (role === "super_admin") redirect = "/dashboard/superadmin";
+        else if (role === "org_admin") redirect = "/dashboard/organization";
+        else if (role === "branch_admin") redirect = "/dashboard/branch";
+        else if (role === "org_member") redirect = "/dashboard/employee/test";
+        toast;
+        router.replace(redirect);
+        return;
+      } catch {
+        // Invalid token, allow login
+      }
+    }
+    setCheckingAuth(false);
+  }, [router]);
+
+  // Animate on mount (always call this hook, even if not rendering yet)
+  useEffect(() => {
+    if (checkingAuth) return;
     const tl = gsap.timeline();
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 0.5 },
+      { opacity: 1, duration: 0.5 }
     );
     tl.fromTo(
       logoRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       descriptionRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.01 },
-      "-=0.6",
+      "-=0.6"
     );
     formFieldsRef.current.forEach((field, index) => {
       tl.fromTo(
         field,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.05 },
-        "-=0.2",
+        "-=0.2"
       );
     });
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       footerRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.01 },
-      "-=0.6",
+      "-=0.6"
     );
     return () => {
       tl.kill();
     };
-  }, []);
+  }, [checkingAuth]);
+
+  if (checkingAuth) return null;
 
   // Load reCAPTCHA script on mount
   // useEffect(() => {
@@ -146,19 +173,33 @@ export default function LoginPage() {
       else if (role === "org_admin") redirect = "/dashboard/organization";
       else if (role === "branch_admin") redirect = "/dashboard/branch";
       else if (role === "org_member") redirect = "/dashboard/employee/test";
+      toast({
+        title: "Login successful",
+        description: ` Logged in as ${role.replace("_", " ")}`,
+      });
+
       window.location.href = redirect;
       // setRecaptchaToken(""); // reset for next login attempt
       // Optionally reset the widget
       // if (window.grecaptcha && recaptchaWidgetRef.current) {
       //   window.grecaptcha.reset();
       // }
-    } catch (err: any) {
-      toast({
-        title: "Login Failed",
-        description: err?.message || "Invalid credentials",
-        variant: "destructive",
-      });
-      setError(err?.message || "Login failed.");
+    } catch (error: any) {
+      let errorMessage = "Something went wrong. Please check your internet.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      setError(errorMessage || "Login failed.");
     } finally {
       setIsLoading(false);
     }
