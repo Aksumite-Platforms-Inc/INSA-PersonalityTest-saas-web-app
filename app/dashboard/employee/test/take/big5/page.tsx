@@ -34,14 +34,17 @@ export default function Big5TestPage() {
     (currentGroup + 1) * questionsPerGroup
   );
 
+  // Only show the restore toast once per session
+  const restoreToastShown = useRef(false);
+
   // Load cached answers and group on mount (only once, before first render)
   useEffect(() => {
+    let restored = false;
     const cached = localStorage.getItem("big5TestAnswers");
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         if (parsed && typeof parsed === "object") {
-          // Defensive: check for valid group and answers
           let validGroup = 0;
           if (
             typeof parsed.currentGroup === "number" &&
@@ -54,16 +57,22 @@ export default function Big5TestPage() {
           if (parsed.answers && typeof parsed.answers === "object") {
             setAnswers(parsed.answers);
           }
-          toast({
-            title: "Progress Restored",
-            description: "Your previous answers have been loaded.",
-            variant: "default",
-          });
+          restored = true;
         }
       } catch (e) {
         // If cache is corrupted, clear it
         localStorage.removeItem("big5TestAnswers");
       }
+    }
+    if (restored && !restoreToastShown.current) {
+      restoreToastShown.current = true;
+      setTimeout(() => {
+        toast({
+          title: "Progress Restored",
+          description: "Your previous answers have been loaded.",
+          variant: "default",
+        });
+      }, 0);
     }
     // eslint-disable-next-line
   }, [totalGroups]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { enneagramTest } from "@/data/tests/enneagram";
 import {
@@ -20,6 +20,7 @@ export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
   const router = useRouter();
 
   const { toast } = useToast();
@@ -101,12 +102,89 @@ export default function EnneagramPage() {
     }
   };
 
+  const handleResetProgress = () => {
+    setAnswers({});
+    setCurrentGroup(0);
+    window.localStorage.removeItem("enneagramTestAnswers");
+    toast({
+      title: "Progress Reset",
+      description: "Your saved progress has been cleared.",
+      variant: "destructive",
+    });
+  };
+
+  // Only show the restore toast once per session
+  const restoreToastShown = useRef(false);
+
+  // Load cached answers and group on mount (only once, before first render)
+  useEffect(() => {
+    let restored = false;
+    const cached = localStorage.getItem("enneagramTestAnswers");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") {
+          let validGroup = 0;
+          if (
+            typeof parsed.currentGroup === "number" &&
+            parsed.currentGroup >= 0 &&
+            parsed.currentGroup < totalPages
+          ) {
+            validGroup = parsed.currentGroup;
+          }
+          setCurrentGroup(validGroup);
+          if (parsed.answers && typeof parsed.answers === "object") {
+            setAnswers(parsed.answers);
+          }
+          restored = true;
+        }
+      } catch (e) {
+        localStorage.removeItem("enneagramTestAnswers");
+      }
+    }
+    if (restored && !restoreToastShown.current) {
+      restoreToastShown.current = true;
+      setTimeout(() => {
+        toast({
+          title: "Progress Restored",
+          description: "Your previous answers have been loaded.",
+          variant: "default",
+        });
+      }, 0);
+    }
+    // eslint-disable-next-line
+  }, [totalPages]);
+
+  // Debounced save to localStorage
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      try {
+        window.localStorage.setItem(
+          "enneagramTestAnswers",
+          JSON.stringify({ answers, currentGroup })
+        );
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1200);
+      } catch (e) {}
+    }, 400); // 400ms debounce
+    return () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    };
+  }, [answers, currentGroup]);
+
   const progress = Math.round(
     (Object.keys(answers).length / questions.length) * 100
   );
 
   return (
     <div className="container mx-auto py-6 relative">
+      {showSaved && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow">
+          Progress saved
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -119,6 +197,14 @@ export default function EnneagramPage() {
               <X className="h-5 w-5" />
             </Button>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </Button>
         </CardHeader>
 
         <CardContent>
