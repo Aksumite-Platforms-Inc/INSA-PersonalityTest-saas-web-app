@@ -16,7 +16,7 @@ export interface RawAuthResponse {
 export const loginUser = async (
   email: string,
   password: string,
-  recaptchaToken: string,
+  recaptchaToken?: string,
 ): Promise<RawAuthResponse> => {
   const res = await apiClient.post<ApiResponse<RawAuthResponse>>(
     "/sso/login",
