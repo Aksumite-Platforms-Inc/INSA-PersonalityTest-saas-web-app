@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { submitMBTIAnswers } from "@/services/test.service";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function MBTITestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -24,6 +24,10 @@ export default function MBTITestPage() {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  // Only show the restore toast once per session
+  const restoreToastShown = useRef(false);
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
 
   const questions =
     currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
@@ -72,8 +76,86 @@ export default function MBTITestPage() {
       ? aAnswers[id] !== undefined
       : bAnswers[id] !== undefined;
 
+  // Load cached answers and group on mount (only once, before first render)
+  useEffect(() => {
+    let restored = false;
+    const cached = localStorage.getItem("mbtiTestAnswers");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") {
+          let validGroup = 0;
+          if (
+            typeof parsed.currentGroup === "number" &&
+            parsed.currentGroup >= 0 &&
+            parsed.currentGroup < 2
+          ) {
+            validGroup = parsed.currentGroup;
+          }
+          setCurrentGroup(validGroup);
+          if (parsed.aAnswers && typeof parsed.aAnswers === "object") {
+            setAAnswers(parsed.aAnswers);
+          }
+          if (parsed.bAnswers && typeof parsed.bAnswers === "object") {
+            setBAnswers(parsed.bAnswers);
+          }
+          restored = true;
+        }
+      } catch (e) {
+        localStorage.removeItem("mbtiTestAnswers");
+      }
+    }
+    if (restored && !restoreToastShown.current) {
+      restoreToastShown.current = true;
+      setTimeout(() => {
+        toast({
+          title: "Progress Restored",
+          description: "Your previous answers have been loaded.",
+          variant: "default",
+        });
+      }, 0);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Debounced save to localStorage
+  useEffect(() => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      try {
+        window.localStorage.setItem(
+          "mbtiTestAnswers",
+          JSON.stringify({ aAnswers, bAnswers, currentGroup })
+        );
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1200);
+      } catch (e) {}
+    }, 400); // 400ms debounce
+    return () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    };
+  }, [aAnswers, bAnswers, currentGroup]);
+
+  // Reset progress handler
+  const handleResetProgress = () => {
+    setAAnswers({});
+    setBAnswers({});
+    setCurrentGroup(0);
+    window.localStorage.removeItem("mbtiTestAnswers");
+    toast({
+      title: "Progress Reset",
+      description: "Your saved progress has been cleared.",
+      variant: "destructive",
+    });
+  };
+
   return (
     <div className="container mx-auto py-6">
+      {showSaved && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow">
+          Progress saved
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -86,6 +168,14 @@ export default function MBTITestPage() {
               <X className="h-5 w-5" />
             </Button>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </Button>
         </CardHeader>
 
         {error && <p className="text-red-600 text-center mb-2">{error}</p>}
