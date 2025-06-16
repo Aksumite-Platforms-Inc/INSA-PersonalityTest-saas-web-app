@@ -233,10 +233,18 @@ export default function UploadEmployeesPage() {
                   <li>Position</li>
                 </ul>
               </div>
-              <Button variant="outline" className="w-full">
-                <Download className="mr-2 h-4 w-4" />
-                {t("upload.downloadTemplate")}
-              </Button>
+              <a
+                href="/NewBulkUserUploadTemplate.xlsx"
+                download
+                className="w-full"
+              >
+                <Button variant="outline" className="w-full" asChild>
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t("upload.downloadTemplate")}
+                  </>
+                </Button>
+              </a>
             </CardContent>
           </Card>
         </div>
@@ -298,7 +306,7 @@ export default function UploadEmployeesPage() {
                                 message: error.message,
                               })}
                             </li>
-                          )
+                          ),
                         )}
                       </ul>
                     </AlertDescription>
