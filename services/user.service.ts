@@ -22,15 +22,12 @@ export interface User {
  * Fetches the current user's information
  * @returns User object containing user details
  */
-export const fetchUserInfo = async (
-  org_id: number,
-  user_id: number
-): Promise<User> => {
+export const fetchUserInfo = async (user_id: number): Promise<User> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<User>>(
-    `/organization/${org_id}/members/${user_id}`
+    `/organization/members/${user_id}/me`,
   );
 
   if (!response.data.success) {
@@ -48,7 +45,7 @@ export const getAllOrgMembers = async (orgId: number): Promise<User[]> => {
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<User[]>>(
-    `/organization/${orgId}/members`
+    `/organization/${orgId}/members`,
   );
 
   if (!response.data.success) {
@@ -65,13 +62,13 @@ export const getAllOrgMembers = async (orgId: number): Promise<User[]> => {
  */
 export const getAllBranchMembers = async (
   orgId: number,
-  branchId: number
+  branchId: number,
 ): Promise<User[]> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.get<ApiResponse<User[]>>(
-    `/organization/${orgId}/branches/${branchId}/members`
+    `/organization/${orgId}/branches/${branchId}/members`,
   );
 
   if (!response.data.success) {
@@ -88,13 +85,13 @@ export const getAllBranchMembers = async (
  */
 export const deleteOrgMember = async (
   orgId: number,
-  memberId: number
+  memberId: number,
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.delete<ApiResponse<null>>(
-    `/organization/${orgId}/members/${memberId}`
+    `/organization/${orgId}/members/${memberId}`,
   );
 
   if (!response.data.success) {
@@ -113,14 +110,14 @@ export const updateProfile = async (
     position?: string;
     department?: string;
     status?: string;
-  }
+  },
 ): Promise<User> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.put<ApiResponse<User>>(
     `/organization/members/${userId}/update`,
-    data
+    data,
   );
 
   if (!response.data.success) {
@@ -131,7 +128,6 @@ export const updateProfile = async (
 };
 
 export const updateMember = async (
-  orgId: number,
   memberId: number,
   data: {
     name?: string;
@@ -139,14 +135,14 @@ export const updateMember = async (
     phone?: string;
     position?: string;
     department?: string;
-  }
+  },
 ): Promise<User> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.put<ApiResponse<User>>(
-    `/organization/${orgId}/members/${memberId}`,
-    data
+    `/organization/members/${memberId}/update`,
+    data,
   );
 
   if (!response.data.success) {
@@ -163,14 +159,14 @@ export const bulkAddUsers = async (
     phone_number: string;
     position: string;
     department: string;
-  }[]
+  }[],
 ): Promise<User[]> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.post<ApiResponse<User[]>>(
     `/organization/addbulkmembers`,
-    { users: data } // Adjusted to match the expected API structure
+    { users: data }, // Adjusted to match the expected API structure
   );
 
   if (!response.data.success) {
@@ -181,19 +177,19 @@ export const bulkAddUsers = async (
 };
 export const updateEmployeeStatus = async (
   memberId: number,
-  status: string
+  status: string,
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.patch<ApiResponse<null>>(
     `/organization/members/${memberId}/status`,
-    { status }
+    { status },
   );
 
   if (!response.data.success) {
     throw new Error(
-      response.data.message || "Failed to update employee status."
+      response.data.message || "Failed to update employee status.",
     );
   }
 
@@ -203,12 +199,12 @@ export const updateEmployeeStatus = async (
 export const activateAccount = async (
   email: string,
   code: string,
-  password: string
+  password: string,
 ) => {
   const response = await apiClient.post<ApiResponse<User>>(
     "/organization/members/activate",
     { email, activation_code: code, new_password: password },
-    { withCredentials: true }
+    { withCredentials: true },
   );
 
   if (!response.data?.success) {
@@ -221,13 +217,13 @@ export const activateAccount = async (
 export const resetPassword = async (
   email: string,
   code: string,
-  password: string
+  password: string,
 ) => {
   try {
     const response = await apiClient.post(
       "/organization/members/validateresetpassword",
       { email, reset_code: code, new_password: password },
-      { withCredentials: true }
+      { withCredentials: true },
     );
     return response.data;
   } catch (error) {
@@ -240,18 +236,18 @@ export const resetPassword = async (
  * @param orgId - ID of the organization
  */
 export const activateOrganization = async (
-  orgId: number
+  orgId: number,
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.post<ApiResponse<null>>(
-    `/sys/organization/${orgId}/activate`
+    `/sys/organization/${orgId}/activate`,
   );
 
   if (!response.data.success) {
     throw new Error(
-      response.data.message || "Failed to activate organization."
+      response.data.message || "Failed to activate organization.",
     );
   }
 
@@ -263,18 +259,18 @@ export const activateOrganization = async (
  * @param orgId - ID of the organization
  */
 export const deactivateOrganization = async (
-  orgId: number
+  orgId: number,
 ): Promise<{ success: boolean; message?: string }> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.post<ApiResponse<null>>(
-    `/sys/organization/${orgId}/inactive`
+    `/sys/organization/${orgId}/inactive`,
   );
 
   if (!response.data.success) {
     throw new Error(
-      response.data.message || "Failed to deactivate organization."
+      response.data.message || "Failed to deactivate organization.",
     );
   }
 

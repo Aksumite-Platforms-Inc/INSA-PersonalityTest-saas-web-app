@@ -16,13 +16,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { fetchUserInfo, updateMember } from "@/services/user.service";
-import { getOrganizationId, getUserId } from "@/utils/tokenUtils";
+import { getUserId } from "@/utils/tokenUtils";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [userId, setUserId] = useState<number | null>(null);
-  const [orgId, setOrgId] = useState<number | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   // const [phone, setPhone] = useState("");
@@ -32,20 +31,17 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const storedUserId = getUserId();
-    const storedOrgId = getOrganizationId();
     if (storedUserId) setUserId(storedUserId);
-    if (storedOrgId) setOrgId(storedOrgId);
   }, []);
 
   useEffect(() => {
-    if (userId === null || orgId === null) return;
-    console.log("ProfilePage: userId", userId, "orgId", orgId);
+    if (userId === null) return;
+    console.log("ProfilePage: userId", userId);
     const loadUserInfo = async () => {
       setLoading(true);
       try {
-        const userInfo = await fetchUserInfo(Number(orgId), Number(userId));
+        const userInfo = await fetchUserInfo(Number(userId));
         setUserId(userInfo.id);
-        setOrgId(userInfo.org_id);
         setFullName(userInfo.name);
         setEmail(userInfo.email);
         setPosition(userInfo.position);
@@ -57,20 +53,20 @@ export default function ProfilePage() {
       }
     };
     loadUserInfo();
-  }, [userId, orgId]);
+  }, [userId]);
 
   const handleSaveProfile = async () => {
-    if (userId === null || orgId === null) {
+    if (userId === null) {
       toast({
         title: "Error",
-        description: "User or organization ID is missing.",
+        description: "User ID is missing.",
         variant: "destructive",
       });
       return;
     }
     setLoading(true);
     try {
-      await updateMember(userId, orgId, {
+      await updateMember(userId, {
         name: fullName,
         email,
         position,
