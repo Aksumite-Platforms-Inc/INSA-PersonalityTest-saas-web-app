@@ -33,6 +33,7 @@ import { getAllOrgMembers } from "@/services/user.service";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/hooks/use-toast";
 import { assignAdminToOrganization } from "@/services/organization.service";
+import { ComponentLoader } from "@/components/ui/loaders";
 
 // Define the props for the table
 interface Organization {
@@ -66,11 +67,13 @@ export function OrganizationsTable({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
     const fetchUserCounts = async () => {
+      setLoading(true);
       try {
         const counts: Record<number, number> = {};
         for (const org of organizations) {
@@ -80,6 +83,8 @@ export function OrganizationsTable({
         setUserCounts(counts);
       } catch (err) {
         console.error("Failed to fetch user counts:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -202,123 +207,124 @@ export function OrganizationsTable({
         </div>
       </Modal>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Sector</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Users</TableHead>
-              {/* <TableHead>Tests Completed</TableHead> */}
-              <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredOrganizations.length === 0 ? (
+      <ComponentLoader loading={loading} size={40}>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No organizations found
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Sector</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Users</TableHead>
+                {/* <TableHead>Tests Completed</TableHead> */}
+                <TableHead>Created</TableHead>
+                <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
-            ) : (
-              filteredOrganizations.map((org) => (
-                <TableRow key={org.id}>
-                  <TableCell className="font-medium">{org.name}</TableCell>
-                  <TableCell>{org.sector}</TableCell>
-                  <TableCell>{renderStatusBadge(org.status)}</TableCell>
-                  <TableCell>{userCounts[org.id] || 0}</TableCell>
-                  {/* <TableCell>{org.testsCompleted}</TableCell> */}
-
-                  <TableCell>
-                    {new Date(org.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2 group relative">
-                      {/* Assign Admin Icon with Tooltip */}
-                      <div className="relative flex items-center">
-                        <Shield
-                          className="h-4 w-4 cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrgId(org.id);
-                            setIsModalOpen(true);
-                          }}
-                          aria-label="Assign Admin"
-                        />
-                        {/* Tooltip */}
-                        <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10 transition-opacity">
-                          Assign Admin
-                        </span>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/superadmin/organizations/${org.id}/edit`
-                              )
-                            }
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/superadmin/organizations/${org.id}`
-                              )
-                            }
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            <span>Details</span>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuSeparator />
-                          {org.status === "active" ? (
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => onDeactivate(org.id)}
-                            >
-                              <Ban className="mr-2 h-4 w-4" />
-                              <span>Suspend</span>
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              className="text-green-600"
-                              onClick={() => onActivate(org.id)}
-                            >
-                              <Shield className="mr-2 h-4 w-4" />
-                              <span>Activate</span>
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem
-                            onClick={() => onDelete(org.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {filteredOrganizations.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No organizations found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                filteredOrganizations.map((org) => (
+                  <TableRow key={org.id}>
+                    <TableCell className="font-medium">{org.name}</TableCell>
+                    <TableCell>{org.sector}</TableCell>
+                    <TableCell>{renderStatusBadge(org.status)}</TableCell>
+                    <TableCell>{userCounts[org.id] || 0}</TableCell>
+                    {/* <TableCell>{org.testsCompleted}</TableCell> */}
+                    <TableCell>
+                      {new Date(org.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2 group relative">
+                        {/* Assign Admin Icon with Tooltip */}
+                        <div className="relative flex items-center">
+                          <Shield
+                            className="h-4 w-4 cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrgId(org.id);
+                              setIsModalOpen(true);
+                            }}
+                            aria-label="Assign Admin"
+                          />
+                          {/* Tooltip */}
+                          <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10 transition-opacity">
+                            Assign Admin
+                          </span>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/superadmin/organizations/${org.id}/edit`
+                                )
+                              }
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/superadmin/organizations/${org.id}`
+                                )
+                              }
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Details</span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+                            {org.status === "active" ? (
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => onDeactivate(org.id)}
+                              >
+                                <Ban className="mr-2 h-4 w-4" />
+                                <span>Suspend</span>
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                className="text-green-600"
+                                onClick={() => onActivate(org.id)}
+                              >
+                                <Shield className="mr-2 h-4 w-4" />
+                                <span>Activate</span>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => onDelete(org.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </ComponentLoader>
     </div>
   );
 }

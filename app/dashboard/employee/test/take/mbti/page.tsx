@@ -10,20 +10,27 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { mbtiTest } from "@/data/tests/mbti";
+import { useToast } from "@/hooks/use-toast";
 import { submitMBTIAnswers } from "@/services/test.service";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function MBTITestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
   const [aAnswers, setAAnswers] = useState<Record<number, number>>({});
   const [bAnswers, setBAnswers] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  // Only show the restore toast once per session
+  const restoreToastShown = useRef(false);
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
 
-  const questions = currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
+  const questions =
+    currentGroup === 0 ? mbtiTest.pages.page1 : mbtiTest.pages.page2;
 
   const handleAnswer = (questionId: number, value: number) => {
     if (currentGroup === 0) {
@@ -34,14 +41,21 @@ export default function MBTITestPage() {
   };
 
   const handleNextGroup = async () => {
+    // Prevent next or submit if not all questions in the current group are answered
+    const unanswered = questions.filter((q) => !isAnswered(q.id));
+    if (unanswered.length > 0) {
+      toast({
+        title: "Please answer all questions before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (currentGroup === 0) {
       setCurrentGroup(1);
       return;
     }
-
     setIsSubmitting(true);
     setError(null);
-
     try {
       const response = await submitMBTIAnswers(aAnswers, bAnswers);
       if (response.success) {
@@ -58,10 +72,90 @@ export default function MBTITestPage() {
   };
 
   const isAnswered = (id: number) =>
-    currentGroup === 0 ? aAnswers[id] !== undefined : bAnswers[id] !== undefined;
+    currentGroup === 0
+      ? aAnswers[id] !== undefined
+      : bAnswers[id] !== undefined;
+
+  // Load cached answers and group on mount (only once, before first render)
+  useEffect(() => {
+    let restored = false;
+    const cached = localStorage.getItem("mbtiTestAnswers");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") {
+          let validGroup = 0;
+          if (
+            typeof parsed.currentGroup === "number" &&
+            parsed.currentGroup >= 0 &&
+            parsed.currentGroup < 2
+          ) {
+            validGroup = parsed.currentGroup;
+          }
+          setCurrentGroup(validGroup);
+          if (parsed.aAnswers && typeof parsed.aAnswers === "object") {
+            setAAnswers(parsed.aAnswers);
+          }
+          if (parsed.bAnswers && typeof parsed.bAnswers === "object") {
+            setBAnswers(parsed.bAnswers);
+          }
+          restored = true;
+        }
+      } catch (e) {
+        localStorage.removeItem("mbtiTestAnswers");
+      }
+    }
+    if (restored && !restoreToastShown.current) {
+      restoreToastShown.current = true;
+      setTimeout(() => {
+        toast({
+          title: "Progress Restored",
+          description: "Your previous answers have been loaded.",
+          variant: "default",
+        });
+      }, 0);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Debounced save to localStorage
+  useEffect(() => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      try {
+        window.localStorage.setItem(
+          "mbtiTestAnswers",
+          JSON.stringify({ aAnswers, bAnswers, currentGroup })
+        );
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1200);
+      } catch (e) {}
+    }, 400); // 400ms debounce
+    return () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    };
+  }, [aAnswers, bAnswers, currentGroup]);
+
+  // Reset progress handler
+  const handleResetProgress = () => {
+    setAAnswers({});
+    setBAnswers({});
+    setCurrentGroup(0);
+    window.localStorage.removeItem("mbtiTestAnswers");
+    toast({
+      title: "Progress Reset",
+      description: "Your saved progress has been cleared.",
+      variant: "destructive",
+    });
+  };
 
   return (
     <div className="container mx-auto py-6">
+      {showSaved && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow">
+          Progress saved
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -74,6 +168,14 @@ export default function MBTITestPage() {
               <X className="h-5 w-5" />
             </Button>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </Button>
         </CardHeader>
 
         {error && <p className="text-red-600 text-center mb-2">{error}</p>}
@@ -94,7 +196,9 @@ export default function MBTITestPage() {
               {currentGroup === 0 ? (
                 <div className="grid grid-cols-7 items-center">
                   {"left" in q && (
-                    <span className="col-span-2 text-right font-medium">{q.left}</span>
+                    <span className="col-span-2 text-right font-medium">
+                      {q.left}
+                    </span>
                   )}
                   <div className="col-span-3 flex justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((val) => (
@@ -124,7 +228,9 @@ export default function MBTITestPage() {
                           key={val}
                           onClick={() => handleAnswer(q.id, val)}
                           className={`w-6 h-6 rounded-full border ${
-                            bAnswers[q.id] === val ? "bg-blue-500" : "bg-gray-200"
+                            bAnswers[q.id] === val
+                              ? "bg-blue-500"
+                              : "bg-gray-200"
                           } hover:bg-blue-100 focus:outline-none focus:ring`}
                         />
                       ))}
@@ -138,7 +244,10 @@ export default function MBTITestPage() {
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button onClick={() => setCurrentGroup(0)} disabled={currentGroup === 0}>
+          <Button
+            onClick={() => setCurrentGroup(0)}
+            disabled={currentGroup === 0}
+          >
             Previous
           </Button>
           <Button

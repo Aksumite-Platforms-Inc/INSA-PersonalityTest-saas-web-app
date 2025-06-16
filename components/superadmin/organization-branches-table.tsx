@@ -36,6 +36,8 @@ import {
   Branch,
   deleteBranch,
 } from "@/services/branch.service";
+import { useRouter } from "next/navigation";
+
 import employee from "@/app/dashboard/employee";
 
 interface OrganizationBranchesTableProps {
@@ -49,6 +51,7 @@ export function OrganizationBranchesTable({
 }: OrganizationBranchesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [Branches, setBranches] = useState<Branch[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -216,8 +219,11 @@ export function OrganizationBranchesTable({
 
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={(e) => e.stopPropagation()}
-                          disabled
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/superadmin/organizations/${organizationId}/branches/${Branch.id}/edit`
+                            )
+                          }
                         >
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit Branch</span>

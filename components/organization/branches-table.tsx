@@ -43,6 +43,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -82,6 +83,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
       });
       return;
     }
+    setAssigning(true);
     try {
       await assignAdminToBranch(organizationId, selectedBranchId, adminEmail);
       toast({
@@ -110,6 +112,8 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -172,13 +176,22 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
             onChange={(e) => setAdminEmail(e.target.value)}
             className="mt-2"
             required
+            disabled={assigning}
           />
           <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={assigning}
+            >
               Cancel
             </Button>
-            <Button className="ml-2" onClick={handleAssignAdmin}>
-              Assign
+            <Button
+              className="ml-2"
+              onClick={handleAssignAdmin}
+              disabled={assigning}
+            >
+              {assigning ? "Assigning..." : "Assign"}
             </Button>
           </div>
         </div>

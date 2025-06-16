@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { getBranchById, updateBranch } from "@/services/branch.service";
 import { getOrganizationId, getBranchId } from "@/utils/tokenUtils";
+import { number } from "framer-motion";
 
 export default function BranchSettingsPage() {
   const { toast } = useToast();
@@ -33,34 +34,62 @@ export default function BranchSettingsPage() {
   const [branchPhone, setBranchPhone] = useState("");
   const [branchAddress, setBranchAddress] = useState("");
   const [loading, setLoading] = useState(true);
+  const [organizationId, setOrganizationId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchBranch = async () => {
       try {
         const orgId = getOrganizationId();
+        setOrganizationId(orgId);
         const branchId = getBranchId();
-        if (!orgId || !branchId) return;
-        const branch = await getBranchById(orgId, branchId);
+        console.log("[BranchSettings] orgId:", orgId, "branchId:", branchId); // Debug log
+        if (!orgId || !branchId) {
+          toast({
+            title: "Error",
+            description:
+              "Missing organization or branch ID. Please log in again or contact support.",
+          });
+          setLoading(false);
+          return;
+        }
+        const branch = await getBranchById(orgId, Number(branchId));
         setBranchName(branch.name || "");
         setBranchEmail(branch.email || "");
         setBranchPhone(branch.phone_number || "");
         setBranchAddress(branch.address || "");
-      } catch (err) {
-        toast({ title: "Error", description: "Failed to fetch branch info." });
+      } catch (error) {
+        let errorMessage = "Something went wrong. Please check your internet.";
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as any).response === "object" &&
+          (error as any).response !== null &&
+          "data" in (error as any).response &&
+          typeof (error as any).response.data === "object" &&
+          (error as any).response.data !== null &&
+          "message" in (error as any).response.data
+        ) {
+          errorMessage = (error as any).response.data.message;
+        }
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
     fetchBranch();
-  }, [toast]);
+  }, []); // Only run once on mount
 
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
       const branchId = getBranchId();
       if (!branchId) throw new Error("Branch ID missing");
-      await updateBranch(branchId, {
-        id: branchId,
+      await updateBranch(Number(organizationId), Number(branchId), {
         name: branchName,
         email: branchEmail,
         phone_number: branchPhone,
@@ -79,6 +108,14 @@ export default function BranchSettingsPage() {
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+  if (!organizationId || !getBranchId()) {
+    return (
+      <div className="text-red-500">
+        Missing organization or branch ID. Please log in again or contact
+        support.
+      </div>
+    );
   }
 
   return (

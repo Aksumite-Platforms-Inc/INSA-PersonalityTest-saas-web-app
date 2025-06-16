@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState, useRef, useEffect } from "react";
 import { riasecTest } from "@/data/tests/riasec";
 import { submitRIASECAnswers } from "@/services/test.service";
 import {
@@ -13,17 +13,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
 export default function RIASECPage() {
   const [answers, setAnswers] = useState<boolean[]>(Array(42).fill(undefined));
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
+  // Only show the restore toast once per session
+  const restoreToastShown = useRef(false);
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
 
   const questions = riasecTest.questions;
   const categories = Object.keys(questions) as Array<keyof typeof questions>;
-  const maxQuestions = Math.max(...categories.map((cat) => questions[cat].length));
+  const maxQuestions = Math.max(
+    ...categories.map((cat) => questions[cat].length)
+  );
 
   const orderedQuestions: { question: string; category: string }[] = [];
   for (let i = 0; i < maxQuestions; i++) {
@@ -44,7 +51,10 @@ export default function RIASECPage() {
 
   const handleSubmit = async () => {
     if (answeredCount !== 42) {
-      toast.error("Please answer all 42 questions.");
+      toast({
+        title: "Please answer all questions before submitting.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -56,14 +66,82 @@ export default function RIASECPage() {
         router.push(`/dashboard/employee/test/result/riasec?data=${encoded}`);
       }
     } catch (error) {
-      toast.error("Submission failed. Please try again.");
+      toast({
+        title: "Error submitting test",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // Load cached answers and group on mount (only once, before first render)
+  useEffect(() => {
+    let restored = false;
+    const cached = localStorage.getItem("riasecTestAnswers");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") {
+          if (Array.isArray(parsed.answers) && parsed.answers.length === 42) {
+            setAnswers(parsed.answers);
+          }
+          restored = true;
+        }
+      } catch (e) {
+        localStorage.removeItem("riasecTestAnswers");
+      }
+    }
+    if (restored && !restoreToastShown.current) {
+      restoreToastShown.current = true;
+      setTimeout(() => {
+        toast({
+          title: "Progress Restored",
+          description: "Your previous answers have been loaded.",
+          variant: "default",
+        });
+      }, 0);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Debounced save to localStorage
+  useEffect(() => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      try {
+        window.localStorage.setItem(
+          "riasecTestAnswers",
+          JSON.stringify({ answers })
+        );
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1200);
+      } catch (e) {}
+    }, 400); // 400ms debounce
+    return () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    };
+  }, [answers]);
+
+  // Reset progress handler
+  const handleResetProgress = () => {
+    setAnswers(Array(42).fill(undefined));
+    window.localStorage.removeItem("riasecTestAnswers");
+    toast({
+      title: "Progress Reset",
+      description: "Your saved progress has been cleared.",
+      variant: "destructive",
+    });
+  };
+
   return (
     <div className="container mx-auto py-6">
+      {showSaved && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-100 text-green-800 px-4 py-2 rounded shadow">
+          Progress saved
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -76,11 +154,21 @@ export default function RIASECPage() {
               <X className="h-5 w-5" />
             </Button>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={handleResetProgress}
+          >
+            Reset Progress
+          </Button>
         </CardHeader>
 
         <CardContent>
           <div className="text-center mb-6">
-            <p className="text-lg font-medium">{answeredCount} of 42 answered</p>
+            <p className="text-lg font-medium">
+              {answeredCount} of 42 answered
+            </p>
             <Progress value={(answeredCount / 42) * 100} className="h-2 mt-2" />
           </div>
 
@@ -124,7 +212,10 @@ export default function RIASECPage() {
           >
             <X className="h-5 w-5" />
           </Button>
-          <Button onClick={handleSubmit} disabled={loading || answeredCount < 42}>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading || answeredCount < 42}
+          >
             {loading ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />

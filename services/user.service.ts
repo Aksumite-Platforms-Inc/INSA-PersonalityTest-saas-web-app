@@ -104,7 +104,7 @@ export const deleteOrgMember = async (
   return { success: true, message: response.data.message };
 };
 
-export const updateUser = async (
+export const updateProfile = async (
   userId: number,
   data: {
     name?: string;
@@ -125,6 +125,32 @@ export const updateUser = async (
 
   if (!response.data.success) {
     throw new Error(response.data.message || "Failed to update user.");
+  }
+
+  return response.data.data;
+};
+
+export const updateMember = async (
+  orgId: number,
+  memberId: number,
+  data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    position?: string;
+    department?: string;
+  }
+): Promise<User> => {
+  const token = getAccessToken();
+  if (!token) throw new Error("Authorization token is missing.");
+
+  const response = await apiClient.put<ApiResponse<User>>(
+    `/organization/${orgId}/members/${memberId}`,
+    data
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to update member.");
   }
 
   return response.data.data;

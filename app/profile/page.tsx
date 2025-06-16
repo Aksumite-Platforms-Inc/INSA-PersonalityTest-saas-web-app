@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { fetchUserInfo, updateUser } from "@/services/user.service";
+import { fetchUserInfo, updateMember } from "@/services/user.service";
 import { getOrganizationId, getUserId } from "@/utils/tokenUtils";
 
 export default function ProfilePage() {
@@ -70,7 +70,7 @@ export default function ProfilePage() {
     }
     setLoading(true);
     try {
-      await updateUser(userId, {
+      await updateMember(userId, orgId, {
         name: fullName,
         email,
         position,
