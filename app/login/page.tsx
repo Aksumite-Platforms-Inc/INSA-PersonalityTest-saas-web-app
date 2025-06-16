@@ -129,8 +129,6 @@ export default function LoginPage() {
     };
   }, [checkingAuth]);
 
-  if (checkingAuth) return null;
-
   // Load reCAPTCHA script on mount
   useEffect(() => {
     if (!(window as any).grecaptcha) {
@@ -153,6 +151,8 @@ export default function LoginPage() {
       setRecaptchaToken(token);
     };
   }, []);
+
+  if (checkingAuth) return null;
 
   // On submit, check for reCAPTCHA token and handle login
   const handleLogin = async (e: React.FormEvent) => {
