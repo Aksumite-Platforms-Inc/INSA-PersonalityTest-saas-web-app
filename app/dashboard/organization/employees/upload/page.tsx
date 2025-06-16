@@ -247,8 +247,12 @@ export default function UploadEmployeesPage() {
                   <li>Position</li>
                 </ul>
               </div>
-              <div className="flex justify-between">
-                <Button variant="outline" className="w-full" asChild>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-1/2 flex items-center justify-center"
+                  asChild
+                >
                   <a href="/NewBulkUserUploadTemplate.xlsx" download>
                     <Download className="mr-2 h-4 w-4" />
                     {t("upload.downloadTemplate")}
@@ -256,6 +260,7 @@ export default function UploadEmployeesPage() {
                 </Button>
                 <Button
                   variant="outline"
+                  className="w-full sm:w-1/2"
                   onClick={() => router.back()}
                   disabled={uploading}
                 >
