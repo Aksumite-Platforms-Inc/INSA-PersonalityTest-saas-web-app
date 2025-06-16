@@ -248,7 +248,7 @@ export default function UploadEmployeesPage() {
                 </ul>
               </div>
               <div className="flex justify-between">
-                <Button variant="outline" className="" asChild>
+                <Button variant="outline" className="w-full" asChild>
                   <a href="/NewBulkUserUploadTemplate.xlsx" download>
                     <Download className="mr-2 h-4 w-4" />
                     {t("upload.downloadTemplate")}
@@ -323,7 +323,7 @@ export default function UploadEmployeesPage() {
                                 message: error.message,
                               })}
                             </li>
-                          )
+                          ),
                         )}
                       </ul>
                     </AlertDescription>
