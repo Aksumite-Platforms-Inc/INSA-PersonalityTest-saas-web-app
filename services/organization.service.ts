@@ -2,6 +2,7 @@
 
 import apiClient from "@/services/apiClient";
 import { ApiResponse } from "@/types/api-response.type";
+import { extractApiError } from "@/lib/errorHandler";
 
 export interface Organization {
   id: number;
@@ -32,18 +33,19 @@ export const createOrganization = async (data: {
   sector: string;
   phone_number: string;
 }): Promise<Organization> => {
-  console.log("Payload for createOrganization:", data);
-  const response = await apiClient.post<ApiResponse<Organization>>(
-    "/sys/organization",
-    data
-  );
-
-  if (!response.data?.success) {
-    console.error("Create Org Error:", response.data);
-    throw new Error(response.data?.message || "Failed to create organization.");
+  try {
+    const response = await apiClient.post<ApiResponse<Organization>>(
+      "/sys/organization",
+      data
+    );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to create organization.`;
+      throw new Error(message);
+    }
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to create organization. Please try again."));
   }
-
-  return response.data.data;
 };
 
 /** Update an organization */
@@ -57,28 +59,33 @@ export const updateOrganization = async (
     status: string;
   }
 ): Promise<Organization> => {
-  const response = await apiClient.put<ApiResponse<Organization>>(
-    `/sys/organization/${id}`,
-    data
-  );
-
-  if (!response.data?.success) {
-    console.error("Update Org Error:", response.data);
-    throw new Error(response.data?.message || "Failed to update organization.");
+  try {
+    const response = await apiClient.put<ApiResponse<Organization>>(
+      `/sys/organization/${id}`,
+      data
+    );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to update organization.`;
+      throw new Error(message);
+    }
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to update organization. Please try again."));
   }
-
-  return response.data.data;
 };
 
 /** Delete an organization */
 export const deleteOrganization = async (id: number): Promise<void> => {
-  const response = await apiClient.delete<ApiResponse<null>>(
-    `/sys/organization/${id}`
-  );
-
-  if (!response.data?.success) {
-    console.error("Delete Org Error:", response.data);
-    throw new Error(response.data?.message || "Failed to delete organization.");
+  try {
+    const response = await apiClient.delete<ApiResponse<null>>(
+      `/sys/organization/${id}`
+    );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to delete organization.`;
+      throw new Error(message);
+    }
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to delete organization. Please try again."));
   }
 };
 
@@ -86,57 +93,68 @@ export const deleteOrganization = async (id: number): Promise<void> => {
 export const getOrganizationById = async (
   id: number
 ): Promise<Organization> => {
-  const response = await apiClient.get<ApiResponse<Organization>>(
-    `/sys/organization/${id}`
-  );
-
-  if (!response.data?.success) {
-    console.error("Fetch Org By ID Error:", response.data);
-    throw new Error(response.data?.message || "Failed to fetch organization.");
+  try {
+    const response = await apiClient.get<ApiResponse<Organization>>(
+      `/sys/organization/${id}`
+    );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to fetch organization.`;
+      throw new Error(message);
+    }
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to fetch organization. Please try again."));
   }
-
-  return response.data.data;
 };
 
 /** List all organizations */
 export const listOrganizations = async (): Promise<Organization[]> => {
-  const response = await apiClient.get<Organization[]>("/sys/organization");
-
-  // Just return directly if it's already an array
-  if (!Array.isArray(response.data)) {
-    console.error("Unexpected response format:", response.data);
-    throw new Error("Failed to fetch organizations.");
+  try {
+    const response = await apiClient.get<ApiResponse<Organization[]>>(
+      "/sys/organization"
+    );
+    if (!(response.status >= 200 && response.status < 300)) {
+      throw new Error(response.statusText || "Failed to fetch organizations.");
+    }
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else {
+      throw new Error("Unexpected response format.");
+    }
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to fetch organizations. Please try again."));
   }
-
-  return response.data;
 };
 
 /** Activate an organization */
 export const activateOrganization = async (id: number): Promise<void> => {
-  const response = await apiClient.post<ApiResponse<null>>(
-    `/sys/organization/${id}/activate`
-  );
-
-  if (!response.data?.success) {
-    console.error("Activate Org Error:", response.data);
-    throw new Error(
-      response.data?.message || "Failed to activate organization."
+  try {
+    const response = await apiClient.post<ApiResponse<null>>(
+      `/sys/organization/${id}/activate`
     );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to activate organization.`;
+      throw new Error(message);
+    }
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to activate organization. Please try again."));
   }
 };
 
-
 /** Deactivate an organization */
 export const deactivateOrganization = async (id: number): Promise<void> => {
-  const response = await apiClient.post<ApiResponse<null>>(
-    `/sys/organization/${id}/deactivate`
-  );
-
-  if (!response.data?.success) {
-    console.error("Deactivate Org Error:", response.data);
-    throw new Error(
-      response.data?.message || "Failed to deactivate organization."
+  try {
+    const response = await apiClient.post<ApiResponse<null>>(
+      `/sys/organization/${id}/deactivate`
     );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to deactivate organization.`;
+      throw new Error(message);
+    }
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to deactivate organization. Please try again."));
   }
 };
 
@@ -144,22 +162,20 @@ export const deactivateOrganization = async (id: number): Promise<void> => {
 export const assignAdminToOrganization = async (
   orgId: number,
   Email: string
-  // adminName: string
 ): Promise<Admin> => {
-  const response = await apiClient.post<ApiResponse<Admin>>(
-    `/sys/organization/${orgId}/admin`,
-    {
-      Email,
-      //  adminName
+  try {
+    const response = await apiClient.post<ApiResponse<Admin>>(
+      `/sys/organization/${orgId}/admin`,
+      { Email }
+    );
+    if (!(response.status >= 200 && response.status < 300) || !response.data?.success) {
+      const message = response.data?.message || `Failed to assign admin.`;
+      throw new Error(message);
     }
-  );
-
-  if (!response.data?.success) {
-    console.error("Assign Admin Error:", response.data);
-    throw new Error(response.data?.message || "Failed to assign admin.");
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(extractApiError(error, "Failed to assign admin. Please try again."));
   }
-
-  return response.data.data;
 };
 // export const getOrganizatioByEmail = async (
 //   email: string

@@ -38,6 +38,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token =
       localStorage.getItem("authToken") || localStorage.getItem("token");
+    setIsLoggedIn(!!token);
     if (!token) return;
 
     try {
