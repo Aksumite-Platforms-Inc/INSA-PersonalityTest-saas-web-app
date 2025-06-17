@@ -30,10 +30,27 @@ const PasswordResetPageContent = ({
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Password policy validation
+  const isPasswordValid = (pwd: string) => {
+    return (
+      pwd.length >= 8 &&
+      /[A-Z]/.test(pwd) &&
+      /[a-z]/.test(pwd) &&
+      /[0-9]/.test(pwd) &&
+      /[^A-Za-z0-9]/.test(pwd)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (!isPasswordValid(password)) {
+      setError(
+        "Password must be at least 8 characters, include uppercase, lowercase, a digit, and a special character."
+      );
       return;
     }
     setIsLoading(true);
