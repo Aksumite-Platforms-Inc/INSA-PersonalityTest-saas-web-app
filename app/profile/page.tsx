@@ -41,11 +41,11 @@ export default function ProfilePage() {
       setLoading(true);
       try {
         const userInfo = await fetchUserInfo(Number(userId));
-        setUserId(userInfo.id);
-        setFullName(userInfo.name);
-        setEmail(userInfo.email);
-        setPosition(userInfo.position);
-        setDepartment(userInfo.department);
+        setUserId(userInfo.id ?? "");
+        setFullName(userInfo.name ?? "");
+        setEmail(userInfo.email ?? "");
+        setPosition(userInfo.position ?? "");
+        setDepartment(userInfo.department ?? "");
       } catch (error) {
         console.error("Failed to load user information:", error);
       } finally {
@@ -109,7 +109,7 @@ export default function ProfilePage() {
               <Label htmlFor="full-name">Full Name</Label>
               <Input
                 id="full-name"
-                value={fullName}
+                value={fullName ?? ""}
                 onChange={(e) => setFullName(e.target.value)}
               />
             </div>
@@ -117,7 +117,7 @@ export default function ProfilePage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                value={email}
+                value={email ?? ""}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
               <Label htmlFor="position">Position</Label>
               <Input
                 id="position"
-                value={position}
+                value={position ?? ""}
                 onChange={(e) => setPosition(e.target.value)}
               />
             </div>
@@ -141,7 +141,7 @@ export default function ProfilePage() {
               <Label htmlFor="department">Department</Label>
               <Input
                 id="department"
-                value={department}
+                value={department ?? ""}
                 onChange={(e) => setDepartment(e.target.value)}
               />
             </div>
