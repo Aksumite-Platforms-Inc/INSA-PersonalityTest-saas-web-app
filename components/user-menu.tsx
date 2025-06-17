@@ -60,7 +60,7 @@ export function UserMenu() {
     });
 
     setTimeout(() => {
-      router.push("/");
+      router.push("/login");
     }, 1000);
   };
 

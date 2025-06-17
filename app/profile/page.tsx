@@ -76,6 +76,7 @@ export default function ProfilePage() {
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
+      router.back();
     } catch (error) {
       console.error("Failed to update profile:", error);
       toast({
@@ -108,7 +109,7 @@ export default function ProfilePage() {
               <Label htmlFor="full-name">Full Name</Label>
               <Input
                 id="full-name"
-                placeholder={fullName}
+                value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
             </div>
@@ -116,7 +117,7 @@ export default function ProfilePage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                placeholder={email}
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -132,7 +133,7 @@ export default function ProfilePage() {
               <Label htmlFor="position">Position</Label>
               <Input
                 id="position"
-                placeholder={position}
+                value={position}
                 onChange={(e) => setPosition(e.target.value)}
               />
             </div>
@@ -140,7 +141,7 @@ export default function ProfilePage() {
               <Label htmlFor="department">Department</Label>
               <Input
                 id="department"
-                placeholder={department}
+                value={department}
                 onChange={(e) => setDepartment(e.target.value)}
               />
             </div>
