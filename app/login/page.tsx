@@ -21,20 +21,21 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { useToast } from "@/hooks/use-toast";
 
-var SITE_KEY: string;
+// --- reCAPTCHA code commented out ---
+// var SITE_KEY: string;
 
-if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-  SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-}
-SITE_KEY = "6LcdsV0rAAAAADqv49UKncRxPs_0debWYdcGtGYm";
+// if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+//   SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+// }
+// SITE_KEY = "6LcdsV0rAAAAADqv49UKncRxPs_0debWYdcGtGYm";
 
-// Optional: Show an error if the site key is missing (for dev/debug)
-if (!SITE_KEY) {
-  // eslint-disable-next-line no-console
-  console.error(
-    "reCAPTCHA site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file.",
-  );
-}
+// // Optional: Show an error if the site key is missing (for dev/debug)
+// if (!SITE_KEY) {
+//   // eslint-disable-next-line no-console
+//   console.error(
+//     "reCAPTCHA site key is missing! Please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in your .env file.",
+//   );
+// }
 
 export default function LoginPage() {
   // All hooks must be called unconditionally at the top
@@ -43,8 +44,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-  const recaptchaWidgetRef = useRef<HTMLDivElement | null>(null);
+  // const [recaptchaToken, setRecaptchaToken] = useState("");
+  // const recaptchaWidgetRef = useRef<HTMLDivElement | null>(null);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -129,28 +130,28 @@ export default function LoginPage() {
     };
   }, [checkingAuth]);
 
-  // Load reCAPTCHA script on mount
-  useEffect(() => {
-    if (!(window as any).grecaptcha) {
-      const script = document.createElement("script");
-      script.src = "https://www.google.com/recaptcha/api.js";
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
-    }
-  }, []);
+  // // Load reCAPTCHA script on mount
+  // useEffect(() => {
+  //   if (!(window as any).grecaptcha) {
+  //     const script = document.createElement("script");
+  //     script.src = "https://www.google.com/recaptcha/api.js";
+  //     script.async = true;
+  //     script.defer = true;
+  //     document.body.appendChild(script);
+  //     return () => {
+  //       document.body.removeChild(script);
+  //     };
+  //   }
+  // }, []);
 
-  // Callback for reCAPTCHA
-  // This will be called by the widget when the user completes the challenge
-  // We must attach this function to window so reCAPTCHA can call it
-  useEffect(() => {
-    (window as any).onRecaptchaSuccess = (token: string) => {
-      setRecaptchaToken(token);
-    };
-  }, []);
+  // // Callback for reCAPTCHA
+  // // This will be called by the widget when the user completes the challenge
+  // // We must attach this function to window so reCAPTCHA can call it
+  // useEffect(() => {
+  //   (window as any).onRecaptchaSuccess = (token: string) => {
+  //     setRecaptchaToken(token);
+  //   };
+  // }, []);
 
   if (checkingAuth) return null;
 
@@ -160,12 +161,13 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
     try {
-      if (!recaptchaToken) {
-        setError("Please complete the reCAPTCHA challenge.");
-        setIsLoading(false);
-        return;
-      }
-      const response = await loginUser(email, password, recaptchaToken);
+      // if (!recaptchaToken) {
+      //   setError("Please complete the reCAPTCHA challenge.");
+      //   setIsLoading(false);
+      //   return;
+      // }
+      // const response = await loginUser(email, password, recaptchaToken);
+      const response = await loginUser(email, password);
       const { role } = response;
       let redirect = "/dashboard";
       if (role === "super_admin") redirect = "/dashboard/superadmin";
@@ -178,11 +180,11 @@ export default function LoginPage() {
       });
 
       window.location.href = redirect;
-      setRecaptchaToken(""); // reset for next login attempt
-      // Optionally reset the widget
-      if ((window as any).grecaptcha && recaptchaWidgetRef.current) {
-        (window as any).grecaptcha.reset();
-      }
+      // setRecaptchaToken(""); // reset for next login attempt
+      // // Optionally reset the widget
+      // if ((window as any).grecaptcha && recaptchaWidgetRef.current) {
+      //   (window as any).grecaptcha.reset();
+      // }
     } catch (error: any) {
       let errorMessage = "Something went wrong. Please check your internet.";
       if (
@@ -278,7 +280,7 @@ export default function LoginPage() {
                 placeholder="********"
               />
             </div>
-            <div className="flex justify-center">
+            {/* <div className="flex justify-center">
               <div
                 ref={recaptchaWidgetRef}
                 className="g-recaptcha"
@@ -287,7 +289,7 @@ export default function LoginPage() {
                 data-theme="light"
                 data-size="normal"
               />
-            </div>
+            </div> */}
             <Button
               ref={buttonRef}
               type="submit"
@@ -318,3 +320,4 @@ export default function LoginPage() {
 
 // Add this to global.d.ts or at the top of the file if you get TS errors:
 // declare global { interface Window { grecaptcha: any } }
+// --- reCAPTCHA code commented out above ---
