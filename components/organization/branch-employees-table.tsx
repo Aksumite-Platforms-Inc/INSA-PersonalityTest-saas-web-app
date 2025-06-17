@@ -124,7 +124,8 @@ export function BranchEmployeesTable({
           </Badge>
         );
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        // return <Badge variant="outline">Unknown</Badge>;
+        return <Badge>{status}</Badge>;
     }
   };
 
