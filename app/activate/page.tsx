@@ -33,14 +33,32 @@ const ActivatePageContent = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const { toast } = useToast();
+
+  // Password policy validation
+  const isPasswordValid = (pwd: string) => {
+    return (
+      pwd.length >= 8 &&
+      /[A-Z]/.test(pwd) &&
+      /[a-z]/.test(pwd) &&
+      /[0-9]/.test(pwd) &&
+      /[^A-Za-z0-9]/.test(pwd)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
+    if (!isPasswordValid(password)) {
+      setError(
+        "Password must be at least 8 characters, include uppercase, lowercase, a digit, and a special character."
+      );
+      return;
+    }
     setIsLoading(true);
-
     try {
       await activateAccount(email as string, code as string, password);
       setSuccess(true);
@@ -48,20 +66,20 @@ const ActivatePageContent = ({
         title: "Success",
         description: "Account activated successfully.",
       });
-    } catch (error) {
+    } catch (err: any) {
       let errorMessage = "Something went wrong. Please check your internet.";
       if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        typeof (error as any).response === "object" &&
-        (error as any).response !== null &&
-        "data" in (error as any).response &&
-        typeof (error as any).response.data === "object" &&
-        (error as any).response.data !== null &&
-        "message" in (error as any).response.data
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as any).response === "object" &&
+        (err as any).response !== null &&
+        "data" in (err as any).response &&
+        typeof (err as any).response.data === "object" &&
+        (err as any).response.data !== null &&
+        "message" in (err as any).response.data
       ) {
-        errorMessage = (error as any).response.data.message;
+        errorMessage = (err as any).response.data.message;
       }
       toast({
         title: "Error",
