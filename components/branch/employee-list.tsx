@@ -178,14 +178,14 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
 
   const renderStatusBadge = (status: string) => {
     switch (status) {
-      case "completed":
-        return <Badge className="bg-green-100 text-green-700">Completed</Badge>;
-      case "in-progress":
+      case "active":
+        return <Badge className="bg-green-100 text-green-700">Active</Badge>;
+      case "inactive":
         return (
-          <Badge className="bg-yellow-100 text-yellow-700">In Progress</Badge>
+          <Badge className="bg-yellow-100 text-yellow-700">Suspended</Badge>
         );
-      case "not-started":
-        return <Badge className="bg-red-100 text-red-700">Not Started</Badge>;
+      // case "not-started":
+      //   return <Badge className="bg-red-100 text-red-700">Not Started</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
