@@ -48,9 +48,23 @@ export function UserMenu() {
   };
 
   const handleLogout = () => {
-    // In a real app, this would call an API to log out
-    // and clear the token from local storage or cookies
-    // logout();
+    // Remove all user-specific test progress from localStorage
+    const userId = tokenUser?.user_id || null;
+    if (userId) {
+      [
+        `big5TestAnswers_${userId}`,
+        `riasecTestAnswers_${userId}`,
+        `mbtiTestAnswers_${userId}`,
+        `enneagramTestAnswers_${userId}`,
+      ].forEach((key) => localStorage.removeItem(key));
+    }
+    // Remove any legacy keys (for safety)
+    [
+      "big5TestAnswers",
+      "riasecTestAnswers",
+      "mbtiTestAnswers",
+      "enneagramTestAnswers",
+    ].forEach((key) => localStorage.removeItem(key));
     localStorage.removeItem("authToken");
     document.cookie = "authToken=; path=/; max-age=0"; // Clear cookie
 

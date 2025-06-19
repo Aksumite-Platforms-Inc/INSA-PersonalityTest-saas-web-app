@@ -15,6 +15,7 @@ import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { getUserId } from "@/utils/tokenUtils";
 
 export default function RIASECPage() {
   const [answers, setAnswers] = useState<boolean[]>(Array(42).fill(undefined));
@@ -23,6 +24,10 @@ export default function RIASECPage() {
   const { toast } = useToast();
   // Only show the restore toast once per session
   const restoreToastShown = useRef(false);
+  const userId = getUserId();
+  const storageKey = userId
+    ? `riasecTestAnswers_${userId}`
+    : "riasecTestAnswers";
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const [showSaved, setShowSaved] = useState(false);
 
@@ -62,6 +67,8 @@ export default function RIASECPage() {
       setLoading(true);
       const result = await submitRIASECAnswers(answers as boolean[]);
       if (result.success) {
+        // Clear cache on success
+        localStorage.removeItem(storageKey);
         const encoded = encodeURIComponent(JSON.stringify(result.data));
         router.push(`/dashboard/employee/test/result/riasec?data=${encoded}`);
       }
@@ -79,7 +86,7 @@ export default function RIASECPage() {
   // Load cached answers and group on mount (only once, before first render)
   useEffect(() => {
     let restored = false;
-    const cached = localStorage.getItem("riasecTestAnswers");
+    const cached = localStorage.getItem(storageKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
@@ -90,7 +97,7 @@ export default function RIASECPage() {
           restored = true;
         }
       } catch (e) {
-        localStorage.removeItem("riasecTestAnswers");
+        localStorage.removeItem(storageKey);
       }
     }
     if (restored && !restoreToastShown.current) {
@@ -104,17 +111,14 @@ export default function RIASECPage() {
       }, 0);
     }
     // eslint-disable-next-line
-  }, []);
+  }, [storageKey]);
 
   // Debounced save to localStorage
   useEffect(() => {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
       try {
-        window.localStorage.setItem(
-          "riasecTestAnswers",
-          JSON.stringify({ answers })
-        );
+        window.localStorage.setItem(storageKey, JSON.stringify({ answers }));
         setShowSaved(true);
         setTimeout(() => setShowSaved(false), 1200);
       } catch (e) {}
@@ -122,12 +126,12 @@ export default function RIASECPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [answers]);
+  }, [answers, storageKey]);
 
   // Reset progress handler
   const handleResetProgress = () => {
     setAnswers(Array(42).fill(undefined));
-    window.localStorage.removeItem("riasecTestAnswers");
+    window.localStorage.removeItem(storageKey);
     toast({
       title: "Progress Reset",
       description: "Your saved progress has been cleared.",
