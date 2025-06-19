@@ -140,6 +140,8 @@ export default function Big5TestPage() {
       if (response.success) {
         // Clear cache on success
         localStorage.removeItem(storageKey);
+        window.localStorage.removeItem("big5TestAnswers");
+
         toast({
           title: "Submission successful!",
           description: "Your answers have been saved.",
@@ -164,6 +166,8 @@ export default function Big5TestPage() {
     setAnswers({});
     setCurrentGroup(0);
     window.localStorage.removeItem(storageKey);
+    window.localStorage.removeItem("big5TestAnswers");
+
     toast({
       title: "Progress Reset",
       description: "Your saved progress has been cleared.",
