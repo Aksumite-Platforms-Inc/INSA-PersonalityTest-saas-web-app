@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { submitBig5TestAnswers } from "@/services/test.service";
+import { getUserId } from "@/utils/tokenUtils";
 
 export default function Big5TestPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -25,6 +26,9 @@ export default function Big5TestPage() {
 
   const router = useRouter();
   const { toast } = useToast();
+
+  const userId = getUserId();
+  const storageKey = userId ? `big5TestAnswers_${userId}` : "big5TestAnswers";
 
   const questionsPerGroup = 12;
   const questions = big5Test.questions;
@@ -40,7 +44,7 @@ export default function Big5TestPage() {
   // Load cached answers and group on mount (only once, before first render)
   useEffect(() => {
     let restored = false;
-    const cached = localStorage.getItem("big5TestAnswers");
+    const cached = localStorage.getItem(storageKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
@@ -60,8 +64,7 @@ export default function Big5TestPage() {
           restored = true;
         }
       } catch (e) {
-        // If cache is corrupted, clear it
-        localStorage.removeItem("big5TestAnswers");
+        localStorage.removeItem(storageKey);
       }
     }
     if (restored && !restoreToastShown.current) {
@@ -75,7 +78,7 @@ export default function Big5TestPage() {
       }, 0);
     }
     // eslint-disable-next-line
-  }, [totalGroups]);
+  }, [totalGroups, storageKey]);
 
   // Debounced save to localStorage
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function Big5TestPage() {
     saveTimeout.current = setTimeout(() => {
       try {
         window.localStorage.setItem(
-          "big5TestAnswers",
+          storageKey,
           JSON.stringify({ answers, currentGroup })
         );
         setShowSaved(true);
@@ -95,7 +98,7 @@ export default function Big5TestPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [answers, currentGroup]);
+  }, [answers, currentGroup, storageKey]);
 
   const handleAnswer = (questionId: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -136,7 +139,7 @@ export default function Big5TestPage() {
 
       if (response.success) {
         // Clear cache on success
-        localStorage.removeItem("big5TestAnswers");
+        localStorage.removeItem(storageKey);
         toast({
           title: "Submission successful!",
           description: "Your answers have been saved.",
@@ -160,7 +163,7 @@ export default function Big5TestPage() {
   const handleResetProgress = () => {
     setAnswers({});
     setCurrentGroup(0);
-    window.localStorage.removeItem("big5TestAnswers");
+    window.localStorage.removeItem(storageKey);
     toast({
       title: "Progress Reset",
       description: "Your saved progress has been cleared.",
