@@ -22,6 +22,8 @@ import { FloatingElement } from "@/components/animations/floating-element";
 import { ParallaxBackground } from "@/components/animations/parallax-background";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
+import { isTokenExpired } from "@/utils/tokenUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   // Refs for animation targets
@@ -34,34 +36,57 @@ export default function LoginPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dashboardRoute, setDashboardRoute] = useState("/login");
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("authToken") || localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-    if (!token) return;
-
+    const token = localStorage.getItem("authToken");
+    if (!token || isTokenExpired()) {
+      if (token && isTokenExpired()) {
+        localStorage.removeItem("authToken");
+        setIsLoggedIn(false);
+        setDashboardRoute("/login");
+        // Show session expired toast
+        if (typeof window !== "undefined") {
+          // Dynamically import toast to avoid SSR issues
+          toast({
+            title: "Session expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        setIsLoggedIn(false);
+        setDashboardRoute("/login");
+      }
+      return;
+    }
     try {
       const decoded: any = jwtDecode(token);
       const role = decoded?.role;
-
+      setIsLoggedIn(true);
       if (role) {
         switch (role) {
           case "Org Admin":
-            router.push("/dashboard/org");
+            setDashboardRoute("/dashboard/org");
             break;
           case "Branch Admin":
-            router.push("/dashboard/branch");
+            setDashboardRoute("/dashboard/branch");
             break;
           case "Employee":
-            router.push("/dashboard/employee");
+            setDashboardRoute("/dashboard/employee");
             break;
           default:
+            setDashboardRoute("/login");
             break;
         }
+      } else {
+        setDashboardRoute("/login");
       }
     } catch (e) {
       console.error("Invalid token, skipping redirect.");
+      localStorage.removeItem("authToken");
+      setIsLoggedIn(false);
+      setDashboardRoute("/login");
     }
   }, []);
 
