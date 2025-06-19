@@ -69,6 +69,8 @@ export default function RIASECPage() {
       if (result.success) {
         // Clear cache on success
         localStorage.removeItem(storageKey);
+        window.localStorage.removeItem("riasecTestAnswers");
+
         const encoded = encodeURIComponent(JSON.stringify(result.data));
         router.push(`/dashboard/employee/test/result/riasec?data=${encoded}`);
       }
@@ -132,6 +134,8 @@ export default function RIASECPage() {
   const handleResetProgress = () => {
     setAnswers(Array(42).fill(undefined));
     window.localStorage.removeItem(storageKey);
+    window.localStorage.removeItem("riasecTestAnswers");
+
     toast({
       title: "Progress Reset",
       description: "Your saved progress has been cleared.",

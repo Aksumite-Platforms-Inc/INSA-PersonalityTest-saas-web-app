@@ -65,6 +65,8 @@ export default function MBTITestPage() {
         // Clear user-specific and legacy cache on success
         localStorage.removeItem(storageKey);
         localStorage.removeItem("mbtiTestAnswers");
+        window.localStorage.removeItem("mbtiTestAnswers");
+
         const encoded = encodeURIComponent(JSON.stringify(response.data));
         router.push(`/dashboard/employee/test/result/mbti?data=${encoded}`);
       } else {
