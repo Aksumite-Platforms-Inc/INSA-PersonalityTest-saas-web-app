@@ -520,9 +520,9 @@ export default function LoginPage() {
                   <div className="flex items-center space-x-4">
                     <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
                     <div>
-                      <h3 className="font-bold">Ministry of Education</h3>
+                      <h3 className="font-bold">MIDROC Investment Group</h3>
                       <p className="text-sm text-muted-foreground">
-                        Government Organization
+                        Private Organization
                       </p>
                     </div>
                   </div>
