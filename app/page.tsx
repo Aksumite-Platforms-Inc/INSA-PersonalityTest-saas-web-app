@@ -495,7 +495,7 @@ export default function LoginPage() {
       </motion.section>
 
       {/* Testimonials Section */}
-      <motion.section
+      {/* <motion.section
         ref={testimonialsRef}
         id="testimonials"
         className="w-full py-12 md:py-24 lg:py-32"
@@ -622,7 +622,7 @@ export default function LoginPage() {
             </motion.div>
           </div>
         </div>
-      </motion.section>
+      </motion.section> */}
 
       {/* CTA Section */}
       <motion.section
