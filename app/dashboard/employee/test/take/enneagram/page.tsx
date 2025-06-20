@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { X, Loader2 } from "lucide-react";
 import { submitEnneagramAnswers } from "@/services/test.service";
 import { useToast } from "@/hooks/use-toast";
+import { getUserId } from "@/utils/tokenUtils";
 
 export default function EnneagramPage() {
   const [currentGroup, setCurrentGroup] = useState(0);
@@ -24,6 +25,10 @@ export default function EnneagramPage() {
   const router = useRouter();
 
   const { toast } = useToast();
+  const userId = getUserId();
+  const storageKey = userId
+    ? `enneagramTestAnswers_${userId}`
+    : "enneagramTestAnswers";
   const questionsPerGroup = 9;
   const questions = enneagramTest.questions;
   const totalPages = Math.ceil(questions.length / questionsPerGroup);
@@ -55,6 +60,7 @@ export default function EnneagramPage() {
     if (currentGroup > 0) setCurrentGroup(currentGroup - 1);
   };
 
+  // Update handleSubmit to clear both keys
   const handleSubmit = async () => {
     const unanswered = questions.filter((q) => !answers[q.id]);
     if (unanswered.length) {
@@ -80,6 +86,9 @@ export default function EnneagramPage() {
           title: "Submitted successfully!",
           variant: "destructive",
         });
+        // Clear both user-specific and legacy keys
+        window.localStorage.removeItem(storageKey);
+        window.localStorage.removeItem("enneagramTestAnswers");
         const encoded = encodeURIComponent(JSON.stringify(response.data));
         router.push(
           `/dashboard/employee/test/result/enneagram?data=${encoded}`
@@ -102,9 +111,11 @@ export default function EnneagramPage() {
     }
   };
 
+  // Update handleResetProgress to clear both keys
   const handleResetProgress = () => {
     setAnswers({});
     setCurrentGroup(0);
+    window.localStorage.removeItem(storageKey);
     window.localStorage.removeItem("enneagramTestAnswers");
     toast({
       title: "Progress Reset",
@@ -119,7 +130,7 @@ export default function EnneagramPage() {
   // Load cached answers and group on mount (only once, before first render)
   useEffect(() => {
     let restored = false;
-    const cached = localStorage.getItem("enneagramTestAnswers");
+    const cached = localStorage.getItem(storageKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
@@ -139,7 +150,7 @@ export default function EnneagramPage() {
           restored = true;
         }
       } catch (e) {
-        localStorage.removeItem("enneagramTestAnswers");
+        localStorage.removeItem(storageKey);
       }
     }
     if (restored && !restoreToastShown.current) {
@@ -153,16 +164,16 @@ export default function EnneagramPage() {
       }, 0);
     }
     // eslint-disable-next-line
-  }, [totalPages]);
+  }, [totalPages, storageKey]);
 
-  // Debounced save to localStorage
+  // Debounced save to localStorage (use user-specific key)
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
       try {
         window.localStorage.setItem(
-          "enneagramTestAnswers",
+          storageKey,
           JSON.stringify({ answers, currentGroup })
         );
         setShowSaved(true);
@@ -172,7 +183,7 @@ export default function EnneagramPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [answers, currentGroup]);
+  }, [answers, currentGroup, storageKey]);
 
   const progress = Math.round(
     (Object.keys(answers).length / questions.length) * 100

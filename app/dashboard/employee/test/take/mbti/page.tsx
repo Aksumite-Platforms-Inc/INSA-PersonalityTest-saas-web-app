@@ -15,8 +15,11 @@ import { submitMBTIAnswers } from "@/services/test.service";
 import { X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { getUserId } from "@/utils/tokenUtils";
 
 export default function MBTITestPage() {
+  const userId = getUserId();
+  const storageKey = userId ? `mbtiTestAnswers_${userId}` : "mbtiTestAnswers";
   const [currentGroup, setCurrentGroup] = useState(0);
   const [aAnswers, setAAnswers] = useState<Record<number, number>>({});
   const [bAnswers, setBAnswers] = useState<Record<number, number>>({});
@@ -59,6 +62,11 @@ export default function MBTITestPage() {
     try {
       const response = await submitMBTIAnswers(aAnswers, bAnswers);
       if (response.success) {
+        // Clear user-specific and legacy cache on success
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem("mbtiTestAnswers");
+        window.localStorage.removeItem("mbtiTestAnswers");
+
         const encoded = encodeURIComponent(JSON.stringify(response.data));
         router.push(`/dashboard/employee/test/result/mbti?data=${encoded}`);
       } else {
@@ -79,7 +87,7 @@ export default function MBTITestPage() {
   // Load cached answers and group on mount (only once, before first render)
   useEffect(() => {
     let restored = false;
-    const cached = localStorage.getItem("mbtiTestAnswers");
+    const cached = localStorage.getItem(storageKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
@@ -102,7 +110,7 @@ export default function MBTITestPage() {
           restored = true;
         }
       } catch (e) {
-        localStorage.removeItem("mbtiTestAnswers");
+        localStorage.removeItem(storageKey);
       }
     }
     if (restored && !restoreToastShown.current) {
@@ -116,7 +124,7 @@ export default function MBTITestPage() {
       }, 0);
     }
     // eslint-disable-next-line
-  }, []);
+  }, [storageKey]);
 
   // Debounced save to localStorage
   useEffect(() => {
@@ -124,7 +132,7 @@ export default function MBTITestPage() {
     saveTimeout.current = setTimeout(() => {
       try {
         window.localStorage.setItem(
-          "mbtiTestAnswers",
+          storageKey,
           JSON.stringify({ aAnswers, bAnswers, currentGroup })
         );
         setShowSaved(true);
@@ -134,13 +142,14 @@ export default function MBTITestPage() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [aAnswers, bAnswers, currentGroup]);
+  }, [aAnswers, bAnswers, currentGroup, storageKey]);
 
   // Reset progress handler
   const handleResetProgress = () => {
     setAAnswers({});
     setBAnswers({});
     setCurrentGroup(0);
+    window.localStorage.removeItem(storageKey);
     window.localStorage.removeItem("mbtiTestAnswers");
     toast({
       title: "Progress Reset",

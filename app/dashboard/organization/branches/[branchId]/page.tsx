@@ -63,7 +63,7 @@ export default function BranchEditPage() {
     try {
       const { id, name, email, phone_number, address } = branch;
       const data = { id, name, email, phone_number, address };
-      await updateBranch(Number(branchId), data);
+      await updateBranch(Number(organizationId), Number(branchId), data);
 
       toast({
         title: "Organization Updated",

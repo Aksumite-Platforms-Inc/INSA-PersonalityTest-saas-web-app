@@ -114,7 +114,7 @@ export default function OrganizationSettingsPage() {
                   <Label htmlFor="org-name">Organization Name</Label>
                   <Input
                     id="org-name"
-                    placeholder={orgName}
+                    value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
                   />
                 </div>
@@ -123,7 +123,7 @@ export default function OrganizationSettingsPage() {
                   <Input
                     id="org-email"
                     type="email"
-                    placeholder={orgEmail}
+                    value={orgEmail}
                     onChange={(e) => setOrgEmail(e.target.value)}
                   />
                 </div>
@@ -131,7 +131,7 @@ export default function OrganizationSettingsPage() {
                   <Label htmlFor="org-phone">Phone</Label>
                   <Input
                     id="org-phone"
-                    placeholder={orgPhone}
+                    value={orgPhone}
                     onChange={(e) => setOrgPhone(e.target.value)}
                   />
                 </div> */}
@@ -139,7 +139,7 @@ export default function OrganizationSettingsPage() {
                   <Label htmlFor="org-address">Address</Label>
                   <Input
                     id="org-address"
-                    placeholder={orgAddress}
+                    value={orgAddress}
                     onChange={(e) => setOrgAddress(e.target.value)}
                   />
                 </div>
@@ -147,7 +147,7 @@ export default function OrganizationSettingsPage() {
                   <Label htmlFor="org-sector">Sector</Label>
                   <Input
                     id="org-sector"
-                    placeholder={orgSector}
+                    value={orgSector}
                     onChange={(e) => setOrgSector(e.target.value)}
                   />
                 </div>

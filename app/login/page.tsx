@@ -20,6 +20,7 @@ import {
 
 import { loginUser } from "@/services/auth.service";
 import { useToast } from "@/hooks/use-toast";
+import { isTokenExpired } from "@/utils/tokenUtils";
 
 // --- reCAPTCHA code commented out ---
 // var SITE_KEY: string;
@@ -62,7 +63,7 @@ export default function LoginPage() {
   // Prevent login page flash for authenticated users
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if (token) {
+    if (token && !isTokenExpired()) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         const role = payload.role;
@@ -76,7 +77,10 @@ export default function LoginPage() {
         return;
       } catch {
         // Invalid token, allow login
+        localStorage.removeItem("authToken");
       }
+    } else if (token && isTokenExpired()) {
+      localStorage.removeItem("authToken");
     }
     setCheckingAuth(false);
   }, [router]);
@@ -88,42 +92,42 @@ export default function LoginPage() {
     tl.fromTo(
       containerRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 0.5 },
+      { opacity: 1, duration: 0.5 }
     );
     tl.fromTo(
       logoRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       titleRef.current,
       { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       descriptionRef.current,
       { opacity: 0, y: -20 },
       { opacity: 1, y: 0, duration: 0.01 },
-      "-=0.6",
+      "-=0.6"
     );
     formFieldsRef.current.forEach((field, index) => {
       tl.fromTo(
         field,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.05 },
-        "-=0.2",
+        "-=0.2"
       );
     });
     tl.fromTo(
       buttonRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.01 },
+      { opacity: 1, y: 0, duration: 0.01 }
     );
     tl.fromTo(
       footerRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.01 },
-      "-=0.6",
+      "-=0.6"
     );
     return () => {
       tl.kill();
