@@ -1,36 +1,54 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { useTheme } from "next-themes";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 
-// Demo data
-const data = [
-  { name: "Government", value: 12 },
-  { name: "Education", value: 5 },
-  { name: "Healthcare", value: 4 },
-  { name: "Finance", value: 3 },
-]
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A020F0",
+  "#FF1493",
+];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
+export function OrganizationsChart({
+  data = {},
+}: {
+  data: Record<string, number>;
+}) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-export function OrganizationsChart() {
-  const { theme } = useTheme()
-  const isDark = theme === "dark"
+  // Convert { sector: count } => [{ name, value }]
+  const chartData = Object.entries(data).map(([name, value]) => ({
+    name,
+    value,
+  }));
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
-          data={data}
+          data={chartData}
           cx="50%"
           cy="50%"
           labelLine={false}
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) =>
+            `${name} ${(percent * 100).toFixed(0)}%`
+          }
         >
-          {data.map((entry, index) => (
+          {chartData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
@@ -44,5 +62,5 @@ export function OrganizationsChart() {
         <Legend />
       </PieChart>
     </ResponsiveContainer>
-  )
+  );
 }

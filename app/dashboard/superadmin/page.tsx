@@ -12,23 +12,29 @@ import { useEffect, useState } from "react";
 
 export default function SuperadminDashboard() {
   const [totalOrganizations, setTotalOrganizations] = useState(0);
+  const [organizationsBySector, setOrganizationsBySector] = useState<Record<string, number>>({});
   const [testsCompleted, setTestsCompleted] = useState(0);
+  const [testsPerMonth, setTestsPerMonth] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+
   const isOnline = useOnlineStatus();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch organizations
         const organizations = await listOrganizations();
         setTotalOrganizations(organizations.length);
 
-        // const tests = await listTests();
-        // const completedTests = tests.filter(
-        //   (test) => test.status === "completed"
-        // );
-        // setTestsCompleted(completedTests.length);
+        // Count orgs by sector
+        const sectorCounts: Record<string, number> = {};
+        organizations.forEach((org) => {
+          const sector = org.sector || "Unknown";
+          sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+        });
+        setOrganizationsBySector(sectorCounts);
       } catch (error) {
-        console.error("Error fetching data for dashboard:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
@@ -90,10 +96,10 @@ export default function SuperadminDashboard() {
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="col-span-1">
             <CardHeader>
-              <CardTitle>Organizations</CardTitle>
+              <CardTitle>Organizations by Sector</CardTitle>
             </CardHeader>
             <CardContent className="h-80">
-              <OrganizationsChart />
+              <OrganizationsChart data={organizationsBySector} />
             </CardContent>
           </Card>
           <Card className="col-span-1">
