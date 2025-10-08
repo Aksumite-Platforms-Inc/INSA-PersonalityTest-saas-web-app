@@ -74,5 +74,40 @@ jobs:
           export $(cat .env.full | grep -v '^#' | xargs)
           docker stack deploy -c docker-compose.prod.yaml insa
 
-      - name: ✅ Confirm Services
-        run: docker service ls
+      - name: ✅ Confirm Services & Check Health/Logs
+        shell: /usr/bin/bash -e {0}
+        env:
+          IMAGE_NAME: enochcodes/insa-backend
+          IMAGE_TAG: latest
+        run: |
+          echo "Listing all services:"
+          docker service ls
+
+          echo "Checking health and recent logs for each service..."
+
+          services=(
+            "insa_insa-backend"
+            "insa_insa_frontend"
+            "insa_pgadmin"
+            "insa_postgres"
+            "insa_redis"
+          )
+
+          for service in "${services[@]}"; do
+            echo "-----------------------------"
+            echo "Service: $service"
+            echo "Tasks:"
+            docker service ps "$service" --no-trunc
+
+            echo "Last 100 log lines for $service:"
+            # Get all running container IDs for the service
+            container_ids=$(docker ps --filter "name=${service}" --format "{{.ID}}")
+            if [ -z "$container_ids" ]; then
+              echo "No running containers for $service"
+            else
+              for cid in $container_ids; do
+                echo "Container ID: $cid"
+                docker logs --tail 100 "$cid" || echo "No logs available for $cid"
+              done
+            fi
+          done
