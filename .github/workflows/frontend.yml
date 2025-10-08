@@ -12,7 +12,7 @@ env:
 jobs:
   build-and-push:
     name: 🛠 Build & Push Frontend Docker Image
-    runs-on: [self-hosted, insa-build-runner]  # use your own build runner
+    runs-on: [self-hosted, insa-build-runner] # use your own build runner
 
     steps:
       - name: 📥 Checkout code
@@ -48,6 +48,23 @@ jobs:
     runs-on: [self-hosted, insa-runner]
 
     steps:
+      - name: 🛑 Gracefully stop running stack (except Postgres)
+        run: |
+          # Remove all services in the 'insa' stack except the postgres service
+          for service in $(docker stack services insa --format '{{.Name}}'); do
+            if [[ "$service" != "insa_postgres" ]]; then
+              docker service rm "$service" || true
+            fi
+          done
+          # Wait for all non-postgres services to be removed
+          while true; do
+            remaining=$(docker stack services insa --format '{{.Name}}' | grep -v '^insa_postgres$' | wc -l)
+            if [ "$remaining" -eq 0 ]; then
+              break
+            fi
+            echo "Waiting for non-postgres services to stop..."
+            sleep 5
+          done
       - name: 📦 Pull latest frontend image
         run: docker pull ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
