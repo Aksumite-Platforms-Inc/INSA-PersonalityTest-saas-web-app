@@ -181,14 +181,14 @@ export const bulkAddUsers = async (
     position: string;
     department: string;
   }[],
-  branchID: number | null,
+  branch_id: number | null,
 ): Promise<User[]> => {
   const token = getAccessToken();
   if (!token) throw new Error("Authorization token is missing.");
 
   const response = await apiClient.post<ApiResponse<User[]>>(
     `/organization/addbulkmembers`,
-    { users: data, branchID }, // Adjusted to match the expected API structure
+    { users: data, branch_id }, // Adjusted to match the expected API structure
   );
 
   if (!response.data.success) {
