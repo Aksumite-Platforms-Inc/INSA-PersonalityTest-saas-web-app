@@ -29,6 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import { bulkAddUsers } from "@/services/user.service";
+import { getBranchId } from "@/utils/tokenUtils";
 
 export default function UploadEmployeesPage() {
   const { t } = useTranslation();
@@ -116,8 +117,8 @@ export default function UploadEmployeesPage() {
     try {
       const validUsers = validationResults.validRows.map((u: any) => u.data);
       if (validUsers.length === 0) throw new Error("No valid users to upload.");
-
-      await bulkAddUsers(validUsers);
+      const branchId = getBranchId();
+      await bulkAddUsers(validUsers, branchId);
       toast({
         title: t("upload.uploadSuccess"),
         description: t("upload.employeesAdded", { count: validUsers.length }),

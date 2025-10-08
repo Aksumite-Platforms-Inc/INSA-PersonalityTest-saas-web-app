@@ -66,7 +66,9 @@ function BranchesPageContent({
         />
         <Button
           onClick={() =>
-            router.push("/dashboard/organization/employees/upload")
+            router.push(
+              `/dashboard/organization/employees/upload?branchId=${branchId}`,
+            )
           }
         >
           <Upload className="mr-2 h-4 w-4" />

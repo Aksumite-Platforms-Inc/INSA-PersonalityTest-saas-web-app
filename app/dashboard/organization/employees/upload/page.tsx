@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageTitle } from "@/components/page-title";
 import {
   Card,
@@ -33,6 +33,8 @@ import { bulkAddUsers } from "@/services/user.service";
 export default function UploadEmployeesPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const branchId = searchParams.get("branchId");
   const { toast } = useToast();
 
   const [file, setFile] = useState<File | null>(null);
@@ -116,8 +118,9 @@ export default function UploadEmployeesPage() {
     try {
       const validUsers = validationResults.validRows.map((u: any) => u.data);
       if (validUsers.length === 0) throw new Error("No valid users to upload.");
-
-      await bulkAddUsers(validUsers);
+      // Use branchId from the search params
+      const branchIdNum = branchId ? Number(branchId) : null;
+      await bulkAddUsers(validUsers, branchIdNum);
       toast({
         title: t("upload.uploadSuccess"),
         description: t("upload.employeesAdded", { count: validUsers.length }),

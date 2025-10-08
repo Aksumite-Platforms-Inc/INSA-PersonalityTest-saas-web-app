@@ -204,7 +204,6 @@ export default function NewEmployeePage() {
                   type="tel"
                   placeholder={t("users.phone")}
                   onChange={(e) => setPhone(e.target.value)}
-                  required
                 />
               </div>
             </div>
