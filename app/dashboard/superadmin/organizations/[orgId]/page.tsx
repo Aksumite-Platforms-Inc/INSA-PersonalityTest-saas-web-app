@@ -63,6 +63,8 @@ export default function OrganizationDetailsPage({
   const [activeTab, setActiveTab] = useState("overview");
   const [totalBranches, setTotalBranches] = useState<number | null>(null);
   const [totalEmployees, setTotalEmployees] = useState<number | null>(null);
+  const [testsCompleted, setTestsCompleted] = useState<number | null>(null);
+  const [completionRate, setCompletionRate] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchOrganization = async () => {
@@ -99,7 +101,12 @@ export default function OrganizationDetailsPage({
       try {
         if (orgId) {
           const members = await getAllOrgMembers(Number(orgId));
-          setTotalEmployees(members.length);
+          const total = members.length;
+          const completed = members.filter((m) => m.is_completed === true).length;
+          const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+          setTotalEmployees(total);
+          setTestsCompleted(completed);
+          setCompletionRate(rate);
         }
       } catch (err) {
         console.error("Failed to fetch total employees:", err);
@@ -188,24 +195,24 @@ export default function OrganizationDetailsPage({
                 </p>
               </CardContent>
             </Card>
-            {/* <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Tests Completed
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {organization.testsCompleted}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {Math.round(
-                    (organization.testsCompleted / (totalEmployees ?? 0)) * 100
-                  )}
-                  % completion rate
-                </p>
-              </CardContent>
-            </Card> */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Tests Completed</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{testsCompleted ?? "-"}</div>
+                  <p className="text-xs text-muted-foreground">Number of members who completed tests</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{completionRate ?? "-"}%</div>
+                  <p className="text-xs text-muted-foreground">% completion rate across the organization</p>
+                </CardContent>
+              </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">

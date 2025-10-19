@@ -29,15 +29,10 @@ function BranchDashboardContent() {
         if (!orgId || !branchId) return;
         // Fetch all branch members
         const members = await getAllBranchMembers(orgId, branchId);
-        // Calculate stats
+        // Calculate stats using is_completed flag returned by API
         const totalEmployees = members.length;
-        const testsCompleted = members.filter(
-          (m) => m.status === "completed"
-        ).length;
-        const completionRate =
-          totalEmployees > 0
-            ? Math.round((testsCompleted / totalEmployees) * 100)
-            : 0;
+        const testsCompleted = members.filter((m) => m.is_completed === true).length;
+        const completionRate = totalEmployees > 0 ? Math.round((testsCompleted / totalEmployees) * 100) : 0;
         // TODO: Fetch and calculate changeInEmployees, changeInTests, changeInCompletionRate from backend if available
         setStats((prev) => ({
           ...prev,

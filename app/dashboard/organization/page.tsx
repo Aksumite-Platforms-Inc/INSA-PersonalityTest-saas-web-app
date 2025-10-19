@@ -16,6 +16,7 @@ export default function OrganizationDashboard() {
   const [stats, setStats] = useState({
     totalBranches: 0,
     totalEmployees: 0,
+    testsCompleted: 0,
     completionRate: 0,
     changeInBranches: 0,
     changeInEmployees: 0,
@@ -39,10 +40,17 @@ export default function OrganizationDashboard() {
           getAllBranches(orgId),
           getAllOrgMembers(orgId),
         ]);
+        // Calculate tests completed using the is_completed flag (returned by API)
+        const totalEmployees = employees.length;
+        const testsCompleted = employees.filter((e) => e.is_completed === true).length;
+        const completionRate = totalEmployees > 0 ? Math.round((testsCompleted / totalEmployees) * 100) : 0;
+
         setStats((prev) => ({
           ...prev,
           totalBranches: branches.length,
-          totalEmployees: employees.length,
+          totalEmployees,
+          testsCompleted,
+          completionRate,
         }));
       } catch (err) {
         setError("Failed to fetch organization stats.");
@@ -97,11 +105,19 @@ export default function OrganizationDashboard() {
             </p>
           </CardContent>
         </Card>
-        {/* <Card>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Test Completion Rate
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Tests Completed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.testsCompleted}</div>
+            <p className="text-xs text-muted-foreground">Number of employees who completed their tests</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Test Completion Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completionRate}%</div>
@@ -112,7 +128,7 @@ export default function OrganizationDashboard() {
               % from last month
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
       </div>
 
       {/* Chart */}

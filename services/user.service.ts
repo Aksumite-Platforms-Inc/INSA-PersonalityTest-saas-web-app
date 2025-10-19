@@ -16,6 +16,8 @@ export interface User {
   branch_id: number;
   created_at: string;
   activation_code?: string;
+  // Indicates whether the user has completed their assigned test
+  is_completed?: boolean;
 }
 
 /**
