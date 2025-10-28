@@ -31,9 +31,7 @@ function BranchDashboardContent() {
         const members = await getAllBranchMembers(orgId, branchId);
         // Calculate stats using is_completed flag returned by API
         const totalEmployees = members.length;
-        const testsCompleted = members.filter(
-          (m) => m.is_completed === true,
-        ).length;
+        const testsCompleted = members.filter((m) => !!m.is_completed).length;
         const completionRate =
           totalEmployees > 0
             ? Math.round((testsCompleted / totalEmployees) * 100)

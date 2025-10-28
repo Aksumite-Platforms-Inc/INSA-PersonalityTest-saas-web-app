@@ -42,8 +42,11 @@ export default function OrganizationDashboard() {
         ]);
         // Calculate tests completed using the is_completed flag (returned by API)
         const totalEmployees = employees.length;
-        const testsCompleted = employees.filter((e) => e.is_completed === true).length;
-        const completionRate = totalEmployees > 0 ? Math.round((testsCompleted / totalEmployees) * 100) : 0;
+        const testsCompleted = employees.filter((e) => !!e.is_completed).length;
+        const completionRate =
+          totalEmployees > 0
+            ? Math.round((testsCompleted / totalEmployees) * 100)
+            : 0;
 
         setStats((prev) => ({
           ...prev,
@@ -107,17 +110,23 @@ export default function OrganizationDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tests Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tests Completed
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.testsCompleted}</div>
-            <p className="text-xs text-muted-foreground">Number of employees who completed their tests</p>
+            <p className="text-xs text-muted-foreground">
+              Number of employees who completed their tests
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Test Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Test Completion Rate
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completionRate}%</div>
