@@ -116,6 +116,11 @@ export default function OrganizationDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.testsCompleted}</div>
+            {stats.testsCompleted === 0 && (
+              <p className="text-xs text-red-500">
+                No tests have been completed yet.
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Number of employees who completed their tests
             </p>

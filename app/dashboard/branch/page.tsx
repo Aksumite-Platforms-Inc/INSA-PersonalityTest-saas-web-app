@@ -88,6 +88,11 @@ function BranchDashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.testsCompleted}</div>
+            {stats.testsCompleted === 0 && (
+              <p className="text-xs text-red-500">
+                No tests have been completed yet.
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               {stats.changeInTests > 0
                 ? `+${stats.changeInTests}`
