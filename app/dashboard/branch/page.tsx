@@ -29,7 +29,7 @@ function BranchDashboardContent() {
         if (!orgId || !branchId) return;
         // Fetch all branch members
         const members = await getAllBranchMembers(orgId, branchId);
-        // Calculate stats
+        // Calculate stats using is_completed flag returned by API
         const totalEmployees = members.length;
         const testsCompleted = members.filter(
           (m) => m.is_completed === true,
