@@ -32,7 +32,7 @@ function BranchDashboardContent() {
         // Calculate stats
         const totalEmployees = members.length;
         const testsCompleted = members.filter(
-          (m) => m.status === "completed"
+          (m) => m.is_completed === true,
         ).length;
         const completionRate =
           totalEmployees > 0

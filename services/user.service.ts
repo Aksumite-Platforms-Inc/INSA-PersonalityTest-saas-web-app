@@ -16,6 +16,7 @@ export interface User {
   branch_id: number;
   created_at: string;
   activation_code?: string;
+  is_completed: boolean;
 }
 
 /**
