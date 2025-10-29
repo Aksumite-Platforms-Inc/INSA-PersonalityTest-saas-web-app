@@ -44,7 +44,8 @@ export default function ForgotPassword() {
       setIsSubmitted(true);
       toast({
         title: "Success!",
-        description: "If an account exists, a reset link has been sent.",
+        description:
+          "If an account exists, a reset link has been sent. Please check your email inbox or spam folder.",
       });
     } catch (err) {
       toast({
@@ -91,7 +92,8 @@ export default function ForgotPassword() {
                 <CardTitle>Email Sent</CardTitle>
                 <CardDescription>
                   If an account with that email exists, you will receive a
-                  password reset email shortly.
+                  password reset email shortly. check your email inbox or spam
+                  folder.
                 </CardDescription>
                 <Button asChild className="mt-4">
                   <Link href="/login">Back to Login</Link>
