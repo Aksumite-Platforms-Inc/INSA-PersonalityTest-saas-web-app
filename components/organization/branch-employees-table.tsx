@@ -165,44 +165,58 @@ export function BranchEmployeesTable({
 
     if (!status) {
       return (
-        <Badge
-          variant="outline"
-          className="bg-gray-50 text-gray-700 border-gray-200"
-        >
-          Not Started
-        </Badge>
+        <div className="flex flex-wrap gap-1">
+          <Badge
+            variant="outline"
+            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
+          >
+            Enneagram
+          </Badge>
+          <Badge
+            variant="outline"
+            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
+          >
+            MBTI
+          </Badge>
+          <Badge
+            variant="outline"
+            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
+          >
+            Big Five
+          </Badge>
+          <Badge
+            variant="outline"
+            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
+          >
+            RIASEC
+          </Badge>
+        </div>
       );
     }
 
-    if (status.remaining_tests_count === 0) {
-      return (
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200"
-        >
-          All Completed
-        </Badge>
-      );
-    }
-
-    if (status.completed_tests_count === 0) {
-      return (
-        <Badge
-          variant="outline"
-          className="bg-gray-50 text-gray-700 border-gray-200"
-        >
-          Not Started
-        </Badge>
-      );
-    }
+    const tests = [
+      { name: "Enneagram", completed: status.enneagram_completed },
+      { name: "MBTI", completed: status.mbti_completed },
+      { name: "Big Five", completed: status.big_five_completed },
+      { name: "RIASEC", completed: status.riasec_completed },
+    ];
 
     return (
-      <Badge
-        variant="outline"
-        className="bg-yellow-50 text-yellow-700 border-yellow-200"
-      >
-        In Progress ({status.completed_tests_count}/4)
-      </Badge>
+      <div className="flex flex-wrap gap-1">
+        {tests.map((test) => (
+          <Badge
+            key={test.name}
+            variant="outline"
+            className={
+              test.completed
+                ? "bg-green-50 text-green-700 border-green-200 text-xs"
+                : "bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+            }
+          >
+            {test.name}
+          </Badge>
+        ))}
+      </div>
     );
   };
 
