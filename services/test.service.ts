@@ -15,6 +15,33 @@ import {
 } from "@/types/personality.type";
 
 // ============================
+// Test Completion Status Types
+// ============================
+export interface TestCompletionStatus {
+  user_id: number;
+  user_name: string;
+  user_email: string;
+  role: string;
+  user_status: string;
+  department: string;
+  position: string;
+  organization_name: string;
+  branch_name: string;
+  test_record_id: number | null;
+  enneagram_completed: boolean;
+  riasec_completed: boolean;
+  mbti_completed: boolean;
+  big_five_completed: boolean;
+  overall_status: "not_started" | "in_progress" | "completed";
+  completed_at: string | null;
+  test_started_at: string | null;
+  test_updated_at: string | null;
+  completed_tests_count: number;
+  remaining_tests_count: number;
+  incomplete_tests_list: string | null;
+}
+
+// ============================
 // Check if a test is taken
 // ============================
 export const checkTestTaken = async (
@@ -122,6 +149,32 @@ export const submitEnneagramAnswers = async (
     const response = await apiClient.post<ApiResponse<ScoreEntry[]>>(
       "/organization/personalityTest/ennegram/calculateScores",
       payload
+    );
+    return response.data;
+  } catch (error: any) {
+    return handleApiError(error);
+  }
+};
+
+// ============================
+// Get Test Completion Status
+// ============================
+export const getTestCompletionStatus = async (
+  orgId?: number,
+  branchId?: number
+): Promise<ApiResponse<TestCompletionStatus[]>> => {
+  try {
+    const params = new URLSearchParams();
+    if (orgId) params.append("org_id", orgId.toString());
+    if (branchId) params.append("branch_id", branchId.toString());
+
+    const queryString = params.toString();
+    const url = `/organization/personalityTest/completion-status${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    const response = await apiClient.get<ApiResponse<TestCompletionStatus[]>>(
+      url
     );
     return response.data;
   } catch (error: any) {

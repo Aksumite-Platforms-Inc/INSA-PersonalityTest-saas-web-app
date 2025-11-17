@@ -21,10 +21,15 @@ import {
 import { Loader2 } from "lucide-react";
 import { Organization } from "@/services/organization.service";
 import { User } from "@/services/user.service";
-import { getResults } from "@/services/test.service";
+import {
+  getResults,
+  getTestCompletionStatus,
+  TestCompletionStatus,
+} from "@/services/test.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
 
 // Dynamically import result components
@@ -65,6 +70,10 @@ export default function SuperadminEmployeeTestsPage() {
   const [errorResults, setErrorResults] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [completionStatus, setCompletionStatus] = useState<
+    Map<number, TestCompletionStatus>
+  >(new Map());
+  const [loadingCompletionStatus, setLoadingCompletionStatus] = useState(false);
 
   // Fetch organizations on component mount
   useEffect(() => {
@@ -87,6 +96,7 @@ export default function SuperadminEmployeeTestsPage() {
   useEffect(() => {
     if (!selectedOrgId) {
       setEmployees([]);
+      setCompletionStatus(new Map());
       return;
     }
 
@@ -111,6 +121,40 @@ export default function SuperadminEmployeeTestsPage() {
       })
       .finally(() => {
         setLoadingEmployees(false);
+      });
+  }, [selectedOrgId]);
+
+  // Fetch completion status when selectedOrgId changes
+  useEffect(() => {
+    if (!selectedOrgId) {
+      setCompletionStatus(new Map());
+      return;
+    }
+
+    setLoadingCompletionStatus(true);
+    const numericOrgId = parseInt(selectedOrgId, 10);
+    if (isNaN(numericOrgId)) {
+      setLoadingCompletionStatus(false);
+      return;
+    }
+
+    getTestCompletionStatus(numericOrgId)
+      .then((res) => {
+        if (res.success && res.data) {
+          // Create a map of user_id -> completion status for quick lookup
+          const statusMap = new Map<number, TestCompletionStatus>();
+          res.data.forEach((status) => {
+            statusMap.set(status.user_id, status);
+          });
+          setCompletionStatus(statusMap);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching completion status:", err);
+        // Don't show error to user, just log it
+      })
+      .finally(() => {
+        setLoadingCompletionStatus(false);
       });
   }, [selectedOrgId]);
 
@@ -178,6 +222,80 @@ export default function SuperadminEmployeeTestsPage() {
     setEmployeeResults(null);
     setSelectedTest(null);
     setErrorResults(null);
+  };
+
+  // Helper function to format incomplete tests list
+  const formatIncompleteTests = (
+    incompleteTestsList: string | null
+  ): string[] => {
+    if (!incompleteTestsList) return [];
+    return incompleteTestsList.split(",").map((test) => test.trim());
+  };
+
+  // Helper function to get test display name
+  const getTestDisplayName = (testName: string): string => {
+    const testMap: Record<string, string> = {
+      mbti: "MBTI",
+      big_five: "Big Five",
+      riasec: "RIASEC",
+      enneagram: "Enneagram",
+    };
+    return testMap[testName.toLowerCase()] || testName;
+  };
+
+  // Helper function to render incomplete tests badge
+  const renderIncompleteTests = (employeeId: number) => {
+    const status = completionStatus.get(employeeId);
+    
+    // If no status found, show all tests as incomplete
+    if (!status) {
+      const allTests = ["mbti", "big_five", "riasec", "enneagram"];
+      return (
+        <div className="flex flex-wrap gap-1">
+          {allTests.map((test) => (
+            <Badge
+              key={test}
+              variant="outline"
+              className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+            >
+              {getTestDisplayName(test)}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+
+    // If all tests are completed, show nothing or a success indicator
+    if (status.remaining_tests_count === 0) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200 text-xs"
+        >
+          All Completed
+        </Badge>
+      );
+    }
+
+    // Show incomplete tests
+    const incompleteTests = formatIncompleteTests(status.incomplete_tests_list);
+    if (incompleteTests.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {incompleteTests.map((test) => (
+          <Badge
+            key={test}
+            variant="outline"
+            className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+          >
+            {getTestDisplayName(test)}
+          </Badge>
+        ))}
+      </div>
+    );
   };
 
   const renderEmployeeList = () => (
@@ -255,6 +373,7 @@ export default function SuperadminEmployeeTestsPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Position</TableHead>
+                  <TableHead>Test Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -265,6 +384,13 @@ export default function SuperadminEmployeeTestsPage() {
                     <TableCell>{employee.email}</TableCell>
                     <TableCell>{employee.department || "N/A"}</TableCell>
                     <TableCell>{employee.position || "N/A"}</TableCell>
+                    <TableCell>
+                      {loadingCompletionStatus ? (
+                        <Loader2 className="animate-spin h-4 w-4" />
+                      ) : (
+                        renderIncompleteTests(employee.id)
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Button onClick={() => handleViewResults(employee.id)}>
                         View Results
