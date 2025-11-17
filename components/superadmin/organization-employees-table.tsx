@@ -35,6 +35,10 @@ import {
   Trash,
 } from "lucide-react";
 import { ComponentLoader } from "@/components/ui/loaders";
+import {
+  getTestCompletionStatus,
+  TestCompletionStatus,
+} from "@/services/test.service";
 
 interface OrganizationEmployeesTableProps {
   organizationId: number;
@@ -48,6 +52,9 @@ export function OrganizationEmployeesTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [completionStatus, setCompletionStatus] = useState<
+    Map<number, TestCompletionStatus>
+  >(new Map());
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -71,6 +78,27 @@ export function OrganizationEmployeesTable({
     };
 
     fetchEmployees();
+  }, [organizationId]);
+
+  useEffect(() => {
+    const fetchTestStatus = async () => {
+      try {
+        const response = await getTestCompletionStatus(organizationId);
+        if (response.success && response.data) {
+          const statusMap = new Map<number, TestCompletionStatus>();
+          response.data.forEach((status) => {
+            statusMap.set(status.user_id, status);
+          });
+          setCompletionStatus(statusMap);
+        }
+      } catch (error) {
+        console.error("Error fetching test completion status:", error);
+      }
+    };
+
+    if (organizationId) {
+      fetchTestStatus();
+    }
   }, [organizationId]);
 
   const handleDeleteEmployee = async (employeeId: number) => {
@@ -130,6 +158,52 @@ export function OrganizationEmployeesTable({
     }
   };
 
+  const renderTestStatusBadge = (employeeId: number) => {
+    const status = completionStatus.get(employeeId);
+
+    if (!status) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-50 text-gray-700 border-gray-200"
+        >
+          Not Started
+        </Badge>
+      );
+    }
+
+    if (status.remaining_tests_count === 0) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          All Completed
+        </Badge>
+      );
+    }
+
+    if (status.completed_tests_count === 0) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-50 text-gray-700 border-gray-200"
+        >
+          Not Started
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge
+        variant="outline"
+        className="bg-yellow-50 text-yellow-700 border-yellow-200"
+      >
+        In Progress ({status.completed_tests_count}/4)
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center">
@@ -153,6 +227,7 @@ export function OrganizationEmployeesTable({
                 <TableHead>Department</TableHead>
                 <TableHead>Position</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Test Status</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-[80px]">Action</TableHead>
               </TableRow>
@@ -161,7 +236,7 @@ export function OrganizationEmployeesTable({
               {filteredEmployees.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center py-8 text-muted-foreground"
                   >
                     No employees found
@@ -181,6 +256,9 @@ export function OrganizationEmployeesTable({
                     <TableCell>{employee.department || "N/A"}</TableCell>
                     <TableCell>{employee.position || "N/A"}</TableCell>
                     <TableCell>{renderStatusBadge(employee.status)}</TableCell>
+                    <TableCell>
+                      {renderTestStatusBadge(employee.id)}
+                    </TableCell>
                     <TableCell>
                       {employee.created_at
                         ? new Date(employee.created_at).toLocaleDateString()
