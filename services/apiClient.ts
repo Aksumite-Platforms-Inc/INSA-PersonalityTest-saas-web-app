@@ -6,8 +6,8 @@ import toast from "react-hot-toast";
 
 const apiClient = axios.create({
 // baseURL:
-//     process.env.NEXT_PUBLIC_API_URL || "https://personality.insa.gov.et/api/v1",  
-  baseURL: "http://localhost:8080/api/v1",
+    process.env.NEXT_PUBLIC_API_URL || "https://personality.insa.gov.et/api/v1",  
+  // baseURL: "http://localhost:8080/api/v1",
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
