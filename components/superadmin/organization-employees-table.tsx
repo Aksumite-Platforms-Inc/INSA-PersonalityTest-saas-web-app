@@ -192,6 +192,24 @@ export function OrganizationEmployeesTable({
       );
     }
 
+    // Check if all tests are completed
+    const allCompleted =
+      status.enneagram_completed &&
+      status.mbti_completed &&
+      status.big_five_completed &&
+      status.riasec_completed;
+
+    if (allCompleted) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200 text-xs"
+        >
+          All Completed
+        </Badge>
+      );
+    }
+
     const tests = [
       { name: "Enneagram", completed: status.enneagram_completed },
       { name: "MBTI", completed: status.mbti_completed },
