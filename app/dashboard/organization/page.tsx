@@ -5,7 +5,7 @@ import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TestCompletionRateChart } from "@/components/dashboard/test-completion-rate-chart";
 import { TestBreakdownChart } from "@/components/dashboard/test-breakdown-chart";
-import { IncompleteTestsList } from "@/components/dashboard/incomplete-tests-list";
+import { TestProgressSummary } from "@/components/dashboard/test-progress-summary";
 import { getOrganizationId } from "@/utils/tokenUtils";
 import { getAllBranches } from "@/services/branch.service";
 import { getTestCompletionStatus, TestCompletionStatus } from "@/services/test.service";
@@ -200,15 +200,8 @@ export default function OrganizationDashboard() {
         </Card>
       </div>
 
-      {/* Incomplete Tests List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Users with Incomplete Tests</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <IncompleteTestsList users={allUsers} maxItems={10} />
-        </CardContent>
-      </Card>
+      {/* Test Progress Summary */}
+      <TestProgressSummary users={allUsers} />
 
       {/* Test Type Stats */}
       <div className="grid gap-4 md:grid-cols-4">

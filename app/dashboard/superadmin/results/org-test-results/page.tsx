@@ -22,8 +22,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Users, FileX, AlertCircle } from "lucide-react";
+import { Users, FileX, AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import dynamic from "next/dynamic";
 
 // Dynamically import result components
@@ -66,6 +73,11 @@ export default function SuperadminEmployeeTestsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<string>("all"); // all, completed, in_progress, not_started
+  const [testFilter, setTestFilter] = useState<string>("all"); // all, mbti, big_five, riasec, enneagram
+  const [branchFilter, setBranchFilter] = useState<string>("all");
 
   // Fetch organizations on component mount
   useEffect(() => {
@@ -84,17 +96,20 @@ export default function SuperadminEmployeeTestsPage() {
       });
   }, []);
 
-  // Fetch users when organization is selected
+  // Fetch users when organization is selected - optimized with abort controller
   useEffect(() => {
     if (!selectedOrgId) {
       setAllUsers([]);
       return;
     }
 
+    const abortController = new AbortController();
     setLoadingUsers(true);
     setError(null);
+    
     getTestCompletionStatus(selectedOrgId)
       .then((res) => {
+        if (abortController.signal.aborted) return;
         if (res.success && res.data) {
           setAllUsers(res.data);
         } else {
@@ -102,12 +117,19 @@ export default function SuperadminEmployeeTestsPage() {
         }
       })
       .catch((err) => {
+        if (abortController.signal.aborted) return;
         setError("Failed to fetch test completion status.");
         console.error("Error fetching completion status:", err);
       })
       .finally(() => {
-        setLoadingUsers(false);
+        if (!abortController.signal.aborted) {
+          setLoadingUsers(false);
+        }
       });
+
+    return () => {
+      abortController.abort();
+    };
   }, [selectedOrgId]);
 
   // Fetch test results when selectedEmployeeId changes
@@ -266,28 +288,80 @@ export default function SuperadminEmployeeTestsPage() {
     );
   };
 
+  // Get unique branches for filter
+  const uniqueBranches = useMemo(() => {
+    const branches = new Set<string>();
+    allUsers.forEach((user) => {
+      if (user.branch_name) branches.add(user.branch_name);
+    });
+    return Array.from(branches).sort();
+  }, [allUsers]);
+
   // Filter and paginate users
   const filteredUsers = useMemo(() => {
-    if (!searchTerm) return allUsers;
-    const lowerSearch = searchTerm.toLowerCase();
-    return allUsers.filter(
-      (user) =>
-        user.user_name?.toLowerCase().includes(lowerSearch) ||
-        user.user_email?.toLowerCase().includes(lowerSearch) ||
-        user.branch_name?.toLowerCase().includes(lowerSearch) ||
-        user.department?.toLowerCase().includes(lowerSearch) ||
-        user.position?.toLowerCase().includes(lowerSearch)
-    );
-  }, [allUsers, searchTerm]);
+    let filtered = allUsers;
+
+    // Search filter
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.user_name?.toLowerCase().includes(lowerSearch) ||
+          user.user_email?.toLowerCase().includes(lowerSearch) ||
+          user.branch_name?.toLowerCase().includes(lowerSearch) ||
+          user.department?.toLowerCase().includes(lowerSearch) ||
+          user.position?.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((user) => {
+        if (statusFilter === "completed") {
+          return user.remaining_tests_count === 0;
+        } else if (statusFilter === "in_progress") {
+          return user.remaining_tests_count > 0 && user.remaining_tests_count < 4;
+        } else if (statusFilter === "not_started") {
+          return user.overall_status === "not_started";
+        }
+        return true;
+      });
+    }
+
+    // Test filter
+    if (testFilter !== "all") {
+      filtered = filtered.filter((user) => {
+        switch (testFilter) {
+          case "mbti":
+            return !user.mbti_completed;
+          case "big_five":
+            return !user.big_five_completed;
+          case "riasec":
+            return !user.riasec_completed;
+          case "enneagram":
+            return !user.enneagram_completed;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Branch filter
+    if (branchFilter !== "all") {
+      filtered = filtered.filter((user) => user.branch_name === branchFilter);
+    }
+
+    return filtered;
+  }, [allUsers, searchTerm, statusFilter, testFilter, branchFilter]);
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
-  // Reset to first page when search term changes
+  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, statusFilter, testFilter, branchFilter]);
 
   const renderOrganizationList = () => (
     <>
@@ -384,15 +458,77 @@ export default function SuperadminEmployeeTestsPage() {
             </p>
           </div>
         </div>
-        <div className="relative max-w-md">
-          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search by name, email, branch, department, or position..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
+            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by name, email, branch, department, or position..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          
+          {/* Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="not_started">Not Started</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={testFilter} onValueChange={setTestFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Test" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tests</SelectItem>
+                <SelectItem value="mbti">Missing MBTI</SelectItem>
+                <SelectItem value="big_five">Missing Big Five</SelectItem>
+                <SelectItem value="riasec">Missing RIASEC</SelectItem>
+                <SelectItem value="enneagram">Missing Enneagram</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {uniqueBranches.length > 0 && (
+              <Select value={branchFilter} onValueChange={setBranchFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Branch" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Branches</SelectItem>
+                  {uniqueBranches.map((branch) => (
+                    <SelectItem key={branch} value={branch}>
+                      {branch}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {(statusFilter !== "all" || testFilter !== "all" || branchFilter !== "all") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setTestFilter("all");
+                  setBranchFilter("all");
+                }}
+                className="flex items-center gap-1"
+              >
+                <X className="h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -408,11 +544,15 @@ export default function SuperadminEmployeeTestsPage() {
         </Alert>
       ) : filteredUsers.length === 0 ? (
         <EmptyState
-          icon={searchTerm ? SearchIcon : Users}
-          title={searchTerm ? "No matching users" : "No users found"}
+          icon={searchTerm || statusFilter !== "all" || testFilter !== "all" || branchFilter !== "all" ? SearchIcon : Users}
+          title={
+            searchTerm || statusFilter !== "all" || testFilter !== "all" || branchFilter !== "all"
+              ? "No matching users"
+              : "No users found"
+          }
           description={
-            searchTerm
-              ? "Try adjusting your search terms to find users."
+            searchTerm || statusFilter !== "all" || testFilter !== "all" || branchFilter !== "all"
+              ? "Try adjusting your filters or search terms to find users."
               : "This organization doesn't have any members yet."
           }
         />
@@ -472,13 +612,16 @@ export default function SuperadminEmployeeTestsPage() {
               </TableBody>
             </Table>
           </div>
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {startIndex + 1} to{" "}
-                {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of{" "}
-                {filteredUsers.length} users
-              </div>
+           {totalPages > 1 && (
+             <div className="flex flex-col sm:flex-row justify-between items-center gap-2 mt-4">
+               <div className="text-sm text-muted-foreground">
+                 Showing {startIndex + 1} to{" "}
+                 {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of{" "}
+                 {filteredUsers.length} users
+                 {filteredUsers.length !== allUsers.length && (
+                   <span className="ml-2">(filtered from {allUsers.length} total)</span>
+                 )}
+               </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

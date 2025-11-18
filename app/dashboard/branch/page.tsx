@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TestBreakdownChart } from "@/components/dashboard/test-breakdown-chart";
-import { IncompleteTestsList } from "@/components/dashboard/incomplete-tests-list";
+import { TestProgressSummary } from "@/components/dashboard/test-progress-summary";
 import { getTestCompletionStatus, TestCompletionStatus } from "@/services/test.service";
 import { getOrganizationId, getBranchId } from "@/utils/tokenUtils";
 import { PageLoader } from "@/components/ui/loaders";
@@ -157,14 +157,7 @@ function BranchDashboardContent() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Users with Incomplete Tests</CardTitle>
-          </CardHeader>
-          <CardContent className="h-80 overflow-auto">
-            <IncompleteTestsList users={allUsers} maxItems={8} />
-          </CardContent>
-        </Card>
+        <TestProgressSummary users={allUsers} />
       </div>
 
       {/* Test Type Stats */}

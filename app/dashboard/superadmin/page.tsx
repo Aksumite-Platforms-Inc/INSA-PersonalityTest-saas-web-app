@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrganizationsChart } from "@/components/dashboard/organizations-chart";
 import { TestCompletionRateChart } from "@/components/dashboard/test-completion-rate-chart";
 import { TestBreakdownChart } from "@/components/dashboard/test-breakdown-chart";
-import { IncompleteTestsList } from "@/components/dashboard/incomplete-tests-list";
+import { TestProgressSummary } from "@/components/dashboard/test-progress-summary";
 import { listOrganizations } from "@/services/organization.service";
 import { getTestCompletionStatus, TestCompletionStatus } from "@/services/test.service";
 import { PageLoader } from "@/components/ui/loaders";
@@ -209,14 +209,7 @@ export default function SuperadminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Users with Incomplete Tests</CardTitle>
-            </CardHeader>
-            <CardContent className="h-80 overflow-auto">
-              <IncompleteTestsList users={allUsers} maxItems={8} />
-            </CardContent>
-          </Card>
+          <TestProgressSummary users={allUsers} />
         </div>
 
         {/* Additional Stats */}
