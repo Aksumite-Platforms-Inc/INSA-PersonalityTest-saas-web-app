@@ -33,6 +33,8 @@ import {
   FileText,
   UserCog,
   Trash,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { getBranchMembers } from "@/services/branch.service";
 import {
@@ -53,9 +55,11 @@ export function BranchEmployeesTable({
 }: BranchEmployeesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState<User[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [completionStatus, setCompletionStatus] = useState<
     Map<number, TestCompletionStatus>
   >(new Map());
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -124,6 +128,18 @@ export function BranchEmployeesTable({
       return matchesSearch;
     });
   }, [employees, searchTerm]);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEmployees = filteredEmployees.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const renderStatusBadge = (status?: string) => {
     switch (status) {
@@ -262,7 +278,7 @@ export function BranchEmployeesTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmployees.length === 0 ? (
+            {paginatedEmployees.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={8}
@@ -272,7 +288,7 @@ export function BranchEmployeesTable({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEmployees.map((employee) => (
+              paginatedEmployees.map((employee) => (
                 <TableRow
                   key={employee.id}
                   className="cursor-pointer hover:bg-muted/50"
@@ -379,6 +395,31 @@ export function BranchEmployeesTable({
           </TableBody>
         </Table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-end items-center space-x-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
