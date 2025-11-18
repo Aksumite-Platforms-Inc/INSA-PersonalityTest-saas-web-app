@@ -1,15 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { listOrganizations } from "@/services/organization.service";
-import { getAllOrgMembers } from "@/services/user.service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -18,9 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
-import { Organization } from "@/services/organization.service";
-import { User } from "@/services/user.service";
+import { Loader2, Search as SearchIcon } from "lucide-react";
 import {
   getResults,
   getTestCompletionStatus,
@@ -28,7 +17,7 @@ import {
 } from "@/services/test.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users, FileX, AlertCircle } from "lucide-react";
@@ -56,13 +45,9 @@ const EnneagramResultAdmin = dynamic(
 type View = "employee_list" | "results_view";
 
 export default function SuperadminEmployeeTestsPage() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
-  const [employees, setEmployees] = useState<User[]>([]);
-  const [loadingOrgs, setLoadingOrgs] = useState(false);
-  const [loadingEmployees, setLoadingEmployees] = useState(false);
-  const [errorOrgs, setErrorOrgs] = useState<string | null>(null);
-  const [errorEmployees, setErrorEmployees] = useState<string | null>(null);
+  const [allUsers, setAllUsers] = useState<TestCompletionStatus[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [currentView, setCurrentView] = useState<View>("employee_list");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
@@ -73,93 +58,30 @@ export default function SuperadminEmployeeTestsPage() {
   const [errorResults, setErrorResults] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [completionStatus, setCompletionStatus] = useState<
-    Map<number, TestCompletionStatus>
-  >(new Map());
-  const [loadingCompletionStatus, setLoadingCompletionStatus] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
-  // Fetch organizations on component mount
+  // Fetch all users' completion status on component mount
   useEffect(() => {
-    setLoadingOrgs(true);
-    setErrorOrgs(null);
-    listOrganizations()
-      .then((res) => {
-        setOrganizations(res);
-      })
-      .catch((err) => {
-        setErrorOrgs("Failed to fetch organizations.");
-        console.error("Error fetching organizations:", err);
-      })
-      .finally(() => {
-        setLoadingOrgs(false);
-      });
-  }, []);
-
-  // Fetch employees when selectedOrgId changes
-  useEffect(() => {
-    if (!selectedOrgId) {
-      setEmployees([]);
-      setCompletionStatus(new Map());
-      return;
-    }
-
-    setLoadingEmployees(true);
-    setErrorEmployees(null);
-    // Ensure selectedOrgId is a number before calling the service
-    const numericOrgId = parseInt(selectedOrgId, 10);
-    if (isNaN(numericOrgId)) {
-      setErrorEmployees("Invalid organization ID.");
-      setLoadingEmployees(false);
-      return;
-    }
-
-    getAllOrgMembers(numericOrgId)
-      .then((res) => {
-        // getAllOrgMembers returns User[] directly
-        setEmployees(res);
-      })
-      .catch((err) => {
-        setErrorEmployees("Failed to fetch employees.");
-        console.error("Error fetching employees:", err);
-      })
-      .finally(() => {
-        setLoadingEmployees(false);
-      });
-  }, [selectedOrgId]);
-
-  // Fetch completion status when selectedOrgId changes
-  useEffect(() => {
-    if (!selectedOrgId) {
-      setCompletionStatus(new Map());
-      return;
-    }
-
-    setLoadingCompletionStatus(true);
-    const numericOrgId = parseInt(selectedOrgId, 10);
-    if (isNaN(numericOrgId)) {
-      setLoadingCompletionStatus(false);
-      return;
-    }
-
-    getTestCompletionStatus(numericOrgId)
+    setLoading(true);
+    setError(null);
+    // Call without org_id to get all users (super admin can see all)
+    getTestCompletionStatus()
       .then((res) => {
         if (res.success && res.data) {
-          // Create a map of user_id -> completion status for quick lookup
-          const statusMap = new Map<number, TestCompletionStatus>();
-          res.data.forEach((status) => {
-            statusMap.set(status.user_id, status);
-          });
-          setCompletionStatus(statusMap);
+          setAllUsers(res.data);
+        } else {
+          setError(res.message || "Failed to fetch test completion status.");
         }
       })
       .catch((err) => {
+        setError("Failed to fetch test completion status.");
         console.error("Error fetching completion status:", err);
-        // Don't show error to user, just log it
       })
       .finally(() => {
-        setLoadingCompletionStatus(false);
+        setLoading(false);
       });
-  }, [selectedOrgId]);
+  }, []);
 
   // Fetch test results when selectedEmployeeId changes
   useEffect(() => {
@@ -170,7 +92,7 @@ export default function SuperadminEmployeeTestsPage() {
 
     setLoadingResults(true);
     setErrorResults(null);
-    getResults(selectedEmployeeId.toString()) // getResults expects string ID
+    getResults(selectedEmployeeId.toString())
       .then((res) => {
         setEmployeeResults(res.data);
         const available = getAvailableTests(res.data);
@@ -247,28 +169,8 @@ export default function SuperadminEmployeeTestsPage() {
   };
 
   // Helper function to render incomplete tests badge
-  const renderIncompleteTests = (employeeId: number) => {
-    const status = completionStatus.get(employeeId);
-    
-    // If no status found, show all tests as incomplete
-    if (!status) {
-      const allTests = ["mbti", "big_five", "riasec", "enneagram"];
-      return (
-        <div className="flex flex-wrap gap-1">
-          {allTests.map((test) => (
-            <Badge
-              key={test}
-              variant="outline"
-              className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
-            >
-              {getTestDisplayName(test)}
-            </Badge>
-          ))}
-        </div>
-      );
-    }
-
-    // If all tests are completed, show nothing or a success indicator
+  const renderTestStatus = (status: TestCompletionStatus) => {
+    // If all tests are completed
     if (status.remaining_tests_count === 0) {
       return (
         <Badge
@@ -280,10 +182,29 @@ export default function SuperadminEmployeeTestsPage() {
       );
     }
 
+    // If no tests started
+    if (status.overall_status === "not_started") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
+        >
+          Not Started
+        </Badge>
+      );
+    }
+
     // Show incomplete tests
     const incompleteTests = formatIncompleteTests(status.incomplete_tests_list);
     if (incompleteTests.length === 0) {
-      return null;
+      return (
+        <Badge
+          variant="outline"
+          className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+        >
+          In Progress
+        </Badge>
+      );
     }
 
     return (
@@ -301,109 +222,123 @@ export default function SuperadminEmployeeTestsPage() {
     );
   };
 
+  // Filter and paginate users
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm) return allUsers;
+    const lowerSearch = searchTerm.toLowerCase();
+    return allUsers.filter(
+      (user) =>
+        user.user_name?.toLowerCase().includes(lowerSearch) ||
+        user.user_email?.toLowerCase().includes(lowerSearch) ||
+        user.organization_name?.toLowerCase().includes(lowerSearch) ||
+        user.branch_name?.toLowerCase().includes(lowerSearch) ||
+        user.department?.toLowerCase().includes(lowerSearch) ||
+        user.position?.toLowerCase().includes(lowerSearch)
+    );
+  }, [allUsers, searchTerm]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const renderEmployeeList = () => (
     <>
-      <div className="mb-4">
-        <label
-          htmlFor="organization-select"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Select Organization
-        </label>
-        {loadingOrgs ? (
-          <div className="flex items-center">
-            <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading
-            organizations...
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-2xl font-semibold mb-1">All Organization Members</h2>
+            <p className="text-sm text-muted-foreground">
+              View test completion status for all users across all organizations
+            </p>
           </div>
-        ) : errorOrgs ? (
-          <div className="text-red-600">{errorOrgs}</div>
-        ) : (
-          <Select
-            onValueChange={(value) => {
-              setSelectedOrgId(value);
-              // Reset employee list and search term when org changes
-              setEmployees([]);
-              setSelectedEmployeeId(null);
-              setEmployeeResults(null);
-              setSearchTerm(""); // Reset search term
-            }}
-            value={selectedOrgId || ""}
-          >
-            <SelectTrigger id="organization-select" className="w-[300px]">
-              <SelectValue placeholder="Select an organization" />
-            </SelectTrigger>
-            <SelectContent>
-              {(organizations || []).map((org) => (
-                <SelectItem key={org.id} value={org.id.toString()}>
-                  {org.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        </div>
+        <div className="relative max-w-md">
+          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search by name, email, organization, branch, department, or position..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
       </div>
 
-      {selectedOrgId && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Employees</h2>
-            <Input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-          {loadingEmployees ? (
-            <div className="flex items-center">
-              <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading
-              employees...
-            </div>
-          ) : errorEmployees ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{errorEmployees}</AlertDescription>
-            </Alert>
-          ) : filteredEmployees.length === 0 ? (
-            <EmptyState
-              icon={searchTerm ? Users : FileX}
-              title={searchTerm ? "No matching employees" : "No employees found"}
-              description={
-                searchTerm
-                  ? "Try adjusting your search terms to find employees."
-                  : "This organization doesn't have any employees yet."
-              }
-            />
-          ) : (
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading users...
+        </div>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : filteredUsers.length === 0 ? (
+        <EmptyState
+          icon={searchTerm ? SearchIcon : Users}
+          title={searchTerm ? "No matching users" : "No users found"}
+          description={
+            searchTerm
+              ? "Try adjusting your search terms to find users."
+              : "No users have been registered yet."
+          }
+        />
+      ) : (
+        <>
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>Branch</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Test Status</TableHead>
+                  <TableHead>Progress</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell>{employee.name}</TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.department || "N/A"}</TableCell>
-                    <TableCell>{employee.position || "N/A"}</TableCell>
+                {paginatedUsers.map((user) => (
+                  <TableRow key={user.user_id}>
+                    <TableCell className="font-medium">
+                      {user.organization_name || "N/A"}
+                    </TableCell>
+                    <TableCell>{user.branch_name || "N/A"}</TableCell>
+                    <TableCell>{user.user_name || "N/A"}</TableCell>
+                    <TableCell>{user.user_email || "N/A"}</TableCell>
+                    <TableCell>{user.department || "N/A"}</TableCell>
+                    <TableCell>{user.position || "N/A"}</TableCell>
+                    <TableCell>{renderTestStatus(user)}</TableCell>
                     <TableCell>
-                      {loadingCompletionStatus ? (
-                        <Loader2 className="animate-spin h-4 w-4" />
-                      ) : (
-                        renderIncompleteTests(employee.id)
-                      )}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {user.completed_tests_count}/4
+                        </span>
+                        <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 transition-all"
+                            style={{
+                              width: `${(user.completed_tests_count / 4) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <Button onClick={() => handleViewResults(employee.id)}>
+                      <Button
+                        onClick={() => handleViewResults(user.user_id)}
+                        size="sm"
+                        variant="outline"
+                      >
                         View Results
                       </Button>
                     </TableCell>
@@ -411,20 +346,45 @@ export default function SuperadminEmployeeTestsPage() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of{" "}
+                {filteredUsers.length} users
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
-        </div>
+        </>
       )}
     </>
   );
-
-  const filteredEmployees = useMemo(() => {
-    if (!searchTerm) return employees;
-    return employees.filter(
-      (employee) =>
-        employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [employees, searchTerm]);
 
   const renderResultsView = () => {
     if (loadingResults) {
@@ -525,12 +485,12 @@ export default function SuperadminEmployeeTestsPage() {
         <div className="flex items-center border-b px-8 py-4 min-w-0">
           <div className="flex-1 text-xl font-semibold truncate">
             {currentView === "employee_list"
-              ? "Employee Test Results"
+              ? "Organization Members Test Results"
               : "Test Results"}
           </div>
           {currentView === "results_view" && (
             <Button onClick={handleBackToEmployees} variant="outline">
-              Back to Employees
+              Back to Members List
             </Button>
           )}
         </div>
