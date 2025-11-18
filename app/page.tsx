@@ -14,6 +14,7 @@ import {
   Shield,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 import { ExamProcessAnimation } from "@/components/animations/exam-process-animation";
@@ -573,9 +574,17 @@ export default function LoginPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
+                    <div className="h-12 w-12 rounded-lg bg-background p-1.5 flex items-center justify-center border border-border">
+                      <Image
+                        src="/Dashen Bank Logo.png"
+                        alt="Dashen Bank"
+                        width={40}
+                        height={40}
+                        className="object-contain"
+                      />
+                    </div>
                     <div>
-                      <h3 className="font-bold">Commercial Bank of Ethiopia</h3>
+                      <h3 className="font-bold">Dashen Bank S.C</h3>
                       <p className="text-sm text-muted-foreground">
                         Financial Institution
                       </p>
@@ -604,18 +613,27 @@ export default function LoginPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
-                    <Building2 className="h-10 w-10 rounded-full bg-muted p-2" />
+                    <div className="h-12 w-12 rounded-lg bg-background p-1.5 flex items-center justify-center border border-border">
+                      <Image
+                        src="/INSAlogo.png"
+                        alt="INSA Internal"
+                        width={40}
+                        height={40}
+                        className="object-contain"
+                      />
+                    </div>
                     <div>
-                      <h3 className="font-bold">Ethiopian Airlines</h3>
+                      <h3 className="font-bold">INSA Internal</h3>
                       <p className="text-sm text-muted-foreground">
-                        Aviation Industry
+                        Internal Testing Organization
                       </p>
                     </div>
                   </div>
                   <p className="mt-4 text-muted-foreground">
-                    "We've seen a 30% improvement in team cohesion since
-                    implementing INSA's personality assessments. The detailed
-                    reports and actionable recommendations are exceptional."
+                    "As our internal testing organization, we continuously validate and refine 
+                    the platform's capabilities. This allows us to ensure the highest quality 
+                    standards, test new features in real-world scenarios, and gather valuable 
+                    feedback to enhance the user experience for all our clients."
                   </p>
                 </CardContent>
               </Card>
