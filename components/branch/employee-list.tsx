@@ -7,6 +7,10 @@ import {
   updateEmployeeStatus,
 } from "@/services/user.service";
 import {
+  getTestCompletionStatus,
+  TestCompletionStatus,
+} from "@/services/test.service";
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import {
   Search,
   ChevronLeft,
@@ -52,6 +57,10 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [completionStatus, setCompletionStatus] = useState<
+    Map<number, TestCompletionStatus>
+  >(new Map());
+  const [loadingCompletionStatus, setLoadingCompletionStatus] = useState(false);
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -74,6 +83,34 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     };
 
     fetchEmployees();
+  }, [organizationId, branchId]);
+
+  // Fetch completion status when organizationId or branchId changes
+  useEffect(() => {
+    if (!organizationId || !branchId || branchId === 0) {
+      setCompletionStatus(new Map());
+      return;
+    }
+
+    setLoadingCompletionStatus(true);
+    getTestCompletionStatus(organizationId, branchId)
+      .then((res) => {
+        if (res.success && res.data) {
+          // Create a map of user_id -> completion status for quick lookup
+          const statusMap = new Map<number, TestCompletionStatus>();
+          res.data.forEach((status) => {
+            statusMap.set(status.user_id, status);
+          });
+          setCompletionStatus(statusMap);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching completion status:", err);
+        // Don't show error to user, just log it
+      })
+      .finally(() => {
+        setLoadingCompletionStatus(false);
+      });
   }, [organizationId, branchId]);
 
   // Reset to first page when search term changes
@@ -191,6 +228,80 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     }
   };
 
+  // Helper function to format incomplete tests list
+  const formatIncompleteTests = (
+    incompleteTestsList: string | null
+  ): string[] => {
+    if (!incompleteTestsList) return [];
+    return incompleteTestsList.split(",").map((test) => test.trim());
+  };
+
+  // Helper function to get test display name
+  const getTestDisplayName = (testName: string): string => {
+    const testMap: Record<string, string> = {
+      mbti: "MBTI",
+      big_five: "Big Five",
+      riasec: "RIASEC",
+      enneagram: "Enneagram",
+    };
+    return testMap[testName.toLowerCase()] || testName;
+  };
+
+  // Helper function to render incomplete tests badge
+  const renderIncompleteTests = (employeeId: number) => {
+    const status = completionStatus.get(employeeId);
+    
+    // If no status found, show all tests as incomplete
+    if (!status) {
+      const allTests = ["mbti", "big_five", "riasec", "enneagram"];
+      return (
+        <div className="flex flex-wrap gap-1">
+          {allTests.map((test) => (
+            <Badge
+              key={test}
+              variant="outline"
+              className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+            >
+              {getTestDisplayName(test)}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+
+    // If all tests are completed, show success indicator
+    if (status.remaining_tests_count === 0) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200 text-xs"
+        >
+          All Completed
+        </Badge>
+      );
+    }
+
+    // Show incomplete tests
+    const incompleteTests = formatIncompleteTests(status.incomplete_tests_list);
+    if (incompleteTests.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {incompleteTests.map((test) => (
+          <Badge
+            key={test}
+            variant="outline"
+            className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+          >
+            {getTestDisplayName(test)}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center">
@@ -212,6 +323,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Test Status</TableHead>
                 <TableHead>Registered On</TableHead>
                 <TableHead className="w-[80px]"></TableHead>
               </TableRow>
@@ -219,7 +331,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
             <TableBody>
               {paginatedEmployees.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     No employees found.
                   </TableCell>
                 </TableRow>
@@ -229,6 +341,13 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
                     <TableCell>{employee.name}</TableCell>
                     <TableCell>{employee.email}</TableCell>
                     <TableCell>{renderStatusBadge(employee.status)}</TableCell>
+                    <TableCell>
+                      {loadingCompletionStatus ? (
+                        <Loader2 className="animate-spin h-4 w-4" />
+                      ) : (
+                        renderIncompleteTests(employee.id)
+                      )}
+                    </TableCell>
                     <TableCell>
                       {employee.created_at
                         ? new Date(employee.created_at).toLocaleDateString()

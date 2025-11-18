@@ -160,48 +160,48 @@ export function BranchEmployeesTable({
     }
   };
 
+  // Helper function to format incomplete tests list
+  const formatIncompleteTests = (
+    incompleteTestsList: string | null
+  ): string[] => {
+    if (!incompleteTestsList) return [];
+    return incompleteTestsList.split(",").map((test) => test.trim());
+  };
+
+  // Helper function to get test display name
+  const getTestDisplayName = (testName: string): string => {
+    const testMap: Record<string, string> = {
+      mbti: "MBTI",
+      big_five: "Big Five",
+      riasec: "RIASEC",
+      enneagram: "Enneagram",
+    };
+    return testMap[testName.toLowerCase()] || testName;
+  };
+
   const renderTestStatusBadge = (employeeId: number) => {
     const status = completionStatus.get(employeeId);
-
+    
+    // If no status found, show all tests as incomplete
     if (!status) {
+      const allTests = ["mbti", "big_five", "riasec", "enneagram"];
       return (
         <div className="flex flex-wrap gap-1">
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            Enneagram
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            MBTI
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            Big Five
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            RIASEC
-          </Badge>
+          {allTests.map((test) => (
+            <Badge
+              key={test}
+              variant="outline"
+              className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+            >
+              {getTestDisplayName(test)}
+            </Badge>
+          ))}
         </div>
       );
     }
 
-    // Check if all tests are completed
-    const allCompleted =
-      status.enneagram_completed &&
-      status.mbti_completed &&
-      status.big_five_completed &&
-      status.riasec_completed;
-
-    if (allCompleted) {
+    // If all tests are completed, show success indicator
+    if (status.remaining_tests_count === 0) {
       return (
         <Badge
           variant="outline"
@@ -212,26 +212,21 @@ export function BranchEmployeesTable({
       );
     }
 
-    const tests = [
-      { name: "Enneagram", completed: status.enneagram_completed },
-      { name: "MBTI", completed: status.mbti_completed },
-      { name: "Big Five", completed: status.big_five_completed },
-      { name: "RIASEC", completed: status.riasec_completed },
-    ];
+    // Show incomplete tests
+    const incompleteTests = formatIncompleteTests(status.incomplete_tests_list);
+    if (incompleteTests.length === 0) {
+      return null;
+    }
 
     return (
       <div className="flex flex-wrap gap-1">
-        {tests.map((test) => (
+        {incompleteTests.map((test) => (
           <Badge
-            key={test.name}
+            key={test}
             variant="outline"
-            className={
-              test.completed
-                ? "bg-green-50 text-green-700 border-green-200 text-xs"
-                : "bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
-            }
+            className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
           >
-            {test.name}
+            {getTestDisplayName(test)}
           </Badge>
         ))}
       </div>
