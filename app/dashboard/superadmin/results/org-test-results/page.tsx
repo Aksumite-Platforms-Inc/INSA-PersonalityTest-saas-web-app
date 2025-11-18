@@ -9,16 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Search as SearchIcon } from "lucide-react";
+import { Loader2, Search as SearchIcon, Building2, ArrowLeft } from "lucide-react";
 import {
   getResults,
   getTestCompletionStatus,
   TestCompletionStatus,
 } from "@/services/test.service";
+import { listOrganizations, Organization } from "@/services/organization.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users, FileX, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -42,14 +44,18 @@ const EnneagramResultAdmin = dynamic(
   { ssr: false }
 );
 
-type View = "employee_list" | "results_view";
+type View = "organization_list" | "employee_list" | "results_view";
 
 export default function SuperadminEmployeeTestsPage() {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
+  const [selectedOrgName, setSelectedOrgName] = useState<string | null>(null);
   const [allUsers, setAllUsers] = useState<TestCompletionStatus[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [currentView, setCurrentView] = useState<View>("employee_list");
+  const [currentView, setCurrentView] = useState<View>("organization_list");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
     null
   );
@@ -61,12 +67,33 @@ export default function SuperadminEmployeeTestsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Fetch all users' completion status on component mount
+  // Fetch organizations on component mount
   useEffect(() => {
-    setLoading(true);
+    setLoadingOrgs(true);
     setError(null);
-    // Call without org_id to get all users (super admin can see all)
-    getTestCompletionStatus()
+    listOrganizations()
+      .then((res) => {
+        setOrganizations(res);
+      })
+      .catch((err) => {
+        setError("Failed to fetch organizations.");
+        console.error("Error fetching organizations:", err);
+      })
+      .finally(() => {
+        setLoadingOrgs(false);
+      });
+  }, []);
+
+  // Fetch users when organization is selected
+  useEffect(() => {
+    if (!selectedOrgId) {
+      setAllUsers([]);
+      return;
+    }
+
+    setLoadingUsers(true);
+    setError(null);
+    getTestCompletionStatus(selectedOrgId)
       .then((res) => {
         if (res.success && res.data) {
           setAllUsers(res.data);
@@ -79,9 +106,9 @@ export default function SuperadminEmployeeTestsPage() {
         console.error("Error fetching completion status:", err);
       })
       .finally(() => {
-        setLoading(false);
+        setLoadingUsers(false);
       });
-  }, []);
+  }, [selectedOrgId]);
 
   // Fetch test results when selectedEmployeeId changes
   useEffect(() => {
@@ -135,6 +162,23 @@ export default function SuperadminEmployeeTestsPage() {
       tests.push("enneagram");
     return tests;
   }
+
+  const handleSelectOrganization = (org: Organization) => {
+    setSelectedOrgId(org.id);
+    setSelectedOrgName(org.name);
+    setCurrentView("employee_list");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
+  const handleBackToOrganizations = () => {
+    setCurrentView("organization_list");
+    setSelectedOrgId(null);
+    setSelectedOrgName(null);
+    setAllUsers([]);
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
 
   const handleViewResults = (employeeId: number) => {
     setSelectedEmployeeId(employeeId);
@@ -230,7 +274,6 @@ export default function SuperadminEmployeeTestsPage() {
       (user) =>
         user.user_name?.toLowerCase().includes(lowerSearch) ||
         user.user_email?.toLowerCase().includes(lowerSearch) ||
-        user.organization_name?.toLowerCase().includes(lowerSearch) ||
         user.branch_name?.toLowerCase().includes(lowerSearch) ||
         user.department?.toLowerCase().includes(lowerSearch) ||
         user.position?.toLowerCase().includes(lowerSearch)
@@ -246,14 +289,98 @@ export default function SuperadminEmployeeTestsPage() {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  const renderEmployeeList = () => (
+  const renderOrganizationList = () => (
     <>
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-2xl font-semibold mb-1">All Organization Members</h2>
+            <h2 className="text-2xl font-semibold mb-1">Select Organization</h2>
             <p className="text-sm text-muted-foreground">
-              View test completion status for all users across all organizations
+              Choose an organization to view its members' test results
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {loadingOrgs ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading organizations...
+        </div>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : organizations.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="No organizations found"
+          description="No organizations have been created yet."
+        />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {organizations.map((org) => (
+            <Card
+              key={org.id}
+              className="cursor-pointer hover:border-primary transition-colors"
+              onClick={() => handleSelectOrganization(org)}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  {org.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <p className="text-muted-foreground">
+                    <span className="font-medium">Sector:</span> {org.sector || "N/A"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    <span className="font-medium">Email:</span> {org.email || "N/A"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    <span className="font-medium">Status:</span>{" "}
+                    <Badge
+                      variant="outline"
+                      className={
+                        org.status === "active"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : "bg-gray-50 text-gray-700 border-gray-200"
+                      }
+                    >
+                      {org.status || "N/A"}
+                    </Badge>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  const renderEmployeeList = () => (
+    <>
+      <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            onClick={handleBackToOrganizations}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Organizations
+          </Button>
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold mb-1">
+              {selectedOrgName} - Members
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              View test completion status for organization members
             </p>
           </div>
         </div>
@@ -261,7 +388,7 @@ export default function SuperadminEmployeeTestsPage() {
           <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search by name, email, organization, branch, department, or position..."
+            placeholder="Search by name, email, branch, department, or position..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -269,7 +396,7 @@ export default function SuperadminEmployeeTestsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {loadingUsers ? (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="animate-spin mr-2 h-5 w-5" /> Loading users...
         </div>
@@ -286,7 +413,7 @@ export default function SuperadminEmployeeTestsPage() {
           description={
             searchTerm
               ? "Try adjusting your search terms to find users."
-              : "No users have been registered yet."
+              : "This organization doesn't have any members yet."
           }
         />
       ) : (
@@ -295,7 +422,6 @@ export default function SuperadminEmployeeTestsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
                   <TableHead>Branch</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
@@ -309,11 +435,10 @@ export default function SuperadminEmployeeTestsPage() {
               <TableBody>
                 {paginatedUsers.map((user) => (
                   <TableRow key={user.user_id}>
-                    <TableCell className="font-medium">
-                      {user.organization_name || "N/A"}
-                    </TableCell>
                     <TableCell>{user.branch_name || "N/A"}</TableCell>
-                    <TableCell>{user.user_name || "N/A"}</TableCell>
+                    <TableCell className="font-medium">
+                      {user.user_name || "N/A"}
+                    </TableCell>
                     <TableCell>{user.user_email || "N/A"}</TableCell>
                     <TableCell>{user.department || "N/A"}</TableCell>
                     <TableCell>{user.position || "N/A"}</TableCell>
@@ -484,8 +609,10 @@ export default function SuperadminEmployeeTestsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center border-b px-8 py-4 min-w-0">
           <div className="flex-1 text-xl font-semibold truncate">
-            {currentView === "employee_list"
-              ? "Organization Members Test Results"
+            {currentView === "organization_list"
+              ? "Organization Test Results"
+              : currentView === "employee_list"
+              ? `${selectedOrgName} - Members`
               : "Test Results"}
           </div>
           {currentView === "results_view" && (
@@ -495,7 +622,9 @@ export default function SuperadminEmployeeTestsPage() {
           )}
         </div>
         <div className="flex-1 flex flex-col px-8 py-6 min-w-0 overflow-x-auto">
-          {currentView === "employee_list"
+          {currentView === "organization_list"
+            ? renderOrganizationList()
+            : currentView === "employee_list"
             ? renderEmployeeList()
             : renderResultsView()}
         </div>
