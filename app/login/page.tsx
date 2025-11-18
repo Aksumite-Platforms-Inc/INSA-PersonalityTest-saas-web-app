@@ -242,9 +242,10 @@ export default function LoginPage() {
         <form ref={formRef} onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="bg-destructive/10 text-destructive text-center py-2 px-3 rounded-md text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
             <div
               className="space-y-2"
@@ -300,7 +301,14 @@ export default function LoginPage() {
               className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
           </CardContent>
         </form>

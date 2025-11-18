@@ -19,6 +19,7 @@ import {
   Minimize,
   MoreHorizontal,
 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface PDFViewerProps {
   pdfUrl: string
@@ -36,6 +37,9 @@ export function PDFViewer({ pdfUrl, allowDownload = true, allowPrint = true }: P
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<number[]>([])
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0)
+  const [downloading, setDownloading] = useState(false)
+  const [printing, setPrinting] = useState(false)
+  const { toast } = useToast()
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -112,14 +116,57 @@ export function PDFViewer({ pdfUrl, allowDownload = true, allowPrint = true }: P
     setCurrentPage(searchResults[newIndex])
   }
 
-  const handleDownload = () => {
-    // In a real implementation, this would download the PDF
-    alert("Downloading PDF...")
+  const handleDownload = async () => {
+    setDownloading(true)
+    try {
+      // In a real implementation, this would download the PDF
+      const link = document.createElement("a")
+      link.href = pdfUrl
+      link.download = "document.pdf"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast({
+        title: "Download Started",
+        description: "The PDF is being downloaded.",
+      })
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the PDF. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setDownloading(false)
+    }
   }
 
-  const handlePrint = () => {
-    // In a real implementation, this would print the PDF
-    alert("Printing PDF...")
+  const handlePrint = async () => {
+    setPrinting(true)
+    try {
+      // In a real implementation, this would print the PDF
+      const printWindow = window.open(pdfUrl, "_blank")
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+        }
+        toast({
+          title: "Print Dialog Opened",
+          description: "The print dialog should open in a new window.",
+        })
+      } else {
+        throw new Error("Failed to open print window")
+      }
+    } catch (error) {
+      toast({
+        title: "Print Failed",
+        description: "Failed to open print dialog. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setPrinting(false)
+    }
   }
 
   // Listen for fullscreen change events
@@ -205,13 +252,25 @@ export function PDFViewer({ pdfUrl, allowDownload = true, allowPrint = true }: P
           </Button>
 
           {allowDownload && (
-            <Button variant="ghost" size="icon" onClick={handleDownload}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleDownload}
+              disabled={downloading}
+              title="Download PDF"
+            >
               <Download className="h-4 w-4" />
             </Button>
           )}
 
           {allowPrint && (
-            <Button variant="ghost" size="icon" onClick={handlePrint}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handlePrint}
+              disabled={printing}
+              title="Print PDF"
+            >
               <Printer className="h-4 w-4" />
             </Button>
           )}

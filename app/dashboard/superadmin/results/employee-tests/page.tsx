@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getResults } from "@/services/test.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileX, AlertCircle } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Import result components (to be reused)
 // These will be loaded dynamically to avoid hydration issues
@@ -98,25 +100,30 @@ export default function SuperadminEmployeeTestsPage() {
 
   if (!employeeId) {
     return (
-      <div className="text-center text-lg mt-10 text-red-600">
-        Invalid or missing employee ID.
-      </div>
+      <Alert variant="destructive" className="mt-10">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Invalid or missing employee ID.</AlertDescription>
+      </Alert>
     );
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="animate-spin mr-2" /> Loading...
+        <Loader2 className="animate-spin mr-2 h-8 w-8" />
+        <span className="text-muted-foreground">Loading test results...</span>
       </div>
     );
   }
 
   if (!results) {
     return (
-      <div className="text-center text-lg mt-10">
-        No test results found for this employee.
-      </div>
+      <EmptyState
+        icon={FileX}
+        title="No test results found"
+        description="This employee hasn't completed any personality tests yet."
+      />
     );
   }
 
@@ -140,9 +147,11 @@ export default function SuperadminEmployeeTestsPage() {
         </div>
         <div className="flex-1 flex flex-col px-8 py-6 min-w-0 overflow-x-auto">
           {availableTests.length === 0 ? (
-            <div className="text-center text-muted-foreground">
-              No test results available.
-            </div>
+            <EmptyState
+              icon={FileX}
+              title="No test results available"
+              description="This employee hasn't completed any personality tests yet."
+            />
           ) : (
             <Tabs
               value={selectedTest || undefined}

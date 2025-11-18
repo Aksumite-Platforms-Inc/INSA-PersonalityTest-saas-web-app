@@ -5,8 +5,10 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Upload, X, File, FileText } from "lucide-react"
+import { Upload, X, File, FileText, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface FileUploaderProps {
   accept: string
@@ -28,6 +30,8 @@ export function FileUploader({
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -80,9 +84,17 @@ export function FileUploader({
     })
 
     if (validFiles.length === 0) {
-      alert(`Please select valid files (${accept}) under ${maxSize}MB`)
+      const errorMessage = `Please select valid files (${accept}) under ${maxSize}MB`
+      setError(errorMessage)
+      toast({
+        title: "Invalid File",
+        description: errorMessage,
+        variant: "destructive",
+      })
       return
     }
+    
+    setError(null)
 
     // Simulate upload progress
     setIsUploading(true)
@@ -136,6 +148,12 @@ export function FileUploader({
 
   return (
     <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <div
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",

@@ -37,6 +37,19 @@ import {
   deleteBranch,
 } from "@/services/branch.service";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Building2, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import employee from "@/app/dashboard/employee";
 
@@ -51,6 +64,10 @@ export function OrganizationBranchesTable({
 }: OrganizationBranchesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [Branches, setBranches] = useState<Branch[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [branchToDelete, setBranchToDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -73,15 +90,46 @@ export function OrganizationBranchesTable({
     fetchBranches();
   }, [organizationId]);
 
-  const handleDeleteBranch = async (branchId: number) => {
-    if (!confirm("Are you sure you want to remove this branch?")) return;
+  const handleDeleteClick = (branchId: number) => {
+    setBranchToDelete(branchId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteBranch = async () => {
+    if (!branchToDelete) return;
+    
+    setDeleting(true);
     try {
-      // You need to implement deleteOrgMember in your user.service
-      await deleteBranch(organizationId, branchId);
-      setBranches((prev) => prev.filter((emp) => emp.id !== branchId));
-    } catch (error) {
-      alert("Failed to remove branch.");
-      console.error(error);
+      await deleteBranch(organizationId, branchToDelete);
+      setBranches((prev) => prev.filter((emp) => emp.id !== branchToDelete));
+      toast({
+        title: "Branch Removed",
+        description: "The branch has been successfully removed.",
+      });
+      setDeleteDialogOpen(false);
+      setBranchToDelete(null);
+    } catch (error: any) {
+      let errorMessage = "Failed to remove branch. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -159,11 +207,16 @@ export function OrganizationBranchesTable({
           <TableBody>
             {filteredBranches.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No Branches found
+                <TableCell colSpan={7} className="p-0">
+                  <EmptyState
+                    icon={searchTerm ? Search : Building2}
+                    title={searchTerm ? "No matching branches" : "No branches found"}
+                    description={
+                      searchTerm
+                        ? "Try adjusting your search terms to find branches."
+                        : "This organization doesn't have any branches yet."
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -231,10 +284,7 @@ export function OrganizationBranchesTable({
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
-                            //
-                            const branchId = Branch.id;
-
-                            handleDeleteBranch(branchId);
+                            handleDeleteClick(Branch.id);
                           }}
                           className="text-red-500"
                         >
@@ -250,6 +300,34 @@ export function OrganizationBranchesTable({
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Branch</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this branch? This action cannot be undone and all associated data will be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteBranch}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                "Remove"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

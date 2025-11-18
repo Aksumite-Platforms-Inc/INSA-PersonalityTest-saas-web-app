@@ -41,6 +41,19 @@ import {
   getTestCompletionStatus,
   TestCompletionStatus,
 } from "@/services/test.service";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Users, Search } from "lucide-react";
 
 interface OrganizationEmployeesTableProps {
   organizationId: number;
@@ -58,6 +71,10 @@ export function OrganizationEmployeesTable({
   const [completionStatus, setCompletionStatus] = useState<
     Map<number, TestCompletionStatus>
   >(new Map());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -105,15 +122,46 @@ export function OrganizationEmployeesTable({
     }
   }, [organizationId]);
 
-  const handleDeleteEmployee = async (employeeId: number) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
+  const handleDeleteClick = (employeeId: number) => {
+    setEmployeeToDelete(employeeId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+    
+    setDeleting(true);
     try {
-      // You need to implement deleteOrgMember in your user.service
-      await deleteOrgMember(organizationId, employeeId);
-      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
-    } catch (error) {
-      alert("Failed to delete employee.");
-      console.error(error);
+      await deleteOrgMember(organizationId, employeeToDelete);
+      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeToDelete));
+      toast({
+        title: "Employee Removed",
+        description: "The employee has been successfully removed.",
+      });
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    } catch (error: any) {
+      let errorMessage = "Failed to delete employee. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -174,48 +222,48 @@ export function OrganizationEmployeesTable({
     }
   };
 
+  // Helper function to format incomplete tests list
+  const formatIncompleteTests = (
+    incompleteTestsList: string | null
+  ): string[] => {
+    if (!incompleteTestsList) return [];
+    return incompleteTestsList.split(",").map((test) => test.trim());
+  };
+
+  // Helper function to get test display name
+  const getTestDisplayName = (testName: string): string => {
+    const testMap: Record<string, string> = {
+      mbti: "MBTI",
+      big_five: "Big Five",
+      riasec: "RIASEC",
+      enneagram: "Enneagram",
+    };
+    return testMap[testName.toLowerCase()] || testName;
+  };
+
   const renderTestStatusBadge = (employeeId: number) => {
     const status = completionStatus.get(employeeId);
-
+    
+    // If no status found, show all tests as incomplete
     if (!status) {
+      const allTests = ["mbti", "big_five", "riasec", "enneagram"];
       return (
         <div className="flex flex-wrap gap-1">
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            Enneagram
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            MBTI
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            Big Five
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200 text-xs"
-          >
-            RIASEC
-          </Badge>
+          {allTests.map((test) => (
+            <Badge
+              key={test}
+              variant="outline"
+              className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+            >
+              {getTestDisplayName(test)}
+            </Badge>
+          ))}
         </div>
       );
     }
 
-    // Check if all tests are completed
-    const allCompleted =
-      status.enneagram_completed &&
-      status.mbti_completed &&
-      status.big_five_completed &&
-      status.riasec_completed;
-
-    if (allCompleted) {
+    // If all tests are completed, show success indicator
+    if (status.remaining_tests_count === 0) {
       return (
         <Badge
           variant="outline"
@@ -226,26 +274,21 @@ export function OrganizationEmployeesTable({
       );
     }
 
-    const tests = [
-      { name: "Enneagram", completed: status.enneagram_completed },
-      { name: "MBTI", completed: status.mbti_completed },
-      { name: "Big Five", completed: status.big_five_completed },
-      { name: "RIASEC", completed: status.riasec_completed },
-    ];
+    // Show incomplete tests
+    const incompleteTests = formatIncompleteTests(status.incomplete_tests_list);
+    if (incompleteTests.length === 0) {
+      return null;
+    }
 
     return (
       <div className="flex flex-wrap gap-1">
-        {tests.map((test) => (
+        {incompleteTests.map((test) => (
           <Badge
-            key={test.name}
+            key={test}
             variant="outline"
-            className={
-              test.completed
-                ? "bg-green-50 text-green-700 border-green-200 text-xs"
-                : "bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
-            }
+            className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
           >
-            {test.name}
+            {getTestDisplayName(test)}
           </Badge>
         ))}
       </div>
@@ -283,11 +326,16 @@ export function OrganizationEmployeesTable({
             <TableBody>
               {paginatedEmployees.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    No employees found
+                  <TableCell colSpan={8} className="p-0">
+                    <EmptyState
+                      icon={searchTerm ? Search : Users}
+                      title={searchTerm ? "No matching employees" : "No employees found"}
+                      description={
+                        searchTerm
+                          ? "Try adjusting your search terms to find employees."
+                          : "This organization doesn't have any employees yet."
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -379,9 +427,7 @@ export function OrganizationEmployeesTable({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              //
-                              const employeeId = employee.id;
-                              handleDeleteEmployee(employeeId);
+                              handleDeleteClick(employee.id);
                             }}
                             className="text-red-600"
                           >
@@ -423,6 +469,27 @@ export function OrganizationEmployeesTable({
           </Button>
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Employee</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this employee? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteEmployee}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -29,6 +29,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { motion } from "framer-motion";
 import { addUser } from "@/services/user.service";
 import * as XLSX from "xlsx";
+import { Loader2 } from "lucide-react";
 
 export default function NewEmployeePage() {
   const { t } = useTranslation();
@@ -226,7 +227,14 @@ export default function NewEmployeePage() {
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t("common.adding") : t("common.add")}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("common.adding")}
+                </>
+              ) : (
+                t("common.add")
+              )}
             </Button>
           </CardFooter>
         </Card>

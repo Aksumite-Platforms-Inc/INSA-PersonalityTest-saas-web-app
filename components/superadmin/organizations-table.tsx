@@ -34,6 +34,8 @@ import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/hooks/use-toast";
 import { assignAdminToOrganization } from "@/services/organization.service";
 import { ComponentLoader } from "@/components/ui/loaders";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Building2, Search } from "lucide-react";
 
 // Define the props for the table
 interface Organization {
@@ -224,11 +226,16 @@ export function OrganizationsTable({
             <TableBody>
               {filteredOrganizations.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    No organizations found
+                  <TableCell colSpan={8} className="p-0">
+                    <EmptyState
+                      icon={searchTerm ? Search : Building2}
+                      title={searchTerm ? "No matching organizations" : "No organizations found"}
+                      description={
+                        searchTerm
+                          ? "Try adjusting your search terms to find organizations."
+                          : "No organizations have been created yet."
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

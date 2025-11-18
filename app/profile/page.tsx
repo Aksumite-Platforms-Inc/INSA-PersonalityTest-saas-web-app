@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { fetchUserInfo, updateMember } from "@/services/user.service";
 import { getUserId } from "@/utils/tokenUtils";
@@ -152,7 +153,14 @@ export default function ProfilePage() {
             Cancel
           </Button>
           <Button onClick={handleSaveProfile} disabled={loading}>
-            Save Changes
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </CardFooter>
       </Card>

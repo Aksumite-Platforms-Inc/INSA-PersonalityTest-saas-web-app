@@ -30,6 +30,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Users, FileX, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from "next/dynamic";
 
 // Dynamically import result components
@@ -358,13 +361,21 @@ export default function SuperadminEmployeeTestsPage() {
               employees...
             </div>
           ) : errorEmployees ? (
-            <div className="text-red-600">{errorEmployees}</div>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{errorEmployees}</AlertDescription>
+            </Alert>
           ) : filteredEmployees.length === 0 ? (
-            <div>
-              {searchTerm
-                ? "No employees match your search."
-                : "No employees found for this organization."}
-            </div>
+            <EmptyState
+              icon={searchTerm ? Users : FileX}
+              title={searchTerm ? "No matching employees" : "No employees found"}
+              description={
+                searchTerm
+                  ? "Try adjusting your search terms to find employees."
+                  : "This organization doesn't have any employees yet."
+              }
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -426,15 +437,21 @@ export default function SuperadminEmployeeTestsPage() {
 
     if (errorResults) {
       return (
-        <div className="text-red-600 text-center mt-10">{errorResults}</div>
+        <Alert variant="destructive" className="mt-10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{errorResults}</AlertDescription>
+        </Alert>
       );
     }
 
     if (!employeeResults) {
       return (
-        <div className="text-center text-lg mt-10">
-          No test results found for this employee or results are still loading.
-        </div>
+        <EmptyState
+          icon={FileX}
+          title="No test results found"
+          description="Test results for this employee are not available or still loading."
+        />
       );
     }
 
@@ -442,9 +459,11 @@ export default function SuperadminEmployeeTestsPage() {
 
     if (availableTests.length === 0) {
       return (
-        <div className="text-center text-muted-foreground mt-10">
-          No test results available for this employee.
-        </div>
+        <EmptyState
+          icon={FileX}
+          title="No test results available"
+          description="This employee hasn't completed any personality tests yet."
+        />
       );
     }
 

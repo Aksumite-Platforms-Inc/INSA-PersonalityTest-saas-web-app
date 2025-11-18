@@ -41,6 +41,19 @@ import {
   getTestCompletionStatus,
   TestCompletionStatus,
 } from "@/services/test.service";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Users, Search } from "lucide-react";
 
 interface BranchEmployeesTableProps {
   organizationId: number;
@@ -59,6 +72,10 @@ export function BranchEmployeesTable({
   const [completionStatus, setCompletionStatus] = useState<
     Map<number, TestCompletionStatus>
   >(new Map());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -106,15 +123,46 @@ export function BranchEmployeesTable({
     }
   }, [organizationId, branchId]);
 
-  const handleDeleteEmployee = async (employeeId: number) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
+  const handleDeleteClick = (employeeId: number) => {
+    setEmployeeToDelete(employeeId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+    
+    setDeleting(true);
     try {
-      // You need to implement deleteOrgMember in your user.service
-      await deleteOrgMember(organizationId, employeeId);
-      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
-    } catch (error) {
-      alert("Failed to delete employee.");
-      console.error(error);
+      await deleteOrgMember(organizationId, employeeToDelete);
+      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeToDelete));
+      toast({
+        title: "Employee Removed",
+        description: "The employee has been successfully removed.",
+      });
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    } catch (error: any) {
+      let errorMessage = "Failed to delete employee. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -280,11 +328,16 @@ export function BranchEmployeesTable({
           <TableBody>
             {paginatedEmployees.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No employees found
+                <TableCell colSpan={8} className="p-0">
+                  <EmptyState
+                    icon={searchTerm ? Search : Users}
+                    title={searchTerm ? "No matching employees" : "No employees found"}
+                    description={
+                      searchTerm
+                        ? "Try adjusting your search terms to find employees."
+                        : "This branch doesn't have any employees yet."
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -376,10 +429,7 @@ export function BranchEmployeesTable({
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
-                            //
-                            const employeeId = employee.id;
-
-                            handleDeleteEmployee(employeeId);
+                            handleDeleteClick(employee.id);
                           }}
                           className="text-red-600"
                         >
@@ -420,6 +470,27 @@ export function BranchEmployeesTable({
           </Button>
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Employee</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this employee? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteEmployee}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

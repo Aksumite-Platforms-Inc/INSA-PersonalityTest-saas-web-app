@@ -45,6 +45,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { ComponentLoader } from "@/components/ui/loaders";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Users, Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface EmployeeListProps {
   organizationId: number;
@@ -61,6 +73,11 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     Map<number, TestCompletionStatus>
   >(new Map());
   const [loadingCompletionStatus, setLoadingCompletionStatus] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
+  const [employeeToUpdate, setEmployeeToUpdate] = useState<{ id: number; status: string } | null>(null);
+  const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -118,12 +135,17 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  const handleUpdateStatus = async (empId: number, newStatus: string) => {
-    if (!confirm(`Are you sure you want to update the status to ${newStatus}?`))
-      return;
+  const handleUpdateStatusClick = (empId: number, newStatus: string) => {
+    setEmployeeToUpdate({ id: empId, status: newStatus });
+    setStatusDialogOpen(true);
+  };
 
+  const handleUpdateStatus = async () => {
+    if (!employeeToUpdate) return;
+
+    setProcessing(true);
     try {
-      await updateEmployeeStatus(empId, newStatus);
+      await updateEmployeeStatus(employeeToUpdate.id, employeeToUpdate.status);
 
       // Refresh the employee list after successful status update
       const fetchedEmployees = await getAllBranchMembers(
@@ -134,50 +156,11 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
 
       toast({
         title: "Status Updated",
-        description: `Employee status has been updated to ${newStatus}.`,
+        description: `Employee status has been updated to ${employeeToUpdate.status}.`,
       });
-    } catch (error) {
-      let errorMessage = "Something went wrong. Please check your internet.";
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        typeof (error as any).response === "object" &&
-        (error as any).response !== null &&
-        "data" in (error as any).response &&
-        typeof (error as any).response.data === "object" &&
-        (error as any).response.data !== null &&
-        "message" in (error as any).response.data
-      ) {
-        errorMessage = (error as any).response.data.message;
-      }
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDelete = async (empId: number) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
-    // setLoading(true);
-    try {
-      await deleteOrgMember(organizationId, empId);
-
-      // setEmployees((prev) => prev.filter((emp) => emp.id !== empId));
-      // Refresh the employee list after successful deletion
-      const fetchedEmployees = await getAllBranchMembers(
-        organizationId,
-        branchId
-      );
-      setEmployees(fetchedEmployees);
-
-      toast({
-        title: "Employee Removed",
-        description: `Employee has been removed successfully.`,
-      });
-    } catch (error) {
+      setStatusDialogOpen(false);
+      setEmployeeToUpdate(null);
+    } catch (error: any) {
       let errorMessage = "Something went wrong. Please check your internet.";
       if (
         typeof error === "object" &&
@@ -198,7 +181,57 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
         variant: "destructive",
       });
     } finally {
-      // setLoading(false);
+      setProcessing(false);
+    }
+  };
+
+  const handleDeleteClick = (empId: number) => {
+    setEmployeeToDelete(empId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!employeeToDelete) return;
+
+    setProcessing(true);
+    try {
+      await deleteOrgMember(organizationId, employeeToDelete);
+
+      // Refresh the employee list after successful deletion
+      const fetchedEmployees = await getAllBranchMembers(
+        organizationId,
+        branchId
+      );
+      setEmployees(fetchedEmployees);
+
+      toast({
+        title: "Employee Removed",
+        description: `Employee has been removed successfully.`,
+      });
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    } catch (error: any) {
+      let errorMessage = "Something went wrong. Please check your internet.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -331,8 +364,16 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
             <TableBody>
               {paginatedEmployees.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    No employees found.
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState
+                      icon={searchTerm ? Search : Users}
+                      title={searchTerm ? "No matching employees" : "No employees found"}
+                      description={
+                        searchTerm
+                          ? "Try adjusting your search terms to find employees."
+                          : "This branch doesn't have any employees yet."
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -369,7 +410,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
                               <DropdownMenuItem
                                 className="text-red-600"
                                 onClick={() =>
-                                  handleUpdateStatus(employee.id, "inactive")
+                                  handleUpdateStatusClick(employee.id, "inactive")
                                 }
                               >
                                 <Ban className="mr-2 h-4 w-4" />
@@ -379,7 +420,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
                               <DropdownMenuItem
                                 className="text-green-600"
                                 onClick={() =>
-                                  handleUpdateStatus(employee.id, "active")
+                                  handleUpdateStatusClick(employee.id, "active")
                                 }
                               >
                                 <Shield className="mr-2 h-4 w-4" />
@@ -387,7 +428,7 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
-                              onClick={handleDelete.bind(null, employee.id)}
+                              onClick={() => handleDeleteClick(employee.id)}
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -429,6 +470,48 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
           </Button>
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Employee</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this employee? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={processing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {processing ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update Employee Status</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to update the employee status to{" "}
+              <strong>{employeeToUpdate?.status}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUpdateStatus}
+              disabled={processing}
+            >
+              {processing ? "Updating..." : "Update"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

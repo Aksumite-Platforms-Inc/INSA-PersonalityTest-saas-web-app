@@ -306,7 +306,14 @@ export default function TestPage({ params }: { params: { testId: string } }) {
                     onClick={handleSubmit}
                     disabled={!answers[question.id] || isSubmitting}
                   >
-                    {isSubmitting ? t("test.submitting") : t("test.submit")}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("test.submitting")}
+                      </>
+                    ) : (
+                      t("test.submit")
+                    )}
                   </Button>
                 )}
               </CardFooter>

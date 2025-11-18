@@ -34,6 +34,18 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteBranch, getAllBranches } from "@/services/branch.service";
 import { getOrganizationById } from "@/services/organization.service";
 import { assignAdminToBranch } from "@/services/branch.service";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2, Building2, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function BranchesTable({ organizationId }: { organizationId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,6 +56,9 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
   const [adminEmail, setAdminEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [branchToDelete, setBranchToDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -130,25 +145,62 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
         branch.phone_number.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleDelete = async (branchId: number) => {
-    if (!confirm("Are you sure you want to delete this branch?")) return;
-    const { success } = await deleteBranch(organizationId, branchId);
-    if (success) {
-      setBranches((prev) => prev.filter((b) => b.id !== branchId));
-    } else {
+  const handleDeleteClick = (branchId: number) => {
+    setBranchToDelete(branchId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!branchToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const { success } = await deleteBranch(organizationId, branchToDelete);
+      if (success) {
+        setBranches((prev) => prev.filter((b) => b.id !== branchToDelete));
+        toast({
+          title: "Branch Deleted",
+          description: "The branch has been successfully deleted.",
+        });
+        setDeleteDialogOpen(false);
+        setBranchToDelete(null);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete branch. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      let errorMessage = "Failed to delete branch. Please try again.";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        typeof (error as any).response.data === "object" &&
+        (error as any).response.data !== null &&
+        "message" in (error as any).response.data
+      ) {
+        errorMessage = (error as any).response.data.message;
+      }
       toast({
         title: "Error",
-        description: "Failed to delete branch",
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setDeleting(false);
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mr-2"></span>
-        <span className="text-muted-foreground">Loading...</span>
+        <Loader2 className="animate-spin h-8 w-8 mr-2" />
+        <span className="text-muted-foreground">Loading branches...</span>
       </div>
     );
   }
@@ -211,11 +263,16 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
           <TableBody>
             {filteredBranches.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No branches found
+                <TableCell colSpan={6} className="p-0">
+                  <EmptyState
+                    icon={searchTerm ? Search : Building2}
+                    title={searchTerm ? "No matching branches" : "No branches found"}
+                    description={
+                      searchTerm
+                        ? "Try adjusting your search terms to find branches."
+                        : "This organization doesn't have any branches yet."
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -287,7 +344,7 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-red-600"
-                            onClick={() => handleDelete(branch.id)}
+                            onClick={() => handleDeleteClick(branch.id)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             <span>Delete</span>
@@ -302,6 +359,34 @@ export function BranchesTable({ organizationId }: { organizationId: number }) {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Branch</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this branch? This action cannot be undone and all associated data will be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
