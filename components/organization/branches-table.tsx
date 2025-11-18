@@ -44,7 +44,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Building2, Search } from "lucide-react";
+import { Loader2, Building2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export function BranchesTable({ organizationId }: { organizationId: number }) {

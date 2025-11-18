@@ -46,7 +46,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ComponentLoader } from "@/components/ui/loaders";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Users, Search } from "lucide-react";
+import { Users } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,

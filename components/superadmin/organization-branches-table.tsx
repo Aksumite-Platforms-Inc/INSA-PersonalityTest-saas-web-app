@@ -48,7 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Building2, Search } from "lucide-react";
+import { Loader2, Building2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import employee from "@/app/dashboard/employee";
