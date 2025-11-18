@@ -35,7 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { assignAdminToOrganization } from "@/services/organization.service";
 import { ComponentLoader } from "@/components/ui/loaders";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2, Search } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 // Define the props for the table
 interface Organization {
