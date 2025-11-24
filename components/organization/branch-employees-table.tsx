@@ -301,7 +301,7 @@ export function BranchEmployeesTable({
 
   const handleExportToExcel = () => {
     try {
-      // Prepare employee data with completion status
+      // Export only filtered employees based on current search/filters
       const employeesWithStatus = filteredEmployees.map((emp) => {
         const status = completionStatus.get(emp.id);
         return {
