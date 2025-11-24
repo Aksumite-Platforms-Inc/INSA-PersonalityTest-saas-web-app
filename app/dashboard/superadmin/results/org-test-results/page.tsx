@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Search as SearchIcon, Building2, ArrowLeft } from "lucide-react";
+import { Loader2, Search as SearchIcon, Building2, ArrowLeft, Download } from "lucide-react";
 import {
   getResults,
   getTestCompletionStatus,
@@ -24,6 +24,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users, FileX, AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { exportEmployeesToExcel } from "@/utils/exportToExcel";
+import { exportTestResultsToExcel } from "@/utils/exportTestResultsToExcel";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -61,6 +64,7 @@ export default function SuperadminEmployeeTestsPage() {
   const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const [currentView, setCurrentView] = useState<View>("organization_list");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
@@ -528,6 +532,114 @@ export default function SuperadminEmployeeTestsPage() {
                 Clear Filters
               </Button>
             )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  toast({
+                    title: "Exporting...",
+                    description: "Preparing test results export. This may take a moment.",
+                  });
+
+                  await exportTestResultsToExcel(
+                    filteredUsers,
+                    `test_results_${selectedOrgName || "all"}_${selectedOrgId || "all"}`,
+                    {
+                      searchTerm: searchTerm || undefined,
+                      statusFilter: statusFilter !== "all" ? statusFilter : undefined,
+                      testFilter: testFilter !== "all" ? testFilter : undefined,
+                      branchFilter: branchFilter !== "all" ? branchFilter : undefined,
+                    }
+                  );
+
+                  toast({
+                    title: "Export Successful",
+                    description: `Exported test results for ${filteredUsers.length} users to Excel.`,
+                  });
+                } catch (error) {
+                  console.error("Error exporting to Excel:", error);
+                  toast({
+                    title: "Export Failed",
+                    description: "Failed to export test results. Please try again.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={filteredUsers.length === 0}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export Test Results
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                try {
+                  // Convert TestCompletionStatus to the format expected by export function
+                  const employeesWithStatus = filteredUsers.map((user) => ({
+                    id: user.user_id,
+                    name: user.user_name || "N/A",
+                    email: user.user_email || "N/A",
+                    department: user.department || undefined,
+                    position: user.position || undefined,
+                    status: user.user_status || undefined,
+                    created_at: user.test_started_at || undefined,
+                    branch_name: user.branch_name || undefined,
+                    organization_name: user.organization_name || undefined,
+                    // Test completion fields
+                    mbti_completed: user.mbti_completed,
+                    big_five_completed: user.big_five_completed,
+                    riasec_completed: user.riasec_completed,
+                    enneagram_completed: user.enneagram_completed,
+                    overall_status: user.overall_status,
+                    completed_tests_count: user.completed_tests_count,
+                    remaining_tests_count: user.remaining_tests_count,
+                    incomplete_tests_list: user.incomplete_tests_list,
+                    test_started_at: user.test_started_at,
+                    completed_at: user.completed_at,
+                  }));
+
+                  // Create a completion status map
+                  const completionStatusMap = new Map<number, TestCompletionStatus>();
+                  filteredUsers.forEach((user) => {
+                    completionStatusMap.set(user.user_id, user);
+                  });
+
+                  exportEmployeesToExcel(
+                    employeesWithStatus,
+                    completionStatusMap,
+                    `superadmin_users_${selectedOrgName || "all"}_${selectedOrgId || "all"}`,
+                    {
+                      searchTerm: searchTerm || undefined,
+                      statusFilter: statusFilter !== "all" ? statusFilter : undefined,
+                      testFilter: testFilter !== "all" ? testFilter : undefined,
+                      branchFilter: branchFilter !== "all" ? branchFilter : undefined,
+                    }
+                  );
+
+                  toast({
+                    title: "Export Successful",
+                    description: `Exported ${filteredUsers.length} users to Excel.`,
+                  });
+                } catch (error) {
+                  console.error("Error exporting to Excel:", error);
+                  toast({
+                    title: "Export Failed",
+                    description: "Failed to export data. Please try again.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={filteredUsers.length === 0}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export User List
+            </Button>
           </div>
         </div>
       </div>

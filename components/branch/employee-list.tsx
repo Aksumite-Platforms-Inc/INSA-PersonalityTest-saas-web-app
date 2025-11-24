@@ -34,6 +34,7 @@ import {
   Shield,
   Ban,
   Trash2,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,6 +48,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ComponentLoader } from "@/components/ui/loaders";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users } from "lucide-react";
+import { exportEmployeesToExcel } from "@/utils/exportToExcel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -335,9 +337,43 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
     );
   };
 
+  const handleExportToExcel = () => {
+    try {
+      // Prepare employee data with completion status
+      const employeesWithStatus = filteredEmployees.map((emp) => {
+        const status = completionStatus.get(emp.id);
+        return {
+          ...emp,
+          ...status,
+        };
+      });
+
+      exportEmployeesToExcel(
+        employeesWithStatus,
+        completionStatus,
+        `branch_employees_report_${organizationId}_${branchId}`,
+        {
+          searchTerm: searchTerm || undefined,
+        }
+      );
+
+      toast({
+        title: "Export Successful",
+        description: `Exported ${filteredEmployees.length} employees to Excel.`,
+      });
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -347,6 +383,15 @@ export function EmployeeList({ organizationId, branchId }: EmployeeListProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <Button
+          onClick={handleExportToExcel}
+          variant="outline"
+          className="gap-2"
+          disabled={filteredEmployees.length === 0}
+        >
+          <Download className="h-4 w-4" />
+          Export to Excel
+        </Button>
       </div>
       <ComponentLoader loading={loading} size={40}>
         <div className="rounded-md border">
