@@ -9,13 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Search as SearchIcon, Building2, ArrowLeft, Download } from "lucide-react";
+import { Loader2, Search as SearchIcon, Building2, ArrowLeft, Download, FileText, FolderArchive } from "lucide-react";
 import {
   getResults,
   getTestCompletionStatus,
   TestCompletionStatus,
 } from "@/services/test.service";
 import { listOrganizations, Organization } from "@/services/organization.service";
+import { getAllBranches, Branch } from "@/services/branch.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,8 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users, FileX, AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { exportEmployeesToExcel } from "@/utils/exportToExcel";
-import { exportTestResultsToExcel } from "@/utils/exportTestResultsToExcel";
+import { exportUserPdf, exportOrganizationZip, exportBranchZip } from "@/services/export.service";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -82,6 +82,14 @@ export default function SuperadminEmployeeTestsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all"); // all, completed, in_progress, not_started
   const [testFilter, setTestFilter] = useState<string>("all"); // all, mbti, big_five, riasec, enneagram
   const [branchFilter, setBranchFilter] = useState<string>("all");
+  
+  // Export loading states
+  const [exportingOrgZip, setExportingOrgZip] = useState(false);
+  const [exportingBranchZip, setExportingBranchZip] = useState<number | null>(null);
+  const [exportingUserPdf, setExportingUserPdf] = useState<number | null>(null);
+  
+  // Branches state for mapping branch names to IDs
+  const [branches, setBranches] = useState<Branch[]>([]);
 
   // Fetch organizations on component mount
   useEffect(() => {
@@ -100,10 +108,11 @@ export default function SuperadminEmployeeTestsPage() {
       });
   }, []);
 
-  // Fetch users when organization is selected - optimized with abort controller
+  // Fetch users and branches when organization is selected - optimized with abort controller
   useEffect(() => {
     if (!selectedOrgId) {
       setAllUsers([]);
+      setBranches([]);
       return;
     }
 
@@ -111,14 +120,22 @@ export default function SuperadminEmployeeTestsPage() {
     setLoadingUsers(true);
     setError(null);
     
-    getTestCompletionStatus(selectedOrgId)
-      .then((res) => {
+    // Fetch both users and branches in parallel
+    Promise.all([
+      getTestCompletionStatus(selectedOrgId),
+      getAllBranches(selectedOrgId).catch((err) => {
+        console.warn("Failed to fetch branches for organization:", err);
+        return [] as Branch[];
+      })
+    ])
+      .then(([usersRes, branchesData]) => {
         if (abortController.signal.aborted) return;
-        if (res.success && res.data) {
-          setAllUsers(res.data);
+        if (usersRes.success && usersRes.data) {
+          setAllUsers(usersRes.data);
         } else {
-          setError(res.message || "Failed to fetch test completion status.");
+          setError(usersRes.message || "Failed to fetch test completion status.");
         }
+        setBranches(branchesData);
       })
       .catch((err) => {
         if (abortController.signal.aborted) return;
@@ -202,6 +219,7 @@ export default function SuperadminEmployeeTestsPage() {
     setSelectedOrgId(null);
     setSelectedOrgName(null);
     setAllUsers([]);
+    setBranches([]);
     setSearchTerm("");
     setCurrentPage(1);
   };
@@ -533,113 +551,95 @@ export default function SuperadminEmployeeTestsPage() {
               </Button>
             )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                try {
-                  toast({
-                    title: "Exporting...",
-                    description: "Preparing test results export. This may take a moment.",
-                  });
+            {/* Export Organization ZIP Button */}
+            {selectedOrgId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  if (!selectedOrgId) return;
+                  setExportingOrgZip(true);
+                  try {
+                    toast({
+                      title: "Exporting...",
+                      description: "Preparing organization export. This may take a moment.",
+                    });
 
-                  await exportTestResultsToExcel(
-                    filteredUsers,
-                    `test_results_${selectedOrgName || "all"}_${selectedOrgId || "all"}`,
-                    {
-                      searchTerm: searchTerm || undefined,
-                      statusFilter: statusFilter !== "all" ? statusFilter : undefined,
-                      testFilter: testFilter !== "all" ? testFilter : undefined,
-                      branchFilter: branchFilter !== "all" ? branchFilter : undefined,
+                    await exportOrganizationZip(selectedOrgId);
+
+                    toast({
+                      title: "Export Successful",
+                      description: `Organization test results exported as ZIP.`,
+                    });
+                  } catch (error: any) {
+                    console.error("Error exporting organization ZIP:", error);
+                    toast({
+                      title: "Export Failed",
+                      description: error.message || "Failed to export organization ZIP. Please try again.",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setExportingOrgZip(false);
+                  }
+                }}
+                disabled={exportingOrgZip || allUsers.length === 0}
+                className="flex items-center gap-2"
+              >
+                {exportingOrgZip ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FolderArchive className="h-4 w-4" />
+                )}
+                Export Org (ZIP)
+              </Button>
+            )}
+
+            {/* Export Branch ZIP Button - Only show when a specific branch is selected */}
+            {branchFilter !== "all" && (() => {
+              const selectedBranch = branches.find(b => b.name === branchFilter);
+              if (!selectedBranch) return null;
+              return (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (!selectedBranch) return;
+                    setExportingBranchZip(selectedBranch.id);
+                    try {
+                      toast({
+                        title: "Exporting...",
+                        description: `Preparing branch "${branchFilter}" export. This may take a moment.`,
+                      });
+
+                      await exportBranchZip(selectedBranch.id);
+
+                      toast({
+                        title: "Export Successful",
+                        description: `Branch test results exported as ZIP.`,
+                      });
+                    } catch (error: any) {
+                      console.error("Error exporting branch ZIP:", error);
+                      toast({
+                        title: "Export Failed",
+                        description: error.message || "Failed to export branch ZIP. Please try again.",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setExportingBranchZip(null);
                     }
-                  );
-
-                  toast({
-                    title: "Export Successful",
-                    description: `Exported test results for ${filteredUsers.length} users to Excel.`,
-                  });
-                } catch (error) {
-                  console.error("Error exporting to Excel:", error);
-                  toast({
-                    title: "Export Failed",
-                    description: "Failed to export test results. Please try again.",
-                    variant: "destructive",
-                  });
-                }
-              }}
-              disabled={filteredUsers.length === 0}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export Test Results
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                try {
-                  // Convert TestCompletionStatus to the format expected by export function
-                  const employeesWithStatus = filteredUsers.map((user) => ({
-                    id: user.user_id,
-                    name: user.user_name || "N/A",
-                    email: user.user_email || "N/A",
-                    department: user.department || undefined,
-                    position: user.position || undefined,
-                    status: user.user_status || undefined,
-                    created_at: user.test_started_at || undefined,
-                    branch_name: user.branch_name || undefined,
-                    organization_name: user.organization_name || undefined,
-                    // Test completion fields
-                    mbti_completed: user.mbti_completed,
-                    big_five_completed: user.big_five_completed,
-                    riasec_completed: user.riasec_completed,
-                    enneagram_completed: user.enneagram_completed,
-                    overall_status: user.overall_status,
-                    completed_tests_count: user.completed_tests_count,
-                    remaining_tests_count: user.remaining_tests_count,
-                    incomplete_tests_list: user.incomplete_tests_list,
-                    test_started_at: user.test_started_at,
-                    completed_at: user.completed_at,
-                  }));
-
-                  // Create a completion status map
-                  const completionStatusMap = new Map<number, TestCompletionStatus>();
-                  filteredUsers.forEach((user) => {
-                    completionStatusMap.set(user.user_id, user);
-                  });
-
-                  exportEmployeesToExcel(
-                    employeesWithStatus,
-                    completionStatusMap,
-                    `superadmin_users_${selectedOrgName || "all"}_${selectedOrgId || "all"}`,
-                    {
-                      searchTerm: searchTerm || undefined,
-                      statusFilter: statusFilter !== "all" ? statusFilter : undefined,
-                      testFilter: testFilter !== "all" ? testFilter : undefined,
-                      branchFilter: branchFilter !== "all" ? branchFilter : undefined,
-                    }
-                  );
-
-                  toast({
-                    title: "Export Successful",
-                    description: `Exported ${filteredUsers.length} users to Excel.`,
-                  });
-                } catch (error) {
-                  console.error("Error exporting to Excel:", error);
-                  toast({
-                    title: "Export Failed",
-                    description: "Failed to export data. Please try again.",
-                    variant: "destructive",
-                  });
-                }
-              }}
-              disabled={filteredUsers.length === 0}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export User List
-            </Button>
+                  }}
+                  disabled={exportingBranchZip === selectedBranch.id || filteredUsers.length === 0}
+                  className="flex items-center gap-2"
+                >
+                  {exportingBranchZip === selectedBranch.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FolderArchive className="h-4 w-4" />
+                  )}
+                  Export Branch (ZIP)
+                </Button>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -711,13 +711,54 @@ export default function SuperadminEmployeeTestsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        onClick={() => handleViewResults(user.user_id)}
-                        size="sm"
-                        variant="outline"
-                      >
-                        View Results
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => handleViewResults(user.user_id)}
+                          size="sm"
+                          variant="outline"
+                        >
+                          View Results
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            if (user.completed_tests_count === 0) {
+                              toast({
+                                title: "No Results",
+                                description: "This user has not completed any tests yet.",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            setExportingUserPdf(user.user_id);
+                            try {
+                              await exportUserPdf(user.user_id);
+                              toast({
+                                title: "Export Successful",
+                                description: `PDF exported for ${user.user_name}.`,
+                              });
+                            } catch (error: any) {
+                              console.error("Error exporting user PDF:", error);
+                              toast({
+                                title: "Export Failed",
+                                description: error.message || "Failed to export PDF. Please try again.",
+                                variant: "destructive",
+                              });
+                            } finally {
+                              setExportingUserPdf(null);
+                            }
+                          }}
+                          size="sm"
+                          variant="outline"
+                          disabled={exportingUserPdf === user.user_id || user.completed_tests_count === 0}
+                          title={user.completed_tests_count === 0 ? "No test results to export" : "Export as PDF"}
+                        >
+                          {exportingUserPdf === user.user_id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileText className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
