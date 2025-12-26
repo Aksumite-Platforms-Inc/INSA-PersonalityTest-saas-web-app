@@ -123,7 +123,10 @@ export default function SuperadminEmployeeTestsPage() {
     // Fetch both users and branches in parallel
     Promise.all([
       getTestCompletionStatus(selectedOrgId),
-      getAllBranches(selectedOrgId).catch(() => [] as Branch[]) // Silently fail for branches
+      getAllBranches(selectedOrgId).catch((err) => {
+        console.warn("Failed to fetch branches for organization:", err);
+        return [] as Branch[];
+      })
     ])
       .then(([usersRes, branchesData]) => {
         if (abortController.signal.aborted) return;
